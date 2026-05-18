@@ -102,7 +102,7 @@ async function main() {
         if (!resolution) {
           console.log(`Cache miss for "${stepText}". Calling Gemini...`);
           const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-2.5-flash-lite',
             contents: stepText,
             config: {
               systemInstruction: `You are an AI compiler for BDD tests.\nMap the user's step to a function in this manifest: ${manifestStr}\nUse context: ${currentContext}`,

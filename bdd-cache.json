@@ -1,18 +1,27 @@
 {
   "The user navigates to \"/login\"": {
     "matchedFunction": "navigate_to",
-    "extractedArguments": ["/login"]
+    "extractedArguments": [
+      "/login"
+    ]
   },
   "The user enters \"frontend_wizard\" into the \"Username\" field": {
     "matchedFunction": "enter_into_field",
-    "extractedArguments": ["frontend_wizard", "Username"]
+    "extractedArguments": [
+      "frontend_wizard",
+      "Username"
+    ]
   },
   "Smash the \"Sign In\" button": {
     "matchedFunction": "click_button",
-    "extractedArguments": ["Sign In"]
+    "extractedArguments": [
+      "Sign In"
+    ]
   },
   "The user should see the heading \"Welcome Back, Wizard!\"": {
     "matchedFunction": "verify_heading",
-    "extractedArguments": ["Welcome Back, Wizard!"]
+    "extractedArguments": [
+      "Welcome Back, Wizard!"
+    ]
   }
 }
