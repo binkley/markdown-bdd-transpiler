@@ -1,0 +1,12 @@
+FROM mcr.microsoft.com/playwright:v1.49.0-jammy
+
+WORKDIR /app
+
+# Cache layer: copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy the rest of the workspace (including transpile.ts, standard-ui-steps, and BDD files)
+COPY . .
+
+CMD ["npm", "test"]

@@ -10,17 +10,19 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.4.0",
+    "express": "^5.2.1",
     "prettier": "^3.8.3",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.59.3"
   },
   "scripts": {
+    "demo": "node demo-app.js",
+    "format": "prettier --write .",
+    "lint": "eslint .",
     "postinstall": "playwright install chromium",
     "pretest": "tsx transpile.ts",
     "test": "vitest run",
-    "type-check": "tsc --noEmit",
-    "lint": "eslint .",
-    "format": "prettier --write ."
+    "type-check": "tsc --noEmit"
   }
 }

@@ -1,0 +1,23 @@
+services:
+  demo-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.demo
+    ports:
+      - "5173:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:5173/login"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - TEST_BASE_URL=http://demo-app:5173
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+    depends_on:
+      demo-app:
+        condition: service_healthy
