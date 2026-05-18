@@ -12,6 +12,7 @@
     "eslint": "^10.4.0",
     "express": "^5.2.1",
     "globals": "^17.6.0",
+    "husky": "^9.1.7",
     "prettier": "^3.8.3",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
@@ -24,6 +25,7 @@
     "postinstall": "playwright install chromium",
     "pretest": "tsx transpile.ts",
     "test": "vitest run",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepare": "husky"
   }
 }
