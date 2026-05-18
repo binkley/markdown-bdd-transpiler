@@ -7,17 +7,17 @@ align="right" width="10%" height="auto"/>
 
 # AI-Augmented Markdown BDD Transpiler for Testing
 
-A modern, Behavior-Driven Development (BDD) testing framework that allows non-technical stakeholders to author End-to-End (E2E) user journeys using native Markdown. 
+A modern, Behavior-Driven Development (BDD) testing framework that allows non-technical stakeholders to author End-to-End (E2E) user journeys using native Markdown.
 
 Traditional BDD frameworks (like Cucumber) often suffer from "step-definition bloat," requiring extensive engineering work to map rigid phrases to code via Regex. This project solves that by utilizing the **Google Gen AI SDK (`gemini-2.5-flash`)** as a semantic translation layer at compile-time. It maps human language variations to a standardized UI action manifest natively executed by **Playwright** and **Vitest**.
 
 ## 🌟 Key Features
 
-*   **Zero-Config Authoring:** Test specs are written in pure Markdown (`.md`). No IDE plugins or custom language servers are required. Syntax highlighting and formatting work out-of-the-box in GitHub and all major editors.
-*   **Semantic AI Translation:** Users can write naturally (e.g., "click the button", "smash the button", "tap"). The transpiler uses Gemini to map intent to deterministic UI actions.
-*   **No Step-Definition Bloat:** Actions are mapped to a finite "Standard Library" of Playwright's A11y (accessibility-first) locators. If the UI is accessible, it can be tested without writing new JavaScript.
-*   **Deterministic Caching:** Compiled steps are saved to `bdd-cache.json`. Subsequent runs execute instantly without hitting the AI API, ensuring stable, offline, and fast CI/CD pipeline runs.
-*   **Fully Dockerized:** Includes a clean Docker Compose environment to spin up the target application and execute tests in complete isolation.
+- **Zero-Config Authoring:** Test specs are written in pure Markdown (`.md`). No IDE plugins or custom language servers are required. Syntax highlighting and formatting work out-of-the-box in GitHub and all major editors.
+- **Semantic AI Translation:** Users can write naturally (e.g., "click the button", "smash the button", "tap"). The transpiler uses Gemini to map intent to deterministic UI actions.
+- **No Step-Definition Bloat:** Actions are mapped to a finite "Standard Library" of Playwright's A11y (accessibility-first) locators. If the UI is accessible, it can be tested without writing new JavaScript.
+- **Deterministic Caching:** Compiled steps are saved to `bdd-cache.json`. Subsequent runs execute instantly without hitting the AI API, ensuring stable, offline, and fast CI/CD pipeline runs.
+- **Fully Dockerized:** Includes a clean Docker Compose environment to spin up the target application and execute tests in complete isolation.
 
 ---
 
@@ -35,9 +35,9 @@ Traditional BDD frameworks (like Cucumber) often suffer from "step-definition bl
 
 ### Prerequisites
 
-*   **Node.js** (v22+ recommended)
-*   **Docker** and **Docker Compose**
-*   A Google Gemini API Key.
+- **Node.js** (v22+ recommended)
+- **Docker** and **Docker Compose**
+- A Google Gemini API Key.
 
 ### 1. Environment Setup
 
@@ -71,6 +71,7 @@ To run the application and the test suite in a clean, isolated environment, simp
 ```
 
 This script will:
+
 1. Build the lightweight Express frontend container.
 2. Build the Playwright test-runner container.
 3. Automatically orchestrate network connections between them.
@@ -89,19 +90,22 @@ Add new test scenarios to the `t/` directory using standard Markdown formatting:
 ## Scenario: User logs in successfully
 
 ### GIVEN
-* The user navigates to "/login"
+
+- The user navigates to "/login"
 
 ### WHEN
-* The user enters "frontend_wizard" into the "Username" field
-* Click the "Sign In" button
+
+- The user enters "frontend_wizard" into the "Username" field
+- Click the "Sign In" button
 
 ### THEN
-* The user should see the heading "Welcome Back, Wizard!"
+
+- The user should see the heading "Welcome Back, Wizard!"
 ```
 
 ## 🛠️ Development Commands
 
-*   `npm run type-check`: Validates TypeScript structural integrity.
-*   `npm run lint`: Runs ESLint for code quality.
-*   `npm run format`: Runs Prettier to standardize codebase formatting.
-*   `npm run pretest`: Manually triggers the transpilation step without running Vitest.
+- `npm run type-check`: Validates TypeScript structural integrity.
+- `npm run lint`: Runs ESLint for code quality.
+- `npm run format`: Runs Prettier to standardize codebase formatting.
+- `npm run pretest`: Manually triggers the transpilation step without running Vitest.
