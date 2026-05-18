@@ -3,8 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.demo
-    ports:
-      - '5173:5173'
     healthcheck:
       test: ['CMD', 'wget', '-q', '-O', '-', 'http://localhost:5173/login']
       interval: 2s
