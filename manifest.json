@@ -1,0 +1,24 @@
+{
+  "available_steps": [
+    {
+      "function_name": "navigate_to",
+      "description": "Navigates the browser page to a relative URL path.",
+      "parameters": ["url_string"]
+    },
+    {
+      "function_name": "enter_into_field",
+      "description": "Fills out a form input or text field using its associated label.",
+      "parameters": ["text_to_type", "field_label"]
+    },
+    {
+      "function_name": "click_button",
+      "description": "Clicks an accessible button or element with a button role matching the specified text identifier.",
+      "parameters": ["button_text"]
+    },
+    {
+      "function_name": "verify_heading",
+      "description": "Asserts that a heading element containing the specified text is visible on screen.",
+      "parameters": ["heading_text"]
+    }
+  ]
+}

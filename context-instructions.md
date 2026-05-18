@@ -20,16 +20,15 @@ generating language polyglot overhead.
 
 - **Decision:** We use standard Markdown files (`.md`). Features are defined
   by `#`, Scenarios by `##`, and BDD structural blocks by `### GIVEN`, `###
-  WHEN`, and `### THEN` subheaders. Individual steps are structured as standard
+WHEN`, and `### THEN` subheaders. Individual steps are structured as standard
   Markdown unordered list items (`*` or `-`).
 
-- **Reasoning:** 
-
-  * Avoids paragraph text merging out-of-the-box in GitHub, IDEs, and Markdown
+- **Reasoning:**
+  - Avoids paragraph text merging out-of-the-box in GitHub, IDEs, and Markdown
     previewers.
-  * Employs native editor syntax highlighting with zero local workspace
+  - Employs native editor syntax highlighting with zero local workspace
     configuration.
-  * Drastically reduces user typos by eliminating the need to repeat `AND` or
+  - Drastically reduces user typos by eliminating the need to repeat `AND` or
     keyword prefixes on every line.
 
 ### ADR 2: Unified Toolchain & Target Runtime
