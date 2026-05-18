@@ -1,6 +1,6 @@
 <a href="./LICENSE.md">
 <img
-src="https://creativecommons.org/wp-content/themes/vocabulary-theme/vocabulary/svg/cc/icons/cc-icons.svg#cc-zero"
+src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/cc-zero.svg"
 alt="Creative Commons Public Domain Dedication"
 align="right" width="10%" height="auto"/>
 </a>
@@ -79,6 +79,27 @@ This script will:
 3. Automatically orchestrate network connections between them.
 4. Execute the test suite and output the results.
 5. Gracefully tear down the containers upon completion.
+
+---
+
+## ✅ CI/CD & Local Validation
+
+This repository is configured to ensure code quality through rigorous static analysis and automated E2E testing using GitHub Actions.
+
+### Husky Pre-Push Hook
+
+To prevent broken code from being pushed to the remote repository, this project utilizes a **Husky `pre-push` hook**.
+
+Whenever you run `git push`, the hook automatically executes the `./validate.sh` script. This script performs the following checks in sequence:
+
+1. **Formatting:** `npx prettier --check .`
+2. **Linting:** `npm run lint`
+3. **Type-Checking:** `npm run type-check`
+4. **E2E Tests:** Executes `./run.sh` inside Docker.
+
+If any of these steps fail, the push is aborted.
+
+_Tip: If formatting fails, simply run `npm run format` to auto-fix the issues before pushing again._
 
 ---
 
