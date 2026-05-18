@@ -25,7 +25,7 @@ Traditional BDD frameworks (like Cucumber) often suffer from "step-definition bl
 
 ## 🏗️ Architecture
 
-1.  **Authoring (`t/*.md`)**: Stakeholders define features and scenarios.
+1.  **Authoring (`tests/*.md`)**: Stakeholders define features and scenarios.
 2.  **Manifest (`manifest.json`)**: A JSON schema defining available accessible actions (e.g., `navigate_to`, `enter_into_field`).
 3.  **Transpiler (`transpile.ts`)**: Crawls markdown, checks the cache, and calls the Gemini API to map unregistered human language steps to the manifest constraints.
 4.  **Standard Library (`framework/standard-ui-steps.ts`)**: The physical Playwright implementation of the manifest.
@@ -105,7 +105,7 @@ _Tip: If formatting fails, simply run `npm run format` to auto-fix the issues be
 
 ## ✍️ Writing Tests
 
-Add new test scenarios to the `t/` directory using standard Markdown formatting:
+Add new test scenarios to the `tests/` directory using standard Markdown formatting:
 
 ```markdown
 # Feature: User Authentication

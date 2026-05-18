@@ -21,9 +21,9 @@ async function main() {
 
   let files: string[];
   try {
-    files = await fs.readdir('t');
+    files = await fs.readdir('tests');
   } catch {
-    console.log('No "t" directory found.');
+    console.log('No "tests" directory found.');
     return;
   }
   const mdFiles = files.filter((f) => f.endsWith('.md'));
@@ -33,7 +33,7 @@ async function main() {
   let cacheUpdated = false;
 
   for (const mdFile of mdFiles) {
-    const filePath = path.join('t', mdFile);
+    const filePath = path.join('tests', mdFile);
     const content = await fs.readFile(filePath, 'utf-8');
     const lines = content.split('\n');
 
