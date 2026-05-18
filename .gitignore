@@ -1,3 +1,6 @@
-/.envrc
-/.generated/
+.envrc
+.generated
+*.err
+*.out
+*.time
 node_modules
