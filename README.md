@@ -7,6 +7,8 @@ align="right" width="10%" height="auto"/>
 
 # AI-Augmented Markdown BDD Transpiler for Testing
 
+[![CI Pipeline](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml/badge.svg)](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml)
+
 A modern, Behavior-Driven Development (BDD) testing framework that allows non-technical stakeholders to author End-to-End (E2E) user journeys using native Markdown.
 
 Traditional BDD frameworks (like Cucumber) often suffer from "step-definition bloat," requiring extensive engineering work to map rigid phrases to code via Regex. This project solves that by utilizing the **Google Gen AI SDK (`gemini-2.5-flash`)** as a semantic translation layer at compile-time. It maps human language variations to a standardized UI action manifest natively executed by **Playwright** and **Vitest**.
