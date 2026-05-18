@@ -17,7 +17,7 @@ Traditional BDD frameworks (like Cucumber) often suffer from "step-definition bl
 
 - **Zero-Config Authoring:** Test specs are written in pure Markdown (`.md`). No IDE plugins or custom language servers are required. Syntax highlighting and formatting work out-of-the-box in GitHub and all major editors.
 - **Semantic AI Translation:** Users can write naturally (e.g., "click the button", "smash the button", "tap"). The transpiler uses Gemini to map intent to deterministic UI actions.
-- **No Step-Definition Bloat:** Generic functions support the AI intelligently infers implicit ARIA roles from human text (e.g., classifying a step as targeting a "link" or a "checkbox").
+- **No Step-Definition Bloat:** Generic functions for the AI to intelligently infer implicit ARIA roles from human text (e.g., classifying a step as targeting a "link" or a "checkbox").
 - **Deterministic Caching:** Compiled steps are saved to `bdd-cache.json`. Subsequent runs execute instantly without hitting the AI API, ensuring stable, offline, and fast CI/CD pipeline runs.
 - **Fully Dockerized:** Includes a clean Docker Compose environment to spin up the target application and execute tests in complete isolation.
 
