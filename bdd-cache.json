@@ -8,11 +8,11 @@
     "extractedArguments": ["frontend_wizard", "Username"]
   },
   "Smash the \"Sign In\" button": {
-    "matchedFunction": "click_button",
-    "extractedArguments": ["Sign In"]
+    "matchedFunction": "interact_with_element",
+    "extractedArguments": ["click", "button", "Sign In"]
   },
   "The user should see the heading \"Welcome Back, Wizard!\"": {
-    "matchedFunction": "verify_heading",
-    "extractedArguments": ["Welcome Back, Wizard!"]
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["visible", "heading", "Welcome Back, Wizard!"]
   }
 }

@@ -17,7 +17,7 @@ Traditional BDD frameworks (like Cucumber) often suffer from "step-definition bl
 
 - **Zero-Config Authoring:** Test specs are written in pure Markdown (`.md`). No IDE plugins or custom language servers are required. Syntax highlighting and formatting work out-of-the-box in GitHub and all major editors.
 - **Semantic AI Translation:** Users can write naturally (e.g., "click the button", "smash the button", "tap"). The transpiler uses Gemini to map intent to deterministic UI actions.
-- **No Step-Definition Bloat:** Actions are mapped to a finite "Standard Library" of Playwright's A11y (accessibility-first) locators. If the UI is accessible, it can be tested without writing new JavaScript.
+- **No Step-Definition Bloat:** Generic functions support the AI intelligently infers implicit ARIA roles from human text (e.g., classifying a step as targeting a "link" or a "checkbox").
 - **Deterministic Caching:** Compiled steps are saved to `bdd-cache.json`. Subsequent runs execute instantly without hitting the AI API, ensuring stable, offline, and fast CI/CD pipeline runs.
 - **Fully Dockerized:** Includes a clean Docker Compose environment to spin up the target application and execute tests in complete isolation.
 
@@ -26,7 +26,7 @@ Traditional BDD frameworks (like Cucumber) often suffer from "step-definition bl
 ## 🏗️ Architecture
 
 1.  **Authoring (`tests/*.md`)**: Stakeholders define features and scenarios.
-2.  **Manifest (`manifest.json`)**: A JSON schema defining available accessible actions (e.g., `navigate_to`, `enter_into_field`).
+2.  **Manifest (`manifest.json`)**: A JSON schema defining a highly generic set of Playwright A11y actions (e.g., `interact_with_element`, `verify_element_state`).
 3.  **Transpiler (`transpile.ts`)**: Crawls markdown, checks the cache, and calls the Gemini API to map unregistered human language steps to the manifest constraints.
 4.  **Standard Library (`framework/standard-ui-steps.ts`)**: The physical Playwright implementation of the manifest.
 5.  **Execution (`.generated/*.test.ts`)**: The transpiler outputs standard, execution-ready Vitest spec files.
