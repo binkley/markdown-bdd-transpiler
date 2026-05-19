@@ -1,5 +1,6 @@
 {
   "singleQuote": true,
   "trailingComma": "none",
-  "printWidth": 100
+  "printWidth": 78,
+  "plugins": ["prettier-plugin-sh"]
 }

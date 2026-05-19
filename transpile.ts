@@ -40,7 +40,9 @@ async function main() {
 
   for (const mdFile of mdFiles) {
     if (isVerbose) {
-      console.log(`📄 Transpiling tests/${mdFile} -> .generated/${mdFile}.test.ts`);
+      console.log(
+        `📄 Transpiling tests/${mdFile} -> .generated/${mdFile}.test.ts`
+      );
     }
 
     const filePath = path.join('tests', mdFile);
@@ -135,7 +137,10 @@ async function main() {
                   type: Type.OBJECT,
                   properties: {
                     matchedFunction: { type: Type.STRING },
-                    extractedArguments: { type: Type.ARRAY, items: { type: Type.STRING } }
+                    extractedArguments: {
+                      type: Type.ARRAY,
+                      items: { type: Type.STRING }
+                    }
                   },
                   required: ['matchedFunction', 'extractedArguments']
                 }
@@ -147,14 +152,22 @@ async function main() {
               console.error(
                 `❌ [API ERROR] Gemini returned 503 (High Demand) while compiling: "${stepText}".`
               );
-              console.error(`   Please wait a few moments and try running the command again.`);
+              console.error(
+                `   Please wait a few moments and try running the command again.`
+              );
             } else {
-              console.error(`❌ [API ERROR] Unexpected failure connecting to Gemini:`, e.message);
+              console.error(
+                `❌ [API ERROR] Unexpected failure connecting to Gemini:`,
+                e.message
+              );
             }
             process.exit(1);
           }
 
-          const callDuration = ((performance.now() - callStart) / 1000).toFixed(2);
+          const callDuration = (
+            (performance.now() - callStart) /
+            1000
+          ).toFixed(2);
           console.log(`⚡ API returned in ${callDuration}s`);
 
           const resultStr = response.text;
@@ -163,7 +176,10 @@ async function main() {
             cache[cacheKey] = resolution;
             cacheUpdated = true;
           } catch {
-            console.error(`⚠️ [PARSE ERROR] AI returned invalid JSON schema:`, resultStr);
+            console.error(
+              `⚠️ [PARSE ERROR] AI returned invalid JSON schema:`,
+              resultStr
+            );
             process.exit(1);
           }
         } else {

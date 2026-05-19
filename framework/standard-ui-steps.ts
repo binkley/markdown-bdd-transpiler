@@ -5,7 +5,11 @@ export async function navigate_to(page: Page, url_string: string) {
   await page.goto(`${baseUrl}${url_string}`);
 }
 
-export async function enter_into_field(page: Page, text_to_type: string, field_label: string) {
+export async function enter_into_field(
+  page: Page,
+  text_to_type: string,
+  field_label: string
+) {
   await page.getByLabel(field_label, { exact: true }).fill(text_to_type);
 }
 
@@ -16,7 +20,10 @@ export async function interact_with_element(
   aria_role: Parameters<Page['getByRole']>[0],
   accessible_name: string
 ) {
-  const locator = page.getByRole(aria_role, { name: accessible_name, exact: true });
+  const locator = page.getByRole(aria_role, {
+    name: accessible_name,
+    exact: true
+  });
   if (action_type === 'click') await locator.click();
   else if (action_type === 'check') await locator.check();
   else if (action_type === 'uncheck') await locator.uncheck();
@@ -31,7 +38,9 @@ export async function verify_element_state(
   accessible_name: string
 ) {
   const locator = page.getByRole(aria_role, { name: accessible_name });
-  await locator.waitFor({ state: expected_state === 'hidden' ? 'hidden' : 'visible' });
+  await locator.waitFor({
+    state: expected_state === 'hidden' ? 'hidden' : 'visible'
+  });
 
   if (expected_state === 'disabled') {
     const isDisabled = await locator.isDisabled();
