@@ -96,12 +96,14 @@ npm test
 
 ### 3. Docker Execution (Recommended)
 
-To run the application and the test suite in a clean, isolated environment,
-simply run:
+To run the application and the test suite in a clean, isolated environment, simply run:
 
 ```bash
 ./run.sh
 ```
+
+_(Optional: Pass `--verbose` to output file-level `MD -> JS` compilation
+logs)._
 
 This script will:
 

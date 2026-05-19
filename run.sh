@@ -3,6 +3,12 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# Parse arguments
+if [[ "$1" == "--verbose" ]]; then
+  export TRANSPILER_VERBOSE=true
+  echo "Verbose mode enabled."
+fi
+
 # Ensure the environment is cleanly torn down when the script exits (success or failure)
 trap 'echo -e "\nCleaning up test environment..."; docker compose down' EXIT
 

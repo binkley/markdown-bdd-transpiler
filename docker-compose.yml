@@ -16,6 +16,7 @@ services:
     environment:
       - TEST_BASE_URL=http://demo-app:5173
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - TRANSPILER_VERBOSE=${TRANSPILER_VERBOSE:-false}
     volumes:
       - ./test-results:/app/test-results
     depends_on:

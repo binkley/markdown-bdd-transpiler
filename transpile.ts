@@ -36,8 +36,13 @@ async function main() {
   let apiCalls = 0;
   let cacheUpdated = false;
   const startTime = performance.now();
+  const isVerbose = process.env.TRANSPILER_VERBOSE === 'true';
 
   for (const mdFile of mdFiles) {
+    if (isVerbose) {
+      console.log(`📄 Transpiling tests/${mdFile} -> .generated/${mdFile}.test.ts`);
+    }
+
     const filePath = path.join('tests', mdFile);
     const content = await fs.readFile(filePath, 'utf-8');
     const lines = content.split('\n');
