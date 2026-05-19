@@ -9,27 +9,57 @@ align="right" width="10%" height="auto"/>
 
 [![CI Pipeline](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml/badge.svg)](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml)
 
-A modern, Behavior-Driven Development (BDD) testing framework that allows non-technical stakeholders to author End-to-End (E2E) user journeys using native Markdown.
+A modern, Behavior-Driven Development (BDD) testing framework that allows
+non-technical stakeholders to author End-to-End (E2E) user journeys using
+native Markdown.
 
-Traditional BDD frameworks (like Cucumber) often suffer from "step-definition bloat," requiring extensive engineering work to map rigid phrases to code via Regex. This project solves that by utilizing the **Google Gen AI SDK (`gemini-2.5-flash`)** as a semantic translation layer at compile-time. It maps human language variations to a standardized UI action manifest natively executed by **Playwright** and **Vitest**.
+Traditional BDD frameworks (like Cucumber) often suffer from "step-definition
+bloat," requiring extensive engineering work to map rigid phrases to code via
+Regex. This project solves that by utilizing the **Google Gen AI SDK
+(`gemini-2.5-flash`)** as a semantic translation layer at compile-time. It
+maps human language variations to a standardized UI action manifest natively
+executed by **Playwright** and **Vitest**.
 
 ## 🌟 Key Features
 
-- **Zero-Config Authoring:** Test specs are written in pure Markdown (`.md`). No IDE plugins or custom language servers are required. Syntax highlighting and formatting work out-of-the-box in GitHub and all major editors.
-- **Semantic AI Translation:** Users can write naturally (e.g., "click the button", "smash the button", "tap"). The transpiler uses Gemini to map intent to deterministic UI actions.
-- **No Step-Definition Bloat:** Generic functions for the AI to intelligently infer implicit ARIA roles from human text (e.g., classifying a step as targeting a "link" or a "checkbox").
-- **Deterministic Caching:** Compiled steps are saved to `bdd-cache.json`. Subsequent runs execute instantly without hitting the AI API, ensuring stable, offline, and fast CI/CD pipeline runs.
-- **Fully Dockerized:** Includes a clean Docker Compose environment to spin up the target application and execute tests in complete isolation.
+- **Zero-Config Authoring:** Test specs are written in pure Markdown (`.md`).
+  No IDE plugins or custom language servers are required. Syntax highlighting
+  and formatting work out-of-the-box in GitHub and all major editors.
+- **Semantic AI Translation:** Users can write naturally (e.g., "click the
+  button", "smash the button", "tap"). The transpiler uses Gemini to map
+  intent to deterministic UI actions.
+- **No Step-Definition Bloat:** Generic functions for the AI to intelligently
+  infer implicit ARIA roles from human text (e.g., classifying a step as
+  targeting a "link" or a "checkbox").
+- **Deterministic Caching:** Compiled steps are saved to `bdd-cache.json`.
+  Subsequent runs execute instantly without hitting the AI API, ensuring
+  stable, offline, and fast CI/CD pipeline runs.
+- **Fully Dockerized:** Includes a clean Docker Compose environment to spin up
+  the target application and execute tests in complete network isolation
+  (preventing local `EADDRINUSE` port conflicts).
+- **Visual Debugging:** Automatically captures full-page Playwright
+  screenshots whenever a test step fails, saving them locally to
+  `test-results/`. The GitHub Actions CI pipeline is configured to securely
+  upload these artifacts for easy debugging.
+- **Production-Grade Transpiler:** Structured compilation logging, API
+  performance profiling, and an enforced "clean state" architecture that
+  automatically deletes stale generated tests.
 
 ---
 
 ## 🏗️ Architecture
 
 1.  **Authoring (`tests/*.md`)**: Stakeholders define features and scenarios.
-2.  **Manifest (`manifest.json`)**: A JSON schema defining a highly generic set of Playwright A11y actions (e.g., `interact_with_element`, `verify_element_state`).
-3.  **Transpiler (`transpile.ts`)**: Crawls markdown, checks the cache, and calls the Gemini API to map unregistered human language steps to the manifest constraints.
-4.  **Standard Library (`framework/standard-ui-steps.ts`)**: The physical Playwright implementation of the manifest.
-5.  **Execution (`.generated/*.test.ts`)**: The transpiler outputs standard, execution-ready Vitest spec files.
+2.  **Manifest (`manifest.json`)**: A JSON schema defining a highly generic
+    set of Playwright A11y actions (e.g., `interact_with_element`,
+    `verify_element_state`).
+3.  **Transpiler (`transpile.ts`)**: Crawls markdown, checks the cache, and
+    calls the Gemini API to map unregistered human language steps to the
+    manifest constraints.
+4.  **Standard Library (`framework/standard-ui-steps.ts`)**: The physical
+    Playwright implementation of the manifest.
+5.  **Execution (`.generated/*.test.ts`)**: The transpiler outputs standard,
+    execution-ready Vitest spec files.
 
 ---
 
@@ -66,7 +96,8 @@ npm test
 
 ### 3. Docker Execution (Recommended)
 
-To run the application and the test suite in a clean, isolated environment, simply run:
+To run the application and the test suite in a clean, isolated environment,
+simply run:
 
 ```bash
 ./run.sh
@@ -84,13 +115,16 @@ This script will:
 
 ## ✅ CI/CD & Local Validation
 
-This repository is configured to ensure code quality through rigorous static analysis and automated E2E testing using GitHub Actions.
+This repository is configured to ensure code quality through rigorous static
+analysis and automated E2E testing using GitHub Actions.
 
 ### Husky Pre-Push Hook
 
-To prevent broken code from being pushed to the remote repository, this project utilizes a **Husky `pre-push` hook**.
+To prevent broken code from being pushed to the remote repository, this
+project utilizes a **Husky `pre-push` hook**.
 
-Whenever you run `git push`, the hook automatically executes the `./validate.sh` script. This script performs the following checks in sequence:
+Whenever you run `git push`, the hook automatically executes the
+`./validate.sh` script. This script performs the following checks in sequence:
 
 1. **Formatting:** `npx prettier --check .`
 2. **Linting:** `npm run lint`
@@ -99,13 +133,15 @@ Whenever you run `git push`, the hook automatically executes the `./validate.sh`
 
 If any of these steps fail, the push is aborted.
 
-_Tip: If formatting fails, simply run `npm run format` to auto-fix the issues before pushing again._
+_Tip: If formatting fails, simply run `npm run format` to auto-fix the issues
+before pushing again._
 
 ---
 
 ## ✍️ Writing Tests
 
-Add new test scenarios to the `tests/` directory using standard Markdown formatting:
+Add new test scenarios to the `tests/` directory using standard Markdown
+formatting:
 
 ```markdown
 # Feature: User Authentication
@@ -131,4 +167,17 @@ Add new test scenarios to the `tests/` directory using standard Markdown formatt
 - `npm run type-check`: Validates TypeScript structural integrity.
 - `npm run lint`: Runs ESLint for code quality.
 - `npm run format`: Runs Prettier to standardize codebase formatting.
-- `npm run pretest`: Manually triggers the transpilation step without running Vitest.
+- `npm run pretest`: Manually triggers the transpilation step without running
+  Vitest.
+
+---
+
+## 📝 TODO / Future Improvements
+
+- **Resilient API Retries:** Implement an exponential backoff/retry loop
+  inside `transpile.ts` to gracefully handle temporary
+  `503 Service Unavailable` capacity spikes when using the highly demanded
+  `gemini-2.5-flash-lite` model.
+- **Dynamic Data Injection:** Expand the transpiler to support injecting
+  environment variables (e.g., `{{USERNAME}}`) directly into the Markdown
+  steps.
