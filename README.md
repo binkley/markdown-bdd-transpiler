@@ -104,7 +104,12 @@ simply run:
 ```
 
 Use `./run.sh --help` for help.<br/>
-Use `./run.sh --verbose` for verbose logging.
+Use `./run.sh --verbose` for verbose logging:
+
+```Plaintext
+ ✓ .generated/login-journey.md.test.ts (1 test) 237ms
+ ✓ .generated/settings-journey.md.test.ts (1 test) 240ms
+```
 
 This script will:
 
