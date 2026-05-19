@@ -59,7 +59,7 @@ executed by **Playwright** and **Vitest**.
 4.  **Standard Library (`framework/standard-ui-steps.ts`)**: The physical
     Playwright implementation of the manifest.
 5.  **Execution (`.generated/*.test.ts`)**: The transpiler outputs standard,
-    execution-ready Vitest spec files.
+    execution-ready Playwrite spec files.
 
 ---
 

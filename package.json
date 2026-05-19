@@ -4,11 +4,11 @@
   "type": "module",
   "dependencies": {
     "@google/genai": "^2.4.0",
-    "playwright": "^1.49.0",
-    "vitest": "^3.0.0"
+    "playwright": "^1.49.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.60.0",
     "eslint": "^10.4.0",
     "express": "^5.2.1",
     "globals": "^17.6.0",
@@ -26,7 +26,7 @@
     "postinstall": "playwright install chromium",
     "prepare": "husky",
     "pretest": "tsx transpile.ts",
-    "test": "vitest run",
+    "test": "playwright test",
     "type-check": "tsc --noEmit"
   }
 }

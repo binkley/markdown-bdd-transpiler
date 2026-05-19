@@ -51,10 +51,7 @@ async function main() {
 
     let currentContext = '';
 
-    let specCode = `import { test, describe, beforeAll, afterAll, afterEach } from 'vitest';\n`;
-    specCode += `import { chromium, Browser, Page } from 'playwright';\n`;
-    specCode += `import fs from 'fs';\n`;
-    specCode += `import path from 'path';\n`;
+    let specCode = `import { test } from '@playwright/test';\n`;
     specCode += `import * as steps from '../framework/standard-ui-steps.js';\n\n`;
 
     let insideFeature = false;
@@ -76,24 +73,7 @@ async function main() {
 
     const openFeature = (name: string) => {
       closeFeature();
-      specCode += `describe(${JSON.stringify(name)}, () => {\n`;
-      specCode += `  let browser: Browser;\n`;
-      specCode += `  let page: Page;\n\n`;
-      specCode += `  beforeAll(async () => {\n`;
-      specCode += `    browser = await chromium.launch();\n`;
-      specCode += `    page = await browser.newPage();\n`;
-      specCode += `  });\n\n`;
-      specCode += `  afterEach(async (context) => {\n`;
-      specCode += `    if (context.task.result?.state === 'fail') {\n`;
-      specCode += `      const resultsDir = path.resolve('test-results');\n`;
-      specCode += `      if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir, { recursive: true });\n`;
-      specCode += `      const safeName = context.task.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();\n`;
-      specCode += `      await page.screenshot({ path: path.join(resultsDir, \`\${safeName}-failure.png\`), fullPage: true });\n`;
-      specCode += `    }\n`;
-      specCode += `  });\n\n`;
-      specCode += `  afterAll(async () => {\n`;
-      specCode += `    await browser.close();\n`;
-      specCode += `  });\n\n`;
+      specCode += `test.describe(${JSON.stringify(name)}, () => {\n`;
       insideFeature = true;
     };
 
@@ -102,7 +82,7 @@ async function main() {
       if (!insideFeature) {
         openFeature('BDD Feature');
       }
-      specCode += `  test(${JSON.stringify(name)}, async () => {\n`;
+      specCode += `  test(${JSON.stringify(name)}, async ({ page }) => {\n`;
       insideScenario = true;
     };
 
