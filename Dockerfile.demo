@@ -9,8 +9,8 @@ RUN npm ci --ignore-scripts
 # Copy the demo app and config
 COPY demo-app.ts tsconfig.json ./
 
-# Compile the TypeScript to JavaScript
-RUN npx tsc demo-app.ts --outDir . --module NodeNext --moduleResolution NodeNext
+# Compile the TypeScript to JavaScript using tsconfig.json
+RUN npx tsc
 
 EXPOSE 5173
 

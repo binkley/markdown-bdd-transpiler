@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@google/genai": "^2.4.0",
-    "playwright": "^1.49.0"
+    "@google/genai": "^2.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -16,9 +15,9 @@
     "husky": "^9.1.7",
     "prettier": "^3.8.3",
     "prettier-plugin-sh": "^0.18.1",
-    "tsx": "^4.19.0",
-    "typescript": "^5.7.0",
-    "typescript-eslint": "^8.59.3"
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.4"
   },
   "scripts": {
     "demo": "tsx demo-app.ts",

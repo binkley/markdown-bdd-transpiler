@@ -1,4 +1,4 @@
-import type { Page } from 'playwright';
+import type { Page } from '@playwright/test';
 
 export async function navigate_to(page: Page, url_string: string) {
   const baseUrl = process.env.TEST_BASE_URL || 'http://localhost:5173';
