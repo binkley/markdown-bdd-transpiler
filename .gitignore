@@ -5,3 +5,4 @@
 *.time
 node_modules/
 test-results/
+\ndemo-app.js\n

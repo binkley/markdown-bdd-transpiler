@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 
 const app = express();
 const port = 5173;
 
-app.get('/login', (req, res) => {
+app.get('/login', (req: Request, res: Response) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -105,7 +105,7 @@ app.get('/login', (req, res) => {
   `);
 });
 
-app.get('/settings', (req, res) => {
+app.get('/settings', (req: Request, res: Response) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
