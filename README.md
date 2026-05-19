@@ -182,10 +182,42 @@ formatting:
 
 ## 📝 TODO / Future Improvements
 
-- **Resilient API Retries:** Implement an exponential backoff/retry loop
-  inside `transpile.ts` to gracefully handle temporary
-  `503 Service Unavailable` capacity spikes when using the highly demanded
-  `gemini-2.5-flash-lite` model.
-- **Dynamic Data Injection:** Expand the transpiler to support injecting
-  environment variables (e.g., `{{USERNAME}}`) directly into the Markdown
-  steps.
+#### Resilient API Retries
+
+Implement an exponential backoff/retry loop inside `transpile.ts` to
+gracefully handle temporary `503 Service Unavailable` capacity spikes when
+using the highly demanded `gemini-2.5-flash-lite` model.
+
+#### Dynamic Data Injection
+
+Expand the transpiler to support injecting environment variables (e.g.,
+`{{USERNAME}}`) directly into the Markdown steps.
+
+#### NPM Package Publishing
+
+Convert the project from a localized workspace into a standalone, publishable
+NPM package so other repositories can consume it natively without copying
+files. The proposed architectural plan for this migration is:
+
+1.  **Metadata & Exports:** Update `package.json` to define a `bin` executable
+    (e.g., `markdown-bdd`) and configure `exports` to expose the standard UI
+    library publicly.
+2.  **Compilation Step:** Update `tsconfig.json` to emit compiled code
+    (`outDir: "./dist"`) rather than relying on `tsx` for runtime execution.
+3.  **Dynamic Pathing:** Refactor `transpile.ts` to utilize `process.cwd()`
+    for dynamic directory resolution (so it correctly targets the consuming
+    project's `tests/` and `.generated/` folders) and update the generated
+    Playwright specs to import the UI steps from the published package name
+    rather than a relative local path.
+4.  **Publishing Hygiene:** Implement an `.npmignore` file to exclude the demo
+    application, local caches, and Docker configurations from the final
+    published artifact.
+
+#### Descriptive vs. Actionable Bullet Points
+
+The parser currently treats all top-level Markdown list items (`*` or `-`) as
+executable steps. If a user includes a bulleted list purely for documentation,
+the transpiler will erroneously attempt to execute it. Future enhancements
+should address this (e.g., via an AI `ignore_step` classification, strict
+parser context boundaries, explicit formatting conventions, or requiring a
+custom prefix like `@` for actionable steps).
