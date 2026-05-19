@@ -4,16 +4,16 @@
     "extractedArguments": ["/login"]
   },
   "The user enters \"frontend_wizard\" into the \"Username\" field": {
-    "matchedFunction": "enter_into_field",
-    "extractedArguments": ["frontend_wizard", "Username"]
+    "matchedFunction": "fill_input",
+    "extractedArguments": ["textbox", "Username", "frontend_wizard"]
   },
   "Smash the \"Sign In\" button": {
-    "matchedFunction": "interact_with_element",
-    "extractedArguments": ["click", "button", "Sign In"]
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"]
   },
   "The user should see the heading \"Welcome Back, Wizard!\"": {
     "matchedFunction": "verify_element_state",
-    "extractedArguments": ["visible", "heading", "Welcome Back, Wizard!"]
+    "extractedArguments": ["heading", "Welcome Back, Wizard!", "visible"]
   },
   "The user navigates to \"/settings\"": {
     "matchedFunction": "navigate_to",
@@ -21,14 +21,14 @@
   },
   "Verify the \"Save Changes\" button is disabled": {
     "matchedFunction": "verify_element_state",
-    "extractedArguments": ["disabled", "button", "Save Changes"]
+    "extractedArguments": ["button", "Save Changes", "disabled"]
   },
   "Check the \"Enable Notifications\" checkbox": {
-    "matchedFunction": "interact_with_element",
-    "extractedArguments": ["check", "checkbox", "Enable Notifications"]
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["checkbox", "Enable Notifications"]
   },
   "Verify the \"Save Changes\" button is enabled": {
     "matchedFunction": "verify_element_state",
-    "extractedArguments": ["enabled", "button", "Save Changes"]
+    "extractedArguments": ["button", "Save Changes", "enabled"]
   }
 }

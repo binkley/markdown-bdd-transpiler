@@ -5,18 +5,19 @@ export async function navigate_to(page: Page, url_string: string) {
   await page.goto(`${baseUrl}${url_string}`);
 }
 
-export async function enter_into_field(
+export async function fill_input(
   page: Page,
-  text_to_type: string,
-  field_label: string
+  aria_role: Parameters<Page['getByRole']>[0],
+  accessible_name: string,
+  value_to_type: string
 ) {
-  await page.getByLabel(field_label, { exact: true }).fill(text_to_type);
+  await page
+    .getByRole(aria_role, { name: accessible_name, exact: true })
+    .fill(value_to_type);
 }
 
-type ActionType = 'click' | 'check' | 'uncheck';
-export async function interact_with_element(
+export async function interact_with(
   page: Page,
-  action_type: ActionType,
   aria_role: Parameters<Page['getByRole']>[0],
   accessible_name: string
 ) {
@@ -24,23 +25,25 @@ export async function interact_with_element(
     name: accessible_name,
     exact: true
   });
-  if (action_type === 'click') await locator.click();
-  else if (action_type === 'check') await locator.check();
-  else if (action_type === 'uncheck') await locator.uncheck();
-  else throw new Error(`Unsupported action: ${action_type}`);
+  // Playwright's click() is smart enough to handle toggling checkboxes automatically
+  await locator.click();
 }
 
 type ElementState = 'visible' | 'hidden' | 'enabled' | 'disabled';
 export async function verify_element_state(
   page: Page,
-  expected_state: ElementState,
   aria_role: Parameters<Page['getByRole']>[0],
-  accessible_name: string
+  accessible_name: string,
+  expected_state: ElementState
 ) {
   const locator = page.getByRole(aria_role, { name: accessible_name });
-  await locator.waitFor({
-    state: expected_state === 'hidden' ? 'hidden' : 'visible'
-  });
+
+  if (expected_state === 'hidden') {
+    await locator.waitFor({ state: 'hidden' });
+  } else {
+    // Default to waiting for it to be visible before checking enabled/disabled states
+    await locator.waitFor({ state: 'visible' });
+  }
 
   if (expected_state === 'disabled') {
     const isDisabled = await locator.isDisabled();
