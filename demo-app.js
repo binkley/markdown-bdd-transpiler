@@ -105,6 +105,48 @@ app.get('/login', (req, res) => {
   `);
 });
 
+app.get('/settings', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Settings - Dummy App</title>
+      <style>
+        :root { --primary: #4f46e5; --bg: #f3f4f6; --text: #1f2937; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        h2 { margin-top: 0; text-align: center; color: var(--primary); }
+        .form-group { margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--primary); cursor: pointer; }
+        label { font-weight: 500; cursor: pointer; }
+        button { width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        a { display: block; text-align: center; margin-top: 1rem; color: var(--primary); text-decoration: none; font-size: 0.875rem; }
+        a:hover { text-decoration: underline; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h2>Account Settings</h2>
+        <div class="form-group">
+          <input type="checkbox" id="notifications" />
+          <label for="notifications">Enable Notifications</label>
+        </div>
+        <button id="save-btn" disabled>Save Changes</button>
+        <a href="/login">Back to Login</a>
+      </div>
+      <script>
+        document.getElementById('notifications').addEventListener('change', (e) => {
+          document.getElementById('save-btn').disabled = !e.target.checked;
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
 app.listen(port, () => {
   console.log(`Dummy frontend running at http://localhost:${port}`);
 });

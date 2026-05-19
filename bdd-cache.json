@@ -14,5 +14,21 @@
   "The user should see the heading \"Welcome Back, Wizard!\"": {
     "matchedFunction": "verify_element_state",
     "extractedArguments": ["visible", "heading", "Welcome Back, Wizard!"]
+  },
+  "The user navigates to \"/settings\"": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/settings"]
+  },
+  "Verify the \"Save Changes\" button is disabled": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["disabled", "button", "Save Changes"]
+  },
+  "Check the \"Enable Notifications\" checkbox": {
+    "matchedFunction": "interact_with_element",
+    "extractedArguments": ["check", "checkbox", "Enable Notifications"]
+  },
+  "Verify the \"Save Changes\" button is enabled": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["enabled", "button", "Save Changes"]
   }
 }

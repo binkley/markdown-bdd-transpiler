@@ -28,6 +28,8 @@ async function main() {
   }
   const mdFiles = files.filter((f) => f.endsWith('.md'));
 
+  // Ensure a clean slate for generated tests
+  await fs.rm(outDir, { recursive: true, force: true });
   await fs.mkdir(outDir, { recursive: true });
 
   let cacheUpdated = false;
@@ -39,8 +41,10 @@ async function main() {
 
     let currentContext = '';
 
-    let specCode = `import { test, describe, beforeAll, afterAll } from 'vitest';\n`;
+    let specCode = `import { test, describe, beforeAll, afterAll, afterEach } from 'vitest';\n`;
     specCode += `import { chromium, Browser, Page } from 'playwright';\n`;
+    specCode += `import fs from 'fs';\n`;
+    specCode += `import path from 'path';\n`;
     specCode += `import * as steps from '../framework/standard-ui-steps.js';\n\n`;
 
     let insideFeature = false;
@@ -68,6 +72,14 @@ async function main() {
       specCode += `  beforeAll(async () => {\n`;
       specCode += `    browser = await chromium.launch();\n`;
       specCode += `    page = await browser.newPage();\n`;
+      specCode += `  });\n\n`;
+      specCode += `  afterEach(async (context) => {\n`;
+      specCode += `    if (context.task.result?.state === 'fail') {\n`;
+      specCode += `      const resultsDir = path.resolve('test-results');\n`;
+      specCode += `      if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir, { recursive: true });\n`;
+      specCode += `      const safeName = context.task.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();\n`;
+      specCode += `      await page.screenshot({ path: path.join(resultsDir, \`\${safeName}-failure.png\`), fullPage: true });\n`;
+      specCode += `    }\n`;
       specCode += `  });\n\n`;
       specCode += `  afterAll(async () => {\n`;
       specCode += `    await browser.close();\n`;

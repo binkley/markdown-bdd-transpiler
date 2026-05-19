@@ -4,3 +4,4 @@
 *.out
 *.time
 node_modules
+test-results/
