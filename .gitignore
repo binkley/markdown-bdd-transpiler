@@ -1,7 +1,7 @@
 .envrc
-.generated
+.generated/
 *.err
 *.out
 *.time
-node_modules
+node_modules/
 test-results/
