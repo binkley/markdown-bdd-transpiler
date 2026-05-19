@@ -32,7 +32,10 @@ async function main() {
   await fs.rm(outDir, { recursive: true, force: true });
   await fs.mkdir(outDir, { recursive: true });
 
+  let cacheHits = 0;
+  let apiCalls = 0;
   let cacheUpdated = false;
+  const startTime = performance.now();
 
   for (const mdFile of mdFiles) {
     const filePath = path.join('tests', mdFile);
@@ -112,23 +115,42 @@ async function main() {
 
         let resolution = cache[cacheKey];
         if (!resolution) {
-          console.log(`Cache miss for "${stepText}". Calling Gemini...`);
-          const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-lite',
-            contents: stepText,
-            config: {
-              systemInstruction: `You are an AI compiler for BDD tests.\nMap the user's step to a function in this manifest: ${manifestStr}\nUse context: ${currentContext}`,
-              responseMimeType: 'application/json',
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                  matchedFunction: { type: Type.STRING },
-                  extractedArguments: { type: Type.ARRAY, items: { type: Type.STRING } }
-                },
-                required: ['matchedFunction', 'extractedArguments']
+          console.log(`\n☁️  Cache miss: "${stepText}"`);
+          const callStart = performance.now();
+
+          let response;
+          try {
+            response = await ai.models.generateContent({
+              model: 'gemini-2.5-flash-lite',
+              contents: stepText,
+              config: {
+                systemInstruction: `You are an AI compiler for BDD tests.\nMap the user's step to a function in this manifest: ${manifestStr}\nUse context: ${currentContext}`,
+                responseMimeType: 'application/json',
+                responseSchema: {
+                  type: Type.OBJECT,
+                  properties: {
+                    matchedFunction: { type: Type.STRING },
+                    extractedArguments: { type: Type.ARRAY, items: { type: Type.STRING } }
+                  },
+                  required: ['matchedFunction', 'extractedArguments']
+                }
               }
+            });
+            apiCalls++;
+          } catch (e: any) {
+            if (e.status === 503) {
+              console.error(
+                `❌ [API ERROR] Gemini returned 503 (High Demand) while compiling: "${stepText}".`
+              );
+              console.error(`   Please wait a few moments and try running the command again.`);
+            } else {
+              console.error(`❌ [API ERROR] Unexpected failure connecting to Gemini:`, e.message);
             }
-          });
+            process.exit(1);
+          }
+
+          const callDuration = ((performance.now() - callStart) / 1000).toFixed(2);
+          console.log(`⚡ API returned in ${callDuration}s`);
 
           const resultStr = response.text;
           try {
@@ -136,9 +158,11 @@ async function main() {
             cache[cacheKey] = resolution;
             cacheUpdated = true;
           } catch {
-            console.error('Failed to parse gemini response:', resultStr);
+            console.error(`⚠️ [PARSE ERROR] AI returned invalid JSON schema:`, resultStr);
             process.exit(1);
           }
+        } else {
+          cacheHits++;
         }
 
         const argsStr = (resolution.extractedArguments || [])
@@ -157,10 +181,12 @@ async function main() {
 
   if (cacheUpdated) {
     await fs.writeFile(cachePath, JSON.stringify(cache, null, 2));
-    console.log('Cache updated.');
-  } else {
-    console.log('Transpilation complete (cached).');
   }
+
+  const totalDuration = ((performance.now() - startTime) / 1000).toFixed(2);
+  console.log(
+    `\n✅ Transpilation Complete: ${cacheHits + apiCalls} steps processed (${cacheHits} cached, ${apiCalls} generated via AI) in ${totalDuration}s.`
+  );
 }
 
 main().catch(console.error);
