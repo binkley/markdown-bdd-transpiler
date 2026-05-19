@@ -1,0 +1,7 @@
+# Ignore generated test files and results
+.generated
+test-results
+
+# Ignore generated Husky scripts and Node downloads
+.husky/_
+node_modules
