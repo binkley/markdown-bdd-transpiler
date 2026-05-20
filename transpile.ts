@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { GoogleGenAI, Type } from '@google/genai';
+import { marked } from 'marked';
 
 const ai = new GoogleGenAI({});
 
@@ -47,134 +48,163 @@ async function main() {
 
     const filePath = path.join('tests', mdFile);
     const content = await fs.readFile(filePath, 'utf-8');
-    const lines = content.split('\n');
 
     let currentContext = '';
+    
+    type Scenario = { name: string; steps: string[] };
+    type Feature = { name: string; scenarios: Scenario[] };
+    const features: Feature[] = [];
+    
+    let currentFeature: Feature | null = null;
+    let currentScenario: Scenario | null = null;
+
+    const openFeature = (name: string) => {
+      currentFeature = { name, scenarios: [] };
+      features.push(currentFeature);
+      currentScenario = null;
+    };
+
+    const openScenario = (name: string) => {
+      if (!currentFeature) {
+        openFeature('BDD Feature');
+      }
+      currentScenario = { name, steps: [] };
+      currentFeature!.scenarios.push(currentScenario);
+    };
+
+    const tokens = marked.lexer(content);
+
+    // Function to recursively traverse the AST to find context and bdd code blocks
+    async function traverseTokens(tokensList: marked.TokensList | marked.Token[]) {
+      for (const token of tokensList) {
+        if (token.type === 'heading') {
+          const depth = token.depth;
+          const text = token.text.trim();
+          
+          if (depth === 1) {
+            openFeature(text);
+          } else if (depth === 2) {
+            openScenario(text);
+          } else if (depth === 3) {
+            currentContext = text;
+          }
+        } else if (token.type === 'code' && token.lang === 'bdd') {
+          // We found a BDD block! Process its content as steps.
+          const stepLines = token.text.split('\n');
+          for (const line of stepLines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+              const stepText = trimmed.slice(2).trim();
+              const cacheKey = `${stepText}`;
+
+              let resolution = cache[cacheKey];
+              if (!resolution) {
+                console.log(`\n☁️  Cache miss: "${stepText}"`);
+                const callStart = performance.now();
+
+                let response;
+                try {
+                  response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash-lite',
+                    contents: stepText,
+                    config: {
+                      systemInstruction: `You are an AI compiler for BDD tests.\nMap the user's step to a function in this manifest: ${manifestStr}\nUse context: ${currentContext}`,
+                      responseMimeType: 'application/json',
+                      responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                          matchedFunction: { type: Type.STRING },
+                          extractedArguments: {
+                            type: Type.ARRAY,
+                            items: { type: Type.STRING }
+                          }
+                        },
+                        required: ['matchedFunction', 'extractedArguments']
+                      }
+                    }
+                  });
+                  apiCalls++;
+                } catch (e: any) {
+                  if (e.status === 503) {
+                    console.error(
+                      `❌ [API ERROR] Gemini returned 503 (High Demand) while compiling: "${stepText}".`
+                    );
+                    console.error(
+                      `   Please wait a few moments and try running the command again.`
+                    );
+                  } else {
+                    console.error(
+                      `❌ [API ERROR] Unexpected failure connecting to Gemini:`,
+                      e.message
+                    );
+                  }
+                  process.exit(1);
+                }
+
+                const callDuration = (
+                  (performance.now() - callStart) /
+                  1000
+                ).toFixed(2);
+                console.log(`⚡ API returned in ${callDuration}s`);
+
+                const resultStr = response.text;
+                try {
+                  resolution = JSON.parse(resultStr || '{}');
+                  cache[cacheKey] = resolution;
+                  cacheUpdated = true;
+                } catch {
+                  console.error(
+                    `⚠️ [PARSE ERROR] AI returned invalid JSON schema:`,
+                    resultStr
+                  );
+                  process.exit(1);
+                }
+              } else {
+                cacheHits++;
+              }
+
+              const argsStr = (resolution.extractedArguments || [])
+                .map((a: string) => JSON.stringify(a))
+                .join(', ');
+              const argsCall = argsStr ? `, ${argsStr}` : '';
+              
+              if (!currentScenario) {
+                openScenario('BDD Scenario');
+              }
+              currentScenario!.steps.push(`await steps.${resolution.matchedFunction}(page${argsCall});`);
+            }
+          }
+        } 
+        
+        // Recursively search lists and blockquotes for code fences
+        if ('tokens' in token && token.tokens) {
+          await traverseTokens(token.tokens);
+        } else if (token.type === 'list') {
+            await traverseTokens(token.items);
+        }
+      }
+    }
+
+    await traverseTokens(tokens);
 
     let specCode = `import { test } from '@playwright/test';\n`;
     specCode += `import * as steps from '../framework/standard-ui-steps.js';\n\n`;
 
-    let insideFeature = false;
-    let insideScenario = false;
+    for (const feature of features) {
+      // Filter out scenarios with 0 steps (like documentation headers)
+      const validScenarios = feature.scenarios.filter((s) => s.steps.length > 0);
+      if (validScenarios.length === 0) continue; // Skip empty features entirely
 
-    const closeScenario = () => {
-      if (insideScenario) {
-        specCode += `  });\n\n`;
-        insideScenario = false;
-      }
-    };
-    const closeFeature = () => {
-      closeScenario();
-      if (insideFeature) {
-        specCode += `});\n\n`;
-        insideFeature = false;
-      }
-    };
-
-    const openFeature = (name: string) => {
-      closeFeature();
-      specCode += `test.describe(${JSON.stringify(name)}, () => {\n`;
-      insideFeature = true;
-    };
-
-    const openScenario = (name: string) => {
-      closeScenario();
-      if (!insideFeature) {
-        openFeature('BDD Feature');
-      }
-      specCode += `  test(${JSON.stringify(name)}, async ({ page }) => {\n`;
-      insideScenario = true;
-    };
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-
-      if (trimmed.startsWith('# ')) {
-        openFeature(trimmed.slice(2).trim());
-      } else if (trimmed.startsWith('## ')) {
-        openScenario(trimmed.slice(3).trim());
-      } else if (trimmed.startsWith('### ')) {
-        currentContext = trimmed.slice(4).trim();
-      } else if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
-        const stepText = trimmed.slice(2).trim();
-        const cacheKey = `${stepText}`;
-
-        let resolution = cache[cacheKey];
-        if (!resolution) {
-          console.log(`\n☁️  Cache miss: "${stepText}"`);
-          const callStart = performance.now();
-
-          let response;
-          try {
-            response = await ai.models.generateContent({
-              model: 'gemini-2.5-flash-lite',
-              contents: stepText,
-              config: {
-                systemInstruction: `You are an AI compiler for BDD tests.\nMap the user's step to a function in this manifest: ${manifestStr}\nUse context: ${currentContext}`,
-                responseMimeType: 'application/json',
-                responseSchema: {
-                  type: Type.OBJECT,
-                  properties: {
-                    matchedFunction: { type: Type.STRING },
-                    extractedArguments: {
-                      type: Type.ARRAY,
-                      items: { type: Type.STRING }
-                    }
-                  },
-                  required: ['matchedFunction', 'extractedArguments']
-                }
-              }
-            });
-            apiCalls++;
-          } catch (e: any) {
-            if (e.status === 503) {
-              console.error(
-                `❌ [API ERROR] Gemini returned 503 (High Demand) while compiling: "${stepText}".`
-              );
-              console.error(
-                `   Please wait a few moments and try running the command again.`
-              );
-            } else {
-              console.error(
-                `❌ [API ERROR] Unexpected failure connecting to Gemini:`,
-                e.message
-              );
-            }
-            process.exit(1);
-          }
-
-          const callDuration = (
-            (performance.now() - callStart) /
-            1000
-          ).toFixed(2);
-          console.log(`⚡ API returned in ${callDuration}s`);
-
-          const resultStr = response.text;
-          try {
-            resolution = JSON.parse(resultStr || '{}');
-            cache[cacheKey] = resolution;
-            cacheUpdated = true;
-          } catch {
-            console.error(
-              `⚠️ [PARSE ERROR] AI returned invalid JSON schema:`,
-              resultStr
-            );
-            process.exit(1);
-          }
-        } else {
-          cacheHits++;
+      specCode += `test.describe(${JSON.stringify(feature.name)}, () => {\n`;
+      for (const scenario of validScenarios) {
+        specCode += `  test(${JSON.stringify(scenario.name)}, async ({ page }) => {\n`;
+        for (const step of scenario.steps) {
+          specCode += `    ${step}\n`;
         }
-
-        const argsStr = (resolution.extractedArguments || [])
-          .map((a: string) => JSON.stringify(a))
-          .join(', ');
-        const argsCall = argsStr ? `, ${argsStr}` : '';
-        specCode += `    await steps.${resolution.matchedFunction}(page${argsCall});\n`;
+        specCode += `  });\n\n`;
       }
+      specCode += `});\n\n`;
     }
-
-    closeFeature();
 
     const outPath = path.join(outDir, `${mdFile}.test.ts`);
     await fs.writeFile(outPath, specCode);

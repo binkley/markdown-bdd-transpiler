@@ -149,26 +149,34 @@ before pushing again._
 ## ✍️ Writing Tests
 
 Add new test scenarios to the `tests/` directory using standard Markdown
-formatting:
+formatting. Actionable testing steps must be wrapped in a `bdd` code fence and formatted as bullet points:
 
-```markdown
+````markdown
 # Feature: User Authentication
 
 ## Scenario: User logs in successfully
 
 ### GIVEN
 
+```bdd
 - The user navigates to "/login"
+```
+````
 
 ### WHEN
 
+```bdd
 - The user enters "frontend_wizard" into the "Username" field
 - Click the "Sign In" button
+```
 
 ### THEN
 
+```bdd
 - The user should see the heading "Welcome Back, Wizard!"
 ```
+
+````
 
 ## 🛠️ Development Commands
 
@@ -212,12 +220,5 @@ files. The proposed architectural plan for this migration is:
 4.  **Publishing Hygiene:** Implement an `.npmignore` file to exclude the demo
     application, local caches, and Docker configurations from the final
     published artifact.
-
-#### Descriptive vs. Actionable Bullet Points
-
-The parser currently treats all top-level Markdown list items (`*` or `-`) as
-executable steps. If a user includes a bulleted list purely for documentation,
-the transpiler will erroneously attempt to execute it. Future enhancements
-should address this (e.g., via an AI `ignore_step` classification, strict
-parser context boundaries, explicit formatting conventions, or requiring a
-custom prefix like `@` for actionable steps).
+```
+````

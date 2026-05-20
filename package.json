@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@google/genai": "^2.4.0"
+    "@google/genai": "^2.4.0",
+    "@types/marked": "^5.0.2",
+    "marked": "^18.0.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
