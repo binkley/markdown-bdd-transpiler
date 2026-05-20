@@ -23,8 +23,9 @@ executed by **Playwright** and **Vitest**.
 ## 🌟 Key Features
 
 - **Zero-Config Authoring:** Test specs are written in pure Markdown (`.md`).
-  No IDE plugins or custom language servers are required. Syntax highlighting
-  and formatting work out-of-the-box in GitHub and all major editors.
+  No IDE plugins, custom language servers, or complex setup is required for
+  authors. Syntax highlighting and formatting work out-of-the-box in GitHub
+  and all major editors.
 - **Semantic AI Translation:** Users can write naturally (e.g., "click the
   button", "smash the button", "tap"). The transpiler uses Gemini to map
   intent to deterministic UI actions.
@@ -234,6 +235,45 @@ warning to the console during the build:
 _Note: You can safely interleave as much standard markdown documentation
 (paragraphs, images, tables) as you want between the `bdd` code fences. The
 parser will ignore everything outside the fences._
+
+---
+
+## ⚙️ Configuration (`bdd.config.json`)
+
+While the framework is designed to work out-of-the-box, it is fully
+configurable to match your project's architecture. You can define a
+`bdd.config.json` file in your project root:
+
+```json
+{
+  "testDir": "tests",
+  "outDir": ".generated",
+  "manifestPath": "manifest.json",
+  "cachePath": "bdd-cache.json",
+  "frameworkImport": "../framework/standard-ui-steps.js",
+  "setupInjection": "test.use({ extraHTTPHeaders: { 'x-mock-user': 'admin' } });"
+}
+```
+
+### Configuration Options:
+
+- **`testDir`**: The directory containing your Markdown (`.md`) feature files.
+  (Default: `tests`)
+- **`outDir`**: The directory where the transpiler will output the generated
+  Playwright `.test.ts` files. (Default: `.generated`)
+- **`manifestPath`**: The path to your JSON manifest defining the available UI
+  steps. (Default: `manifest.json`)
+- **`cachePath`**: The file where AI resolutions are deterministically cached
+  to speed up future runs. (Default: `bdd-cache.json`)
+- **`frameworkImport`**: The module path injected into the generated tests to
+  import the standard Playwright UI functions.
+- **`setupInjection`**: (Optional) A string of TypeScript code injected at the
+  top of every generated test file. This is highly useful for injecting global
+  Playwright `test.use({})` blocks to mock headers, cookies, or authentication
+  state in E2E environments.
+
+_Note: All configuration options can also be overridden via CLI flags (e.g.,
+`npx markdown-bdd-transpiler --testDir e2e/features`)._
 
 ---
 

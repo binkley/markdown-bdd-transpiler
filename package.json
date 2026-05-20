@@ -5,12 +5,14 @@
   "dependencies": {
     "@google/genai": "^2.4.0",
     "@types/marked": "^5.0.2",
-    "marked": "^18.0.4"
+    "marked": "^18.0.4",
+    "mri": "^1.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
     "@types/express": "^5.0.6",
+    "@types/mri": "^1.1.5",
     "eslint": "^10.4.0",
     "express": "^5.2.1",
     "globals": "^17.6.0",

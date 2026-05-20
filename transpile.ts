@@ -2,15 +2,82 @@ import fs from 'fs/promises';
 import path from 'path';
 import { GoogleGenAI, Type } from '@google/genai';
 import { marked, type Token, type TokensList } from 'marked';
+import mri from 'mri';
 
 const ai = new GoogleGenAI({});
 
-async function main() {
-  const manifestPath = path.resolve('manifest.json');
-  const cachePath = path.resolve('bdd-cache.json');
-  const outDir = path.resolve('.generated');
+interface TranspilerConfig {
+  testDir: string;
+  outDir: string;
+  manifestPath: string;
+  cachePath: string;
+  frameworkImport: string;
+  setupInjection?: string;
+}
 
-  const manifestStr = await fs.readFile(manifestPath, 'utf-8');
+async function loadConfig(): Promise<TranspilerConfig> {
+  const argv = mri(process.argv.slice(2), {
+    alias: { c: 'config' },
+    default: { config: 'bdd.config.json' }
+  });
+
+  const defaultConfig: TranspilerConfig = {
+    testDir: 'tests',
+    outDir: '.generated',
+    manifestPath: 'manifest.json',
+    cachePath: 'bdd-cache.json',
+    frameworkImport: '../framework/standard-ui-steps.js'
+  };
+
+  let fileConfig: Partial<TranspilerConfig> = {};
+  try {
+    const configContent = await fs.readFile(
+      path.resolve(process.cwd(), argv.config),
+      'utf-8'
+    );
+    fileConfig = JSON.parse(configContent);
+    console.log(`\n⚙️  Loaded configuration from ${argv.config}`);
+  } catch (error: any) {
+    if (error.code !== 'ENOENT') {
+      console.error(
+        `⚠️ Failed to parse config file ${argv.config}:`,
+        error.message
+      );
+    }
+  }
+
+  return {
+    testDir: argv.testDir || fileConfig.testDir || defaultConfig.testDir,
+    outDir: argv.outDir || fileConfig.outDir || defaultConfig.outDir,
+    manifestPath:
+      argv.manifestPath ||
+      fileConfig.manifestPath ||
+      defaultConfig.manifestPath,
+    cachePath:
+      argv.cachePath || fileConfig.cachePath || defaultConfig.cachePath,
+    frameworkImport:
+      argv.frameworkImport ||
+      fileConfig.frameworkImport ||
+      defaultConfig.frameworkImport,
+    setupInjection: argv.setupInjection || fileConfig.setupInjection
+  };
+}
+
+async function main() {
+  const config = await loadConfig();
+
+  const manifestPath = path.resolve(process.cwd(), config.manifestPath);
+  const cachePath = path.resolve(process.cwd(), config.cachePath);
+  const outDir = path.resolve(process.cwd(), config.outDir);
+  const testDir = path.resolve(process.cwd(), config.testDir);
+
+  let manifestStr = '';
+  try {
+    manifestStr = await fs.readFile(manifestPath, 'utf-8');
+  } catch {
+    console.error(`❌ [ERROR] Failed to read manifest at ${manifestPath}`);
+    process.exit(1);
+  }
 
   let cache: Record<string, any> = {};
   try {
@@ -22,9 +89,9 @@ async function main() {
 
   let files: string[];
   try {
-    files = await fs.readdir('tests');
+    files = await fs.readdir(testDir);
   } catch {
-    console.log('No "tests" directory found.');
+    console.log(`No "${config.testDir}" directory found.`);
     return;
   }
   const mdFiles = files.filter((f) => f.endsWith('.md'));
@@ -42,11 +109,11 @@ async function main() {
   for (const mdFile of mdFiles) {
     if (isVerbose) {
       console.log(
-        `📄 Transpiling tests/${mdFile} -> .generated/${mdFile}.test.ts`
+        `📄 Transpiling ${config.testDir}/${mdFile} -> ${config.outDir}/${mdFile}.test.ts`
       );
     }
 
-    const filePath = path.join('tests', mdFile);
+    const filePath = path.join(testDir, mdFile);
     const content = await fs.readFile(filePath, 'utf-8');
 
     let currentContext = '';
@@ -199,7 +266,13 @@ async function main() {
     await traverseTokens(tokens);
 
     let specCode = `import { test } from '@playwright/test';\n`;
-    specCode += `import * as steps from '../framework/standard-ui-steps.js';\n\n`;
+    specCode += `import * as steps from '${config.frameworkImport}';\n\n`;
+
+    if (config.setupInjection) {
+      specCode += `// --- INJECTED BDD SETUP ---\n`;
+      specCode += `${config.setupInjection}\n`;
+      specCode += `// --------------------------\n\n`;
+    }
 
     for (const feature of features) {
       // Filter out scenarios with 0 steps (like documentation headers)

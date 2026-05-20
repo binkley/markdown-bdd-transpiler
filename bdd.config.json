@@ -1,0 +1,7 @@
+{
+  "testDir": "tests",
+  "outDir": ".generated",
+  "manifestPath": "manifest.json",
+  "cachePath": "bdd-cache.json",
+  "frameworkImport": "../framework/standard-ui-steps.js"
+}
