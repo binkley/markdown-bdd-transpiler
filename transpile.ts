@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { GoogleGenAI, Type } from '@google/genai';
-import { marked } from 'marked';
+import { marked, type Token, type TokensList } from 'marked';
 
 const ai = new GoogleGenAI({});
 
@@ -50,11 +50,11 @@ async function main() {
     const content = await fs.readFile(filePath, 'utf-8');
 
     let currentContext = '';
-    
-    type Scenario = { name: string; steps: string[] };
+
+    type Scenario = { name: string; steps: string[]; phases: string[] };
     type Feature = { name: string; scenarios: Scenario[] };
     const features: Feature[] = [];
-    
+
     let currentFeature: Feature | null = null;
     let currentScenario: Scenario | null = null;
 
@@ -68,25 +68,34 @@ async function main() {
       if (!currentFeature) {
         openFeature('BDD Feature');
       }
-      currentScenario = { name, steps: [] };
+      currentScenario = { name, steps: [], phases: [] };
       currentFeature!.scenarios.push(currentScenario);
     };
 
     const tokens = marked.lexer(content);
 
     // Function to recursively traverse the AST to find context and bdd code blocks
-    async function traverseTokens(tokensList: marked.TokensList | marked.Token[]) {
+    async function traverseTokens(tokensList: TokensList | Token[]) {
       for (const token of tokensList) {
         if (token.type === 'heading') {
           const depth = token.depth;
           const text = token.text.trim();
-          
+
           if (depth === 1) {
             openFeature(text);
           } else if (depth === 2) {
             openScenario(text);
           } else if (depth === 3) {
             currentContext = text;
+            if (currentScenario) {
+              const upper = text.toUpperCase();
+              if (upper.includes('GIVEN'))
+                currentScenario.phases.push('GIVEN');
+              else if (upper.includes('WHEN'))
+                currentScenario.phases.push('WHEN');
+              else if (upper.includes('THEN'))
+                currentScenario.phases.push('THEN');
+            }
           }
         } else if (token.type === 'code' && token.lang === 'bdd') {
           // We found a BDD block! Process its content as steps.
@@ -167,20 +176,22 @@ async function main() {
                 .map((a: string) => JSON.stringify(a))
                 .join(', ');
               const argsCall = argsStr ? `, ${argsStr}` : '';
-              
+
               if (!currentScenario) {
                 openScenario('BDD Scenario');
               }
-              currentScenario!.steps.push(`await steps.${resolution.matchedFunction}(page${argsCall});`);
+              currentScenario!.steps.push(
+                `await steps.${resolution.matchedFunction}(page${argsCall});`
+              );
             }
           }
-        } 
-        
+        }
+
         // Recursively search lists and blockquotes for code fences
         if ('tokens' in token && token.tokens) {
           await traverseTokens(token.tokens);
         } else if (token.type === 'list') {
-            await traverseTokens(token.items);
+          await traverseTokens(token.items);
         }
       }
     }
@@ -192,11 +203,38 @@ async function main() {
 
     for (const feature of features) {
       // Filter out scenarios with 0 steps (like documentation headers)
-      const validScenarios = feature.scenarios.filter((s) => s.steps.length > 0);
+      const validScenarios = feature.scenarios.filter(
+        (s) => s.steps.length > 0
+      );
       if (validScenarios.length === 0) continue; // Skip empty features entirely
 
       specCode += `test.describe(${JSON.stringify(feature.name)}, () => {\n`;
       for (const scenario of validScenarios) {
+        if (scenario.phases[0] !== 'GIVEN') {
+          console.error(
+            `⚠️ [WARNING] Scenario "${scenario.name}": Missing an opening GIVEN.`
+          );
+        }
+        if (
+          scenario.phases.includes('GIVEN') &&
+          (!scenario.phases.includes('WHEN') ||
+            !scenario.phases.includes('THEN'))
+        ) {
+          console.error(
+            `⚠️ [WARNING] Scenario "${scenario.name}": GIVEN has no complete WHEN/THEN pair.`
+          );
+        }
+        for (let i = 0; i < scenario.phases.length; i++) {
+          if (scenario.phases[i] === 'WHEN') {
+            if (!scenario.phases.slice(i + 1).includes('THEN')) {
+              console.error(
+                `⚠️ [WARNING] Scenario "${scenario.name}": WHEN is not paired with a subsequent THEN.`
+              );
+              break;
+            }
+          }
+        }
+
         specCode += `  test(${JSON.stringify(scenario.name)}, async ({ page }) => {\n`;
         for (const step of scenario.steps) {
           specCode += `    ${step}\n`;

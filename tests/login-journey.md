@@ -1,3 +1,5 @@
+This is sample text that comes before **FEATURE**.
+
 # Feature: User Authentication Journey
 
 This is a **Feature**. It's a top-level way to organize test scenarios (cases)

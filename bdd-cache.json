@@ -30,5 +30,13 @@
   "Verify the \"Save Changes\" button is enabled": {
     "matchedFunction": "verify_element_state",
     "extractedArguments": ["button", "Save Changes", "enabled"]
+  },
+  "Verify the \"Sign In\" button is visible": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Sign In", "visible"]
+  },
+  "Click the \"Sign In\" button": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"]
   }
 }
