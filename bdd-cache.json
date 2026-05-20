@@ -38,5 +38,17 @@
   "Click the \"Sign In\" button": {
     "matchedFunction": "interact_with",
     "extractedArguments": ["button", "Sign In"]
+  },
+  "The user navigates to \"{{TEST_DYNAMIC_PATH}}\"": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["{{TEST_DYNAMIC_PATH}}"]
+  },
+  "The user enters \"{{TEST_DYNAMIC_USER}}\" into the \"Username\" field": {
+    "matchedFunction": "fill_input",
+    "extractedArguments": ["textbox", "Username", "{{TEST_DYNAMIC_USER}}"]
+  },
+  "The user enters \"\\{{literal_string}}\" into the \"Username\" field": {
+    "matchedFunction": "fill_input",
+    "extractedArguments": ["textbox", "Username", "\\{{literal_string}}"]
   }
 }

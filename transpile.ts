@@ -171,6 +171,18 @@ async function main() {
             const trimmed = line.trim();
             if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
               const stepText = trimmed.slice(2).trim();
+
+              if (
+                /\{\{[^}]*$/.test(stepText) ||
+                /\{\{[^}]*\s/.test(stepText)
+              ) {
+                console.warn(
+                  `⚠️ [WARNING] Scenario "${currentScenario?.name}": ` +
+                    `Possible malformed variable in step "${stepText}". ` +
+                    `Ensure it is enclosed in double braces, e.g., {{VARIABLE_NAME}}`
+                );
+              }
+
               const cacheKey = `${stepText}`;
 
               let resolution = cache[cacheKey];
@@ -184,7 +196,7 @@ async function main() {
                     model: 'gemini-2.5-flash-lite',
                     contents: stepText,
                     config: {
-                      systemInstruction: `You are an AI compiler for BDD tests.\nMap the user's step to a function in this manifest: ${manifestStr}\nUse context: ${currentContext}`,
+                      systemInstruction: `You are an AI compiler for BDD tests.\nMap the user's step to a function in this manifest: ${manifestStr}\nUse context: ${currentContext}\nNever evaluate or replace {{VARIABLES}}. Always extract them exactly as written in the text.`,
                       responseMimeType: 'application/json',
                       responseSchema: {
                         type: Type.OBJECT,

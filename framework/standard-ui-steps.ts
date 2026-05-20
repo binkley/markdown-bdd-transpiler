@@ -4,9 +4,32 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
+function interpolate(value: string): string {
+  // Replaces {{VAR_NAME}} with process.env.VAR_NAME, allowing \{{VAR_NAME}} as an escape hatch.
+  return value.replace(
+    /(\\?)\{\{([^}]+)\}\}/g,
+    (match, escapeChar, varName) => {
+      if (escapeChar) {
+        // If escaped, return the literal string without the backslash
+        return '{' + '{' + varName + '}' + '}';
+      }
+
+      const envValue = process.env[varName];
+      if (envValue === undefined) {
+        throw new Error(
+          `\n❌ [BDD Data Injection Error]: The test step tried to use '{{${varName}}}', ` +
+            `but no environment variable named '${varName}' was found.\n` +
+            `Please ensure it is defined in your environment or .env file.\n`
+        );
+      }
+      return envValue;
+    }
+  );
+}
+
 export async function navigate_to(page: Page, url_string: string) {
   const baseUrl = process.env.TEST_BASE_URL || 'http://localhost:5173';
-  await page.goto(`${baseUrl}${url_string}`);
+  await page.goto(`${baseUrl}${interpolate(url_string)}`);
 }
 
 export async function fill_input(
@@ -15,12 +38,15 @@ export async function fill_input(
   accessible_name: string,
   value_to_type: string
 ) {
-  const regexName = new RegExp(escapeRegExp(accessible_name), 'i');
+  const finalName = interpolate(accessible_name);
+  const finalValue = interpolate(value_to_type);
+
+  const regexName = new RegExp(escapeRegExp(finalName), 'i');
   const locator = page
     .getByRole(aria_role, { name: regexName })
     .locator('visible=true')
     .first();
-  await locator.fill(value_to_type);
+  await locator.fill(finalValue);
 }
 
 export async function interact_with(
@@ -28,7 +54,9 @@ export async function interact_with(
   aria_role: Parameters<Page['getByRole']>[0],
   accessible_name: string
 ) {
-  const regexName = new RegExp(escapeRegExp(accessible_name), 'i');
+  const finalName = interpolate(accessible_name);
+
+  const regexName = new RegExp(escapeRegExp(finalName), 'i');
   const locator = page
     .getByRole(aria_role, { name: regexName })
     .locator('visible=true')
@@ -48,7 +76,9 @@ export async function verify_element_state(
   accessible_name: string,
   expected_state: ElementState
 ) {
-  const regexName = new RegExp(escapeRegExp(accessible_name), 'i');
+  const finalName = interpolate(accessible_name);
+
+  const regexName = new RegExp(escapeRegExp(finalName), 'i');
   let locator = page.getByRole(aria_role, { name: regexName });
 
   if (expected_state === 'hidden') {
