@@ -142,10 +142,25 @@ async function main() {
 
     const tokens = marked.lexer(content);
 
+    // Tracks if we have seen a ### GIVEN/WHEN/THEN header but haven't seen a BDD block yet
+    let pendingContext: string | null = null;
+    let pendingScenarioName: string | null = null;
+
+    const checkPendingContext = () => {
+      if (pendingContext) {
+        console.warn(
+          `⚠️ [WARNING] Scenario "${pendingScenarioName}": ` +
+            `Found "### ${pendingContext}" header without a corresponding \`\`\`bdd code fence.`
+        );
+        pendingContext = null;
+      }
+    };
+
     // Function to recursively traverse the AST to find context and bdd code blocks
     async function traverseTokens(tokensList: TokensList | Token[]) {
       for (const token of tokensList) {
         if (token.type === 'heading') {
+          checkPendingContext(); // Check before starting a new context or scenario
           const depth = token.depth;
           const text = token.text.trim();
 
@@ -155,6 +170,8 @@ async function main() {
             openScenario(text);
           } else if (depth === 3) {
             currentContext = text;
+            pendingContext = text;
+            pendingScenarioName = currentScenario?.name || 'Unknown Scenario';
             if (currentScenario) {
               const upper = text.toUpperCase();
               if (upper.includes('GIVEN'))
@@ -165,7 +182,30 @@ async function main() {
                 currentScenario.phases.push('THEN');
             }
           }
-        } else if (token.type === 'code' && token.lang === 'bdd') {
+        } else if (token.type === 'list' && pendingContext) {
+          // Check if this list contains a bdd code fence before warning
+          let hasBdd = false;
+          const searchTokens = (list: any[]) => {
+            for (const t of list) {
+              if (t.type === 'code' && t.lang === 'bdd') hasBdd = true;
+              if (t.tokens) searchTokens(t.tokens);
+              if (t.items) searchTokens(t.items);
+            }
+          };
+          searchTokens(token.items);
+
+          if (!hasBdd) {
+            console.warn(
+              `⚠️ [WARNING] Scenario "${currentScenario?.name}": ` +
+                `Found a bulleted list under "### ${pendingContext}" without a \`\`\`bdd code fence. ` +
+                `Actionable steps must be wrapped in a code fence to be executed.`
+            );
+          }
+          pendingContext = null; // Prevent duplicate warnings for the same header
+        }
+
+        if (token.type === 'code' && token.lang === 'bdd') {
+          pendingContext = null; // We found the BDD block, clear the pending state
           // We found a BDD block! Process its content as steps.
           const stepLines = token.text.split('\n');
           for (const line of stepLines) {
@@ -277,6 +317,7 @@ async function main() {
     }
 
     await traverseTokens(tokens);
+    checkPendingContext(); // Catch any pending context at the end of the file
 
     let specCode = `import { test } from '@playwright/test';\n`;
     specCode += `import * as steps from '${config.frameworkImport}';\n\n`;

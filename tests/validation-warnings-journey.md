@@ -71,3 +71,67 @@ scenario ends abruptly after an action.
 ```bdd
 - Click the "Sign In" button
 ```
+
+---
+
+## Scenario: GIVEN without a BDD code fence to use
+
+### GIVEN
+
+### WHEN
+
+Move the directive to WHEN from GIVEN so that the test passes but we see a
+warning emitted by the transpiler.
+
+```bdd
+- The user navigates to "/login"
+- Click the "Sign In" button
+```
+
+### THEN
+
+```bdd
+- Verify the "Sign In" button is visible
+```
+
+---
+
+## Scenario: WHEN without a BDD code fence to use
+
+### GIVEN
+
+```bdd
+- The user navigates to "/login"
+```
+
+### WHEN
+
+### THEN
+
+Move the directive to THEN from WHEN so that the test passes but we see a
+warning emitted by the transpiler.
+
+```bdd
+- Click the "Sign In" button
+- Verify the "Sign In" button is visible
+```
+
+---
+
+## Scenario: THEN without a BDD code fence to use
+
+### GIVEN
+
+```bdd
+- The user navigates to "/login"
+```
+
+### WHEN
+
+```bdd
+- Click the "Sign In" button
+```
+
+### THEN
+
+Nothing to assert: expect a warning emitted by the transpiler.
