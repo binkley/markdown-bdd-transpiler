@@ -301,7 +301,9 @@ async function main() {
                 openScenario('BDD Scenario');
               }
               currentScenario!.steps.push(
-                `await steps.${resolution.matchedFunction}(page${argsCall});`
+                `    await test.step(${JSON.stringify(stepText)}, async () => {\n` +
+                  `      await steps.${resolution.matchedFunction}(page${argsCall});\n` +
+                  `    });`
               );
             }
           }
@@ -364,7 +366,7 @@ async function main() {
 
         specCode += `  test(${JSON.stringify(scenario.name)}, async ({ page }) => {\n`;
         for (const step of scenario.steps) {
-          specCode += `    ${step}\n`;
+          specCode += `${step}\n`;
         }
         specCode += `  });\n\n`;
       }

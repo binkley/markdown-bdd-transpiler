@@ -323,6 +323,10 @@ _Note: All configuration options can also be overridden via CLI flags (e.g.,
 
 ## 📝 TODO / Future Improvements
 
+#### Source Mapping / Line Number Tracking
+
+Currently, Playwright errors output the raw Markdown string via `test.step()` wrapping, which provides excellent traceability. However, if tests scale to massive files, it would be beneficial to track exact line numbers. The current AST parser (`marked`) does not track line numbers natively. Future iterations should explore injecting file/line metadata (e.g., `[login.md:14]`) into the generated steps or generating native JS Source Maps for perfect IDE/Playwright integration.
+
 #### Resilient API Retries
 
 Implement an exponential backoff/retry loop inside `transpile.ts` to
