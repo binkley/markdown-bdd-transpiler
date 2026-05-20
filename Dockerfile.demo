@@ -7,10 +7,10 @@ COPY package*.json ./
 RUN npm ci --ignore-scripts
 
 # Copy the demo app and config
-COPY demo-app.ts tsconfig.json ./
+COPY demo-app.ts tsconfig.demo.json ./
 
-# Compile the TypeScript to JavaScript using tsconfig.json
-RUN npx tsc
+# Compile the TypeScript to JavaScript using tsconfig.demo.json
+RUN npx tsc -p tsconfig.demo.json
 
 EXPOSE 5173
 

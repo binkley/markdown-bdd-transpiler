@@ -3,6 +3,7 @@
 *.err
 *.out
 *.time
+demo-app.js
+dist/
 node_modules/
 test-results/
-\ndemo-app.js\n
