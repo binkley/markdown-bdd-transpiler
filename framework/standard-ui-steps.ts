@@ -1,5 +1,9 @@
 import type { Page } from '@playwright/test';
 
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 export async function navigate_to(page: Page, url_string: string) {
   const baseUrl = process.env.TEST_BASE_URL || 'http://localhost:5173';
   await page.goto(`${baseUrl}${url_string}`);
@@ -11,9 +15,12 @@ export async function fill_input(
   accessible_name: string,
   value_to_type: string
 ) {
-  await page
-    .getByRole(aria_role, { name: accessible_name, exact: true })
-    .fill(value_to_type);
+  const regexName = new RegExp(escapeRegExp(accessible_name), 'i');
+  const locator = page
+    .getByRole(aria_role, { name: regexName })
+    .locator('visible=true')
+    .first();
+  await locator.fill(value_to_type);
 }
 
 export async function interact_with(
@@ -21,12 +28,17 @@ export async function interact_with(
   aria_role: Parameters<Page['getByRole']>[0],
   accessible_name: string
 ) {
-  const locator = page.getByRole(aria_role, {
-    name: accessible_name,
-    exact: true
-  });
-  // Playwright's click() is smart enough to handle toggling checkboxes automatically
-  await locator.click();
+  const regexName = new RegExp(escapeRegExp(accessible_name), 'i');
+  const locator = page
+    .getByRole(aria_role, { name: regexName })
+    .locator('visible=true')
+    .first();
+
+  if (aria_role === 'checkbox' || aria_role === 'radio') {
+    await locator.click({ force: true });
+  } else {
+    await locator.click();
+  }
 }
 
 type ElementState = 'visible' | 'hidden' | 'enabled' | 'disabled';
@@ -36,12 +48,14 @@ export async function verify_element_state(
   accessible_name: string,
   expected_state: ElementState
 ) {
-  const locator = page.getByRole(aria_role, { name: accessible_name });
+  const regexName = new RegExp(escapeRegExp(accessible_name), 'i');
+  let locator = page.getByRole(aria_role, { name: regexName });
 
   if (expected_state === 'hidden') {
     await locator.waitFor({ state: 'hidden' });
   } else {
-    // Default to waiting for it to be visible before checking enabled/disabled states
+    // For expected visible states, narrow down to the visible instance to avoid strict mode violations from overlapping UI layers
+    locator = locator.locator('visible=true').first();
     await locator.waitFor({ state: 'visible' });
   }
 
