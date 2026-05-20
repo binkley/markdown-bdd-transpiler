@@ -149,7 +149,26 @@ before pushing again._
 ## ✍️ Writing Tests
 
 Add new test scenarios to the `tests/` directory using standard Markdown
-formatting. Actionable testing steps must be wrapped in a `bdd` code fence and formatted as bullet points:
+formatting. This framework is designed to be written by non-technical
+stakeholders in natural language.
+
+### The Anatomy of a Scenario
+
+Every scenario should follow the standard Behavior-Driven Development (BDD)
+structure to ensure tests are deterministic and readable. Actionable testing
+steps **must** be wrapped in a `bdd` code fence and formatted as bullet points
+(`-`).
+
+1. **`GIVEN` (The Setup):** Establishes the initial, immutable state of the
+   application before the test begins. This usually involves navigating to a
+   page or setting up prerequisites.
+2. **`WHEN` (The Action):** Describes the specific interactions the user takes
+   (e.g., clicking, typing, checking boxes). You can use natural language here
+   (e.g., "Smash the button").
+3. **`THEN` (The Verification):** Describes the expected outcome or what the
+   user should see as a result of the `WHEN` actions.
+
+**Example:**
 
 ````markdown
 # Feature: User Authentication
@@ -161,7 +180,6 @@ formatting. Actionable testing steps must be wrapped in a `bdd` code fence and f
 ```bdd
 - The user navigates to "/login"
 ```
-````
 
 ### WHEN
 
@@ -176,7 +194,48 @@ formatting. Actionable testing steps must be wrapped in a `bdd` code fence and f
 - The user should see the heading "Welcome Back, Wizard!"
 ```
 
+---
+
+## Scenario: User sees error with invalid credentials
+
+### GIVEN
+
+```bdd
+- The user navigates to "/login"
+```
+
+### WHEN
+
+```bdd
+- The user enters "bad_wizard" into the "Username" field
+- Click the "Sign In" button
+```
+
+### THEN
+
+```bdd
+- Verify the "Error Message" alert is visible
+```
 ````
+
+### ⚠️ Structural Validation Warnings
+
+To help keep your test suites clean and logical, the transpiler checks the
+sequence of your headings. If it detects a broken pattern, it will print a
+warning to the console during the build:
+
+- **Missing an opening GIVEN:** A scenario jumped straight into a `WHEN`
+  action without first defining the starting state of the application.
+- **GIVEN has no complete WHEN/THEN pair:** The scenario set up the
+  application but never performed an action or checked an outcome.
+- **WHEN is not paired with a subsequent THEN:** The scenario performed an
+  action but never verified that the action did what it was supposed to do.
+
+_Note: You can safely interleave as much standard markdown documentation
+(paragraphs, images, tables) as you want between the `bdd` code fences. The
+parser will ignore everything outside the fences._
+
+---
 
 ## 🛠️ Development Commands
 
@@ -220,5 +279,3 @@ files. The proposed architectural plan for this migration is:
 4.  **Publishing Hygiene:** Implement an `.npmignore` file to exclude the demo
     application, local caches, and Docker configurations from the final
     published artifact.
-```
-````
