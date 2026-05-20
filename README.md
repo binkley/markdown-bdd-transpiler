@@ -219,6 +219,40 @@ steps **must** be wrapped in a `bdd` code fence and formatted as bullet points
 ```
 ````
 
+### 🔄 Dynamic Data Injection
+
+To keep secrets and environment-specific data out of your markdown files, you
+can use the `{{VARIABLE_NAME}}` syntax. During test execution, the framework
+will dynamically replace the placeholder with the matching environment
+variable (e.g., from `process.env` or your `.env` file).
+
+**Example:**
+
+```bdd
+- The user enters "{{TEST_USER_PASSWORD}}" into the "Password" field
+```
+
+or (both work):
+
+```bdd
+- The user enters {{TEST_USER_PASSWORD}} into the "Password" field
+```
+
+_If the environment variable is missing when the test runs, the test will
+immediately fail with a descriptive error to prevent silent UI failures._
+
+#### Escaping (Literal Braces)
+
+If you need the test to literally type curly braces (e.g., when testing a
+templating engine) without the framework attempting to look up a variable,
+escape the first brace with a backslash: `\{{...}}`.
+
+**Example:**
+
+```bdd
+- The user enters "\{{literal_string}}" into the "Code Editor"
+```
+
 ### ⚠️ Structural Validation Warnings
 
 To help keep your test suites clean and logical, the transpiler checks the
@@ -294,11 +328,6 @@ _Note: All configuration options can also be overridden via CLI flags (e.g.,
 Implement an exponential backoff/retry loop inside `transpile.ts` to
 gracefully handle temporary `503 Service Unavailable` capacity spikes when
 using the highly demanded `gemini-2.5-flash-lite` model.
-
-#### Dynamic Data Injection
-
-Expand the transpiler to support injecting environment variables (e.g.,
-`{{USERNAME}}`) directly into the Markdown steps.
 
 #### NPM Package Publishing
 
