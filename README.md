@@ -42,6 +42,11 @@ executed by **Playwright** and **Vitest**.
   screenshots whenever a test step fails, saving them locally to
   `test-results/`. The GitHub Actions CI pipeline is configured to securely
   upload these artifacts for easy debugging.
+- **Precision Traceability:** Generated Playwright actions are wrapped in
+  native `test.step()` blocks using the raw Markdown sentence as the label.
+  When a test fails, Playwright's logs and UI Mode point exactly to the
+  human-readable Markdown step that caused the error, eliminating the need to
+  debug generated code.
 - **Production-Grade Transpiler:** Structured compilation logging, API
   performance profiling, and an enforced "clean state" architecture that
   automatically deletes stale generated tests.
@@ -301,10 +306,14 @@ configurable to match your project's architecture. You can define a
   to speed up future runs. (Default: `bdd-cache.json`)
 - **`frameworkImport`**: The module path injected into the generated tests to
   import the standard Playwright UI functions.
-- **`setupInjection`**: (Optional) A string of TypeScript code injected at the
-  top of every generated test file. This is highly useful for injecting global
+- **`setupFile`**: (Optional) Path to a TypeScript/JavaScript file (e.g.,
+  `tests/setup.ts`). The contents of this file are injected directly into
+  every generated test file. This is the recommended way to inject global
   Playwright `test.use({})` blocks to mock headers, cookies, or authentication
-  state in E2E environments.
+  state.
+- **`setupInjection`**: (Optional) A raw string of code injected at the top of
+  every generated test file. (For complex setups, use `setupFile` instead to
+  avoid stringifying multiline code in JSON).
 
 _Note: All configuration options can also be overridden via CLI flags (e.g.,
 `npx markdown-bdd-transpiler --testDir e2e/features`)._
@@ -325,30 +334,16 @@ _Note: All configuration options can also be overridden via CLI flags (e.g.,
 
 #### Source Mapping / Line Number Tracking
 
-Currently, Playwright errors output the raw Markdown string via `test.step()` wrapping, which provides excellent traceability. However, if tests scale to massive files, it would be beneficial to track exact line numbers. The current AST parser (`marked`) does not track line numbers natively. Future iterations should explore injecting file/line metadata (e.g., `[login.md:14]`) into the generated steps or generating native JS Source Maps for perfect IDE/Playwright integration.
+Currently, Playwright errors output the raw Markdown string via `test.step()`
+wrapping, which provides excellent traceability. However, if tests scale to
+massive files, it would be beneficial to track exact line numbers. The current
+AST parser (`marked`) does not track line numbers natively. Future iterations
+should explore injecting file/line metadata (e.g., `[login.md:14]`) into the
+generated steps or generating native JS Source Maps for perfect IDE/Playwright
+integration.
 
 #### Resilient API Retries
 
 Implement an exponential backoff/retry loop inside `transpile.ts` to
 gracefully handle temporary `503 Service Unavailable` capacity spikes when
 using the highly demanded `gemini-2.5-flash-lite` model.
-
-#### NPM Package Publishing
-
-Convert the project from a localized workspace into a standalone, publishable
-NPM package so other repositories can consume it natively without copying
-files. The proposed architectural plan for this migration is:
-
-1.  **Metadata & Exports:** Update `package.json` to define a `bin` executable
-    (e.g., `markdown-bdd`) and configure `exports` to expose the standard UI
-    library publicly.
-2.  **Compilation Step:** Update `tsconfig.json` to emit compiled code
-    (`outDir: "./dist"`) rather than relying on `tsx` for runtime execution.
-3.  **Dynamic Pathing:** Refactor `transpile.ts` to utilize `process.cwd()`
-    for dynamic directory resolution (so it correctly targets the consuming
-    project's `tests/` and `.generated/` folders) and update the generated
-    Playwright specs to import the UI steps from the published package name
-    rather than a relative local path.
-4.  **Publishing Hygiene:** Implement an `.npmignore` file to exclude the demo
-    application, local caches, and Docker configurations from the final
-    published artifact.

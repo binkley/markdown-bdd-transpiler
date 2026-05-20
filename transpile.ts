@@ -14,6 +14,7 @@ interface TranspilerConfig {
   cachePath: string;
   frameworkImport: string;
   setupInjection?: string;
+  setupFile?: string;
 }
 
 async function loadConfig(): Promise<TranspilerConfig> {
@@ -60,7 +61,8 @@ async function loadConfig(): Promise<TranspilerConfig> {
       argv.frameworkImport ||
       fileConfig.frameworkImport ||
       defaultConfig.frameworkImport,
-    setupInjection: argv.setupInjection || fileConfig.setupInjection
+    setupInjection: argv.setupInjection || fileConfig.setupInjection,
+    setupFile: argv.setupFile || fileConfig.setupFile
   };
 }
 
@@ -328,6 +330,23 @@ async function main() {
       specCode += `// --- INJECTED BDD SETUP ---\n`;
       specCode += `${config.setupInjection}\n`;
       specCode += `// --------------------------\n\n`;
+    }
+
+    if (config.setupFile) {
+      try {
+        const setupContent = await fs.readFile(
+          path.resolve(process.cwd(), config.setupFile),
+          'utf-8'
+        );
+        specCode += `// --- INJECTED BDD SETUP (${config.setupFile}) ---\n`;
+        specCode += `${setupContent}\n`;
+        specCode += `// --------------------------\n\n`;
+      } catch (e: any) {
+        console.error(
+          `⚠️ [WARNING] Failed to read setupFile "${config.setupFile}":`,
+          e.message
+        );
+      }
     }
 
     for (const feature of features) {
