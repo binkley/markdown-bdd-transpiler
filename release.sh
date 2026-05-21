@@ -120,10 +120,17 @@ function npm_version() {
   fi
 }
 
+echo "🎯 Validating for release..."
+$run ./validate.sh
+# Because of 'set -e' at top, this bails out if validation fails before we
+# call either npm or git.
+
 echo "🚀 Bumping '$release_type' release ($old_version -> $new_version)..."
 npm_version
 
 echo "📦 Pushing commit and tag (v$new_version) to origin..."
-$run git push --follow-tags
+# Tell git to skip pre-push hook since we did this manually above with
+# ./validate.sh.
+$run git push --follow-tags --no-verify
 
 echo "✅ Release v$new_version triggered! GitHub Actions will now build and publish to NPM."
