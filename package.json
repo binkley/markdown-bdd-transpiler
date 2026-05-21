@@ -40,9 +40,11 @@
     "marked": "^18.0.4",
     "mri": "^1.2.0"
   },
+  "peerDependencies": {
+    "@playwright/test": "^1.60.0"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.60.0",
     "@types/express": "^5.0.6",
     "eslint": "^10.4.0",
     "express": "^5.2.1",
@@ -50,7 +52,7 @@
     "husky": "^9.1.7",
     "prettier": "^3.8.3",
     "prettier-plugin-sh": "^0.18.1",
-    "shellcheck": "^4.1.0",
+    "shellcheck": "^3.0.0",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.4"
@@ -62,7 +64,6 @@
     "lint": "npm run lint:js && npm run lint:sh",
     "lint:js": "eslint .",
     "lint:sh": "shellcheck *.sh",
-    "postinstall": "playwright install chromium",
     "prepare": "husky",
     "pretest": "npm run build && node ./dist/transpile.js",
     "test": "playwright test",

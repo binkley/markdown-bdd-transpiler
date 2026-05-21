@@ -82,6 +82,15 @@ Install the package as a development dependency:
 npm install --save-dev @binkley/bdd-markdown-transpiler
 ```
 
+_Note: This package requires `@playwright/test` as a peer dependency. If you
+have not already set up Playwright in your repository, you will also need to
+install it and its browser binaries:_
+
+```bash
+npm install --save-dev @playwright/test
+npx playwright install
+```
+
 ### 2. Configure and Run
 
 Create a `bdd.config.json` in your project root (see the
