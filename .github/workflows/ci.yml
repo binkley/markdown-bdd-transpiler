@@ -29,14 +29,17 @@ jobs:
         # Only needed for static checks; run.sh handles its own Docker builds
         run: npm ci
 
+      - name: Format Check
+        run: npx prettier --check .
+
+      - name: Lint JavaScript and TypeScript
+        run: npm run lint:js
+
       - name: Type Check
         run: npm run type-check
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Format Check
-        run: npx prettier --check .
+      - name: Lint Shell Scripts
+        run: npm run lint:sh
 
       - name: Run E2E BDD Tests
         # Executes the dockerized Vitest suite

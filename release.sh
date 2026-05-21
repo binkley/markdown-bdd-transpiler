@@ -56,10 +56,10 @@ case $# in
   1)
     case $1 in
       patch | minor | major)
-        version_type="$1"
+        release_type="$1"
         ;;
       *)
-        echo "❌ Error: Invalid version type: '$version_type'" >&2
+        echo "❌ Error: Invalid version type: '$1'" >&2
         print_usage >&2
         exit 2
         ;;
@@ -73,7 +73,7 @@ esac
 
 run=
 if $dry_run; then
-  run=echo
+  run="echo"
   echo "🔍 DRY RUN. No changes will be made."
 fi
 
@@ -93,7 +93,7 @@ new_version=$(
   set -e # Ensure the subshell aborts on errors
   trap 'git restore package.json package-lock.json >/dev/null 2>&1' EXIT INT TERM
 
-  npm --no-git-tag-version version "$version_type" > /dev/null
+  npm --sign-git-tag --no-git-tag-version version "$release_type" > /dev/null
 
   # "Return" the value to the parent shell by echoing it.
   node -p "require('./package.json').version"
@@ -114,13 +114,13 @@ fi
 
 function npm_version() {
   if $dry_run; then
-    echo npm version "$version_type"
+    echo npm --sign-git-tag version "$release_type"
   else
-    npm version "$version_type" > /dev/null
+    npm --sign-git-tag version "$release_type" > /dev/null
   fi
 }
 
-echo "🚀 Bumping '$version_type' release ($old_version -> $new_version)..."
+echo "🚀 Bumping '$release_type' release ($old_version -> $new_version)..."
 npm_version
 
 echo "📦 Pushing commit and tag (v$new_version) to origin..."

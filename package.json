@@ -50,6 +50,7 @@
     "husky": "^9.1.7",
     "prettier": "^3.8.3",
     "prettier-plugin-sh": "^0.18.1",
+    "shellcheck": "^4.1.0",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.4"
@@ -58,7 +59,9 @@
     "build": "tsc",
     "demo": "tsx demo-app.ts",
     "format": "prettier --write .",
-    "lint": "eslint .",
+    "lint": "npm run lint:js && npm run lint:sh",
+    "lint:js": "eslint .",
+    "lint:sh": "shellcheck *.sh",
     "postinstall": "playwright install chromium",
     "prepare": "husky",
     "pretest": "npm run build && node ./dist/transpile.js",

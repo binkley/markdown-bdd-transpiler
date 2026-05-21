@@ -9,10 +9,13 @@ echo "🧹 Checking formatting..."
 npx prettier --check .
 
 echo "🚨 Linting code..."
-npm run lint
+npm run lint:js
 
 echo "ʦ Type-checking..."
 npm run type-check
+
+echo "🐚 Linting shell scripts..."
+npm run lint:sh
 
 echo "🐳 Running E2E tests in Docker..."
 export TEST_DYNAMIC_PATH="/login"
