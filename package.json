@@ -1,6 +1,6 @@
 {
-  "name": "ai-markdown-bdd-framework",
-  "version": "1.0.0",
+  "name": "@binkley/bdd-markdown-transpiler",
+  "version": "0.0.1",
   "type": "module",
   "bin": {
     "markdown-bdd": "./dist/transpile.js"
