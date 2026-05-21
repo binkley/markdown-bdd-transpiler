@@ -69,7 +69,33 @@ executed by **Playwright** and **Vitest**.
 
 ---
 
-## 🚀 Getting Started
+## 📦 Installation & Usage in Your Project
+
+To use the AI-Augmented Markdown BDD Transpiler in your own testing repository:
+
+### 1. Install via NPM
+
+Install the package as a development dependency:
+
+```bash
+npm install --save-dev @binkley/bdd-markdown-transpiler
+```
+
+### 2. Configure and Run
+
+Create a `bdd.config.json` in your project root (see the [Configuration](#-configuration-bddconfigjson) section below for options).
+
+Then, use the included CLI to transpile your `.md` files into executable tests before running your test runner:
+
+```bash
+npx markdown-bdd
+```
+
+_(Tip: We recommend adding `"pretest": "markdown-bdd"` to your `package.json` scripts)._
+
+---
+
+## 🚀 Local Development (Contributing)
 
 ### Prerequisites
 
@@ -347,3 +373,24 @@ integration.
 Implement an exponential backoff/retry loop inside `transpile.ts` to
 gracefully handle temporary `503 Service Unavailable` capacity spikes when
 using the highly demanded `gemini-2.5-flash-lite` model.
+
+---
+
+## 📦 Releasing and Publishing
+
+This project uses **NPM Trusted Publishing (OIDC)** via GitHub Actions. There are no hardcoded NPM tokens required to publish to the registry.
+
+To publish a new version of the transpiler:
+
+1. Update the `"version"` field in `package.json`.
+2. Commit the version bump to the `main` branch.
+3. Create and push a new Git tag matching the `v*.*.*` format (e.g., `v1.0.0`).
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+_(Tip: You can also use the included `./release.sh <patch|minor|major>` script to automate this)._
+
+The GitHub Action will automatically trigger, build the project, run all static analysis, and securely publish the new version to `@binkley/bdd-markdown-transpiler` on NPM using provenance.
