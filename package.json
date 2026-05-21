@@ -1,7 +1,26 @@
 {
   "name": "@binkley/bdd-markdown-transpiler",
   "version": "0.0.6",
+  "description": "An AI-augmented BDD testing framework that transpiles Markdown user journeys into Playwright tests.",
+  "keywords": [
+    "bdd",
+    "testing",
+    "playwright",
+    "markdown",
+    "gemini",
+    "genai",
+    "e2e"
+  ],
+  "author": "B. K. Oxley (binkley) <binkley@alumni.rice.edu>",
+  "homepage": "https://github.com/binkley/markdown-bdd-transpiler#readme",
+  "bugs": {
+    "url": "https://github.com/binkley/markdown-bdd-transpiler/issues"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "type": "module",
+  "license": "CC0-1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/binkley/markdown-bdd-transpiler.git"

@@ -1,9 +1,0 @@
-# Exclude everything by default
-*
-
-# Whitelist the compiled artifact directory
-!dist/
-!LICENSE.md
-!manifest.json
-!package.json
-!README.md
