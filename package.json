@@ -17,7 +17,7 @@
     "manifest.json"
   ],
   "dependencies": {
-    "@google/genai": "^2.4.0",
+    "@google/genai": "^2.5.0",
     "marked": "^18.0.4",
     "mri": "^1.2.0"
   },
