@@ -34,7 +34,5 @@ jobs:
         run: npm run build
 
       - name: Publish Package
-        # The setup-node action automatically handles the OIDC token exchange
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Fallback if OIDC isn't fully configured yet, otherwise ignored
+        # The setup-node action automatically handles the OIDC token exchange when --provenance is provided
+        run: npm publish --provenance --access public
