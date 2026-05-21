@@ -1,11 +1,11 @@
+# AI-Augmented Markdown BDD Transpiler for Testing
+
 <a href="./LICENSE.md">
 <img
 src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/cc-zero.svg"
 alt="Creative Commons Public Domain Dedication"
 align="right" width="10%" height="auto"/>
 </a>
-
-# AI-Augmented Markdown BDD Transpiler for Testing
 
 [![CI Pipeline](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml/badge.svg)](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml)
 
