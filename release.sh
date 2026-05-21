@@ -113,10 +113,11 @@ if $confirm; then
 fi
 
 function npm_version() {
+  local message="Release and publish to NPM version '$new_version'"
   if $dry_run; then
-    echo npm --sign-git-tag version "$release_type"
+    echo "npm --message \"$message\" --sign-git-tag version \"$release_type"\"
   else
-    npm --sign-git-tag version "$release_type" > /dev/null
+    npm --message "$message" --sign-git-tag version "$release_type" > /dev/null
   fi
 }
 
