@@ -9,6 +9,9 @@ jobs:
   publish:
     name: Build and Publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for NPM Trusted Publishing (OIDC)
 
     steps:
       - name: Checkout Code
@@ -31,6 +34,7 @@ jobs:
         run: npm run build
 
       - name: Publish Package
+        # The setup-node action automatically handles the OIDC token exchange
         run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Fallback if OIDC isn't fully configured yet, otherwise ignored
