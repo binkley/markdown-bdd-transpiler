@@ -5,7 +5,7 @@ set -e
 
 function print_usage() {
   cat << EOU
-Usage: $0 [-h|--help] [-n|--dry-run] <patch|minor|major>
+Usage: $0 [-h|--help] [-n|--dry-run] [-y|--yes] <patch|minor|major>
 EOU
 }
 
@@ -23,12 +23,14 @@ Arguments:
 Options:
   -h, --help      Print this help and exit
   -n, --dry-run   Simulate the release process without making any changes or pushing.
+  -y, --yes       Skip confirmation prompt and proceed immediately.
 EOH
 }
 
-DRY_RUN=false
+confirm=true
+dry_run=false
 
-while getopts :hn-: opt; do
+while getopts :hny-: opt; do
   [[ $opt == - ]] && opt=${OPTARG%%=*} OPTARG=${OPTARG#*=}
   case $opt in
     h | help)
@@ -36,7 +38,11 @@ while getopts :hn-: opt; do
       exit 0
       ;;
     n | dry-run)
-      DRY_RUN=true
+      confirm=false
+      dry_run=true
+      ;;
+    y | yes)
+      confirm=false
       ;;
     *)
       print_usage >&2
@@ -48,12 +54,16 @@ shift $((OPTIND - 1))
 
 case $# in
   1)
-    VERSION_TYPE="$1"
-    if [[ ! "$VERSION_TYPE" =~ ^(patch|minor|major)$ ]]; then
-      echo "❌ Error: Invalid version type '$VERSION_TYPE'." >&2
-      print_usage >&2
-      exit 2
-    fi
+    case $1 in
+      patch | minor | major)
+        version_type="$1"
+        ;;
+      *)
+        echo "❌ Error: Invalid version type: '$version_type'" >&2
+        print_usage >&2
+        exit 2
+        ;;
+    esac
     ;;
   *)
     print_usage >&2
@@ -61,9 +71,10 @@ case $# in
     ;;
 esac
 
-if $DRY_RUN; then
-  echo "🔍 DRY RUN ENABLED. No changes will be made."
-  echo ""
+run=
+if $dry_run; then
+  run=echo
+  echo "🔍 DRY RUN. No changes will be made."
 fi
 
 # Ensure the working directory is clean before bumping
@@ -72,24 +83,47 @@ if ! git diff-index --quiet HEAD --; then
   exit 1
 fi
 
-echo "🚀 Bumping $VERSION_TYPE version in package.json..."
-if $DRY_RUN; then
-  echo "[DRY RUN] Would execute: npm version $VERSION_TYPE"
-  # Simulate extracting the new version (just appending '-dryrun')
-  CURRENT_VERSION=$(node -p "require('./package.json').version")
-  NEW_VERSION="${CURRENT_VERSION}-${VERSION_TYPE}-dryrun"
-else
-  # This command automatically bumps the version, creates a commit, and creates a v* tag
-  npm version "$VERSION_TYPE"
-  # Extract the new version from package.json for logging
-  NEW_VERSION=$(node -p "require('./package.json').version")
+old_version=$(node -p "require('./package.json').version")
+
+# Calculate the new version safely using a subshell $(...) By doing this work
+# inside a subshell, the 'trap' is strictly isolated.  The EXIT trap acts like
+# a 'finally {}' block: it guarantees the files are restored whether the
+# subshell exits cleanly, errors out, or is interrupted.
+new_version=$(
+  set -e # Ensure the subshell aborts on errors
+  trap 'git restore package.json package-lock.json >/dev/null 2>&1' EXIT INT TERM
+
+  npm --no-git-tag-version version "$version_type" > /dev/null
+
+  # "Return" the value to the parent shell by echoing it.
+  node -p "require('./package.json').version"
+
+  # The subshell closes here, triggering the EXIT trap to restore the files.
+)
+
+if $confirm; then
+  read -r -p "🗳️  Ready to release ($old_version -> $new_version) [y/N]: " answer
+  case $answer in
+    y* | Y*) ;;
+    *)
+      echo "👎 Release canceled."
+      exit 0
+      ;;
+  esac
 fi
 
-echo "📦 Pushing commit and tag (v$NEW_VERSION) to origin..."
-if $DRY_RUN; then
-  echo "[DRY RUN] Would execute: git push --follow-tags"
-else
-  git push --follow-tags
-fi
+function npm_version() {
+  if $dry_run; then
+    echo npm version "$version_type"
+  else
+    npm version "$version_type" > /dev/null
+  fi
+}
 
-echo "✅ Release v$NEW_VERSION triggered! GitHub Actions will now build and publish to NPM."
+echo "🚀 Bumping '$version_type' release ($old_version -> $new_version)..."
+npm_version
+
+echo "📦 Pushing commit and tag (v$new_version) to origin..."
+$run git push --follow-tags
+
+echo "✅ Release v$new_version triggered! GitHub Actions will now build and publish to NPM."
