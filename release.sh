@@ -113,7 +113,7 @@ if $confirm; then
 fi
 
 function npm_version() {
-  local message="Release and publish to NPM version '%s'"
+  local message="Release and publish NPM version '%s'"
   if $dry_run; then
     echo "npm --message \"$message\" --sign-git-tag version \"$release_type"\"
   else
