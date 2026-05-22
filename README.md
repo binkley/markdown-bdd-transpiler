@@ -329,7 +329,12 @@ configurable to match your project's architecture. You can define a
   "manifestPath": "manifest.json",
   "cachePath": "bdd-cache.json",
   "frameworkImport": "../framework/standard-ui-steps.js",
-  "setupInjection": "test.use({ extraHTTPHeaders: { 'x-mock-user': 'admin' } });"
+  "setupInjection": "test.use({ extraHTTPHeaders: { 'x-mock-user': 'admin' } });",
+  "gemini": {
+    "maxRetries": 3,
+    "initialDelayMs": 1000,
+    "backoffFactor": 2.0
+  }
 }
 ```
 
@@ -353,6 +358,10 @@ configurable to match your project's architecture. You can define a
 - **`setupInjection`**: (Optional) A raw string of code injected at the top of
   every generated test file. (For complex setups, use `setupFile` instead to
   avoid stringifying multiline code in JSON).
+- **`gemini`**: Configures the Google Gemini API client behavior.
+  - **`maxRetries`**: Maximum number of times to retry a failed API call before crashing. (Default: `3`)
+  - **`initialDelayMs`**: Base delay before the first retry. (Default: `1000`)
+  - **`backoffFactor`**: Exponential multiplier for each subsequent retry. Jitter is automatically applied. (Default: `2.0`)
 
 _Note: All configuration options can also be overridden via CLI flags (e.g.,
 `npx markdown-bdd-transpiler --testDir e2e/features`)._
@@ -406,12 +415,6 @@ AST parser (`marked`) does not track line numbers natively. Future iterations
 should explore injecting file/line metadata (e.g., `[login.md:14]`) into the
 generated steps or generating native JS Source Maps for perfect IDE/Playwright
 integration.
-
-#### Resilient API Retries
-
-Implement an exponential backoff/retry loop inside `transpile.ts` to
-gracefully handle temporary `503 Service Unavailable` capacity spikes when
-using the highly demanded `gemini-2.5-flash-lite` model.
 
 #### Supply Chain Security (Socket.dev)
 

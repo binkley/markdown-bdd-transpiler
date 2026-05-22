@@ -15,6 +15,11 @@ interface TranspilerConfig {
   frameworkImport: string;
   setupInjection?: string;
   setupFile?: string;
+  gemini: {
+    maxRetries: number;
+    initialDelayMs: number;
+    backoffFactor: number;
+  };
 }
 
 async function loadConfig(): Promise<TranspilerConfig> {
@@ -28,7 +33,12 @@ async function loadConfig(): Promise<TranspilerConfig> {
     outDir: '.generated',
     manifestPath: 'manifest.json',
     cachePath: 'bdd-cache.json',
-    frameworkImport: '../framework/standard-ui-steps.js'
+    frameworkImport: '../framework/standard-ui-steps.js',
+    gemini: {
+      maxRetries: 3,
+      initialDelayMs: 1000,
+      backoffFactor: 2.0
+    }
   };
 
   let fileConfig: Partial<TranspilerConfig> = {};
@@ -62,7 +72,11 @@ async function loadConfig(): Promise<TranspilerConfig> {
       fileConfig.frameworkImport ||
       defaultConfig.frameworkImport,
     setupInjection: argv.setupInjection || fileConfig.setupInjection,
-    setupFile: argv.setupFile || fileConfig.setupFile
+    setupFile: argv.setupFile || fileConfig.setupFile,
+    gemini: {
+      ...defaultConfig.gemini,
+      ...fileConfig.gemini
+    }
   };
 }
 
@@ -234,27 +248,57 @@ async function main() {
                 const callStart = performance.now();
 
                 let response;
+                let attempt = 0;
+                const { maxRetries, initialDelayMs, backoffFactor } =
+                  config.gemini;
+
                 try {
-                  response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash-lite',
-                    contents: stepText,
-                    config: {
-                      systemInstruction: `You are an AI compiler for BDD tests.\nMap the user's step to a function in this manifest: ${manifestStr}\nUse context: ${currentContext}\nNever evaluate or replace {{VARIABLES}}. Always extract them exactly as written in the text.`,
-                      responseMimeType: 'application/json',
-                      responseSchema: {
-                        type: Type.OBJECT,
-                        properties: {
-                          matchedFunction: { type: Type.STRING },
-                          extractedArguments: {
-                            type: Type.ARRAY,
-                            items: { type: Type.STRING }
+                  while (attempt <= maxRetries) {
+                    try {
+                      response = await ai.models.generateContent({
+                        model: 'gemini-2.5-flash-lite',
+                        contents: stepText,
+                        config: {
+                          systemInstruction: `You are an AI compiler for BDD tests.\nMap the user's step to a function in this manifest: ${manifestStr}\nUse context: ${currentContext}\nNever evaluate or replace {{VARIABLES}}. Always extract them exactly as written in the text.`,
+                          responseMimeType: 'application/json',
+                          responseSchema: {
+                            type: Type.OBJECT,
+                            properties: {
+                              matchedFunction: { type: Type.STRING },
+                              extractedArguments: {
+                                type: Type.ARRAY,
+                                items: { type: Type.STRING }
+                              }
+                            },
+                            required: [
+                              'matchedFunction',
+                              'extractedArguments'
+                            ]
                           }
-                        },
-                        required: ['matchedFunction', 'extractedArguments']
+                        }
+                      });
+                      apiCalls++;
+                      break; // Success, exit retry loop
+                    } catch (e: any) {
+                      if (attempt === maxRetries) {
+                        throw e; // Exhausted retries
                       }
+
+                      const delay =
+                        initialDelayMs * Math.pow(backoffFactor, attempt);
+                      // Add up to 20% jitter to prevent thundering herd
+                      const jitter = delay * 0.2 * Math.random();
+                      const waitTime = Math.round(delay + jitter);
+
+                      console.warn(
+                        `    ⚠️  API Error (${e.message}). Retrying in ${waitTime}ms...`
+                      );
+                      await new Promise((resolve) =>
+                        setTimeout(resolve, waitTime)
+                      );
+                      attempt++;
                     }
-                  });
-                  apiCalls++;
+                  }
                 } catch (e: any) {
                   if (e.status === 503) {
                     console.error(
@@ -278,6 +322,12 @@ async function main() {
                 ).toFixed(2);
                 console.log(`⚡ API returned in ${callDuration}s`);
 
+                if (!response || !response.text) {
+                  console.error(
+                    `❌ [API ERROR] Received empty response from Gemini.`
+                  );
+                  process.exit(1);
+                }
                 const resultStr = response.text;
                 try {
                   resolution = JSON.parse(resultStr || '{}');
