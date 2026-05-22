@@ -359,9 +359,11 @@ configurable to match your project's architecture. You can define a
   every generated test file. (For complex setups, use `setupFile` instead to
   avoid stringifying multiline code in JSON).
 - **`gemini`**: Configures the Google Gemini API client behavior.
-  - **`maxRetries`**: Maximum number of times to retry a failed API call before crashing. (Default: `3`)
+  - **`maxRetries`**: Maximum number of times to retry a failed API call
+    before crashing. (Default: `3`)
   - **`initialDelayMs`**: Base delay before the first retry. (Default: `1000`)
-  - **`backoffFactor`**: Exponential multiplier for each subsequent retry. Jitter is automatically applied. (Default: `2.0`)
+  - **`backoffFactor`**: Exponential multiplier for each subsequent retry.
+    Jitter is automatically applied. (Default: `2.0`)
 
 _Note: All configuration options can also be overridden via CLI flags (e.g.,
 `npx markdown-bdd-transpiler --testDir e2e/features`)._
@@ -415,6 +417,14 @@ AST parser (`marked`) does not track line numbers natively. Future iterations
 should explore injecting file/line metadata (e.g., `[login.md:14]`) into the
 generated steps or generating native JS Source Maps for perfect IDE/Playwright
 integration.
+
+#### Multi-LLM Provider Support
+
+Research and implement an abstraction layer to allow consumers to bring their
+own LLM provider (e.g., Anthropic Claude, OpenAI GPT-4o, local Ollama models).
+Currently, the transpiler is tightly coupled to the Google Gen AI SDK
+(`gemini-2.5-flash-lite`). Consumers should be able to specify their preferred
+provider and model via `bdd.config.json` if they do not have a Gemini API key.
 
 #### Supply Chain Security (Socket.dev)
 
