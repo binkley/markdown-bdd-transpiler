@@ -1,5 +1,5 @@
 {
-  "name": "@binkley/bdd-markdown-transpiler",
+  "name": "@binkley/markdown-bdd-transpiler",
   "version": "0.0.10",
   "description": "An AI-augmented BDD testing framework that transpiles Markdown user journeys into Playwright tests.",
   "keywords": [

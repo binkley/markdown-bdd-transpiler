@@ -79,7 +79,7 @@ repository:
 Install the package as a development dependency:
 
 ```bash
-npm install --save-dev @binkley/bdd-markdown-transpiler
+npm install --save-dev @binkley/markdown-bdd-transpiler
 ```
 
 _Note: This package requires `@playwright/test` as a peer dependency. If you
@@ -391,7 +391,7 @@ to automate this)._
 
 The GitHub Action will automatically trigger, build the project, run all
 static analysis, and securely publish the new version to
-`@binkley/bdd-markdown-transpiler` on NPM using provenance.
+`@binkley/markdown-bdd-transpiler` on NPM using provenance.
 
 ---
 
