@@ -131,8 +131,13 @@ app.get('/settings', (req: Request, res: Response) => {
       <div class="card">
         <h2>Account Settings</h2>
         <div class="form-group">
+          <!-- For the old test: Check the "Enable Notifications" checkbox -->
           <input type="checkbox" id="notifications" />
           <label for="notifications">Enable Notifications</label>
+        </div>
+        <div class="form-group">
+           <!-- For the new test: Turn it off (button, toggle) -->
+           <input type="checkbox" id="toggle-btn" aria-label="notification control" />
         </div>
         <button id="save-btn" disabled>Save Changes</button>
         <a href="/login">Back to Login</a>
@@ -140,6 +145,41 @@ app.get('/settings', (req: Request, res: Response) => {
       <script>
         document.getElementById('notifications').addEventListener('change', (e) => {
           document.getElementById('save-btn').disabled = !e.target.checked;
+        });
+        document.getElementById('toggle-btn').addEventListener('click', (e) => {
+           // Toggle test clicks the button and expects it to enable the save button
+           document.getElementById('save-btn').disabled = false;
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+app.get('/', (req: Request, res: Response) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><title>Home</title></head>
+    <body>
+      <h1 role="heading">Welcome to the Platform!</h1>
+    </body>
+    </html>
+  `);
+});
+
+app.get('/checkout', (req: Request, res: Response) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><title>Checkout</title></head>
+    <body>
+      <div id="app">
+        <button id="submit-btn" aria-label="Submit">Submit</button>
+      </div>
+      <script>
+        document.getElementById('submit-btn').addEventListener('click', () => {
+          document.getElementById('app').innerHTML = '<h1 role="heading">Order Confirmed</h1>';
         });
       </script>
     </body>

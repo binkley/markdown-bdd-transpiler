@@ -37,8 +37,11 @@
   ],
   "dependencies": {
     "@google/genai": "^2.5.0",
-    "marked": "^18.0.4",
-    "mri": "^1.2.0"
+    "@types/unist": "^3.0.3",
+    "mri": "^1.2.0",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
+    "unist-util-visit": "^5.1.0"
   },
   "peerDependencies": {
     "@playwright/test": "^1.60.0"
@@ -46,6 +49,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/express": "^5.0.6",
+    "@types/mdast": "^4.0.4",
     "eslint": "^10.4.0",
     "express": "^5.2.1",
     "globals": "^17.6.0",

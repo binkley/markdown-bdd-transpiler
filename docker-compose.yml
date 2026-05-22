@@ -14,11 +14,12 @@ services:
       context: .
       dockerfile: Dockerfile.test
     environment:
-      - TEST_BASE_URL=http://demo-app:5173
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
-      - TRANSPILER_VERBOSE=${TRANSPILER_VERBOSE:-false}
+      - PLAYWRIGHT_VERBOSE=${PLAYWRIGHT_VERBOSE:-}
+      - TEST_BASE_URL=http://demo-app:5173
       - TEST_DYNAMIC_PATH=${TEST_DYNAMIC_PATH:-}
       - TEST_DYNAMIC_USER=${TEST_DYNAMIC_USER:-}
+      - TRANSPILER_VERBOSE=${TRANSPILER_VERBOSE:-false}
     volumes:
       - ./test-results:/app/test-results
     depends_on:

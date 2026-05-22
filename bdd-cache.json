@@ -50,5 +50,201 @@
   "The user enters \"\\{{literal_string}}\" into the \"Username\" field": {
     "matchedFunction": "fill_input",
     "extractedArguments": ["textbox", "Username", "\\{{literal_string}}"]
+  },
+  "Go home": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/"]
+  },
+  "The user should see the heading \"Welcome to the Platform!\"": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["heading", "Welcome to the Platform!", "visible"]
+  },
+  "Turn it off": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "toggle"]
+  },
+  "The user navigates to \"/checkout\"": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/checkout"]
+  },
+  "The user looks at the \"Submit\" button": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Submit", "visible"]
+  },
+  "Click it": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", ""]
+  },
+  "The user should see the heading \"Order Confirmed\"": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["heading", "Order Confirmed", "visible"]
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Navigating based on Feature Context\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"]
+  },
+  "Go home|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Navigating based on Feature Context\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/"]
+  },
+  "The user should see the heading \"Welcome to the Platform!\"|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Navigating based on Feature Context\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["heading", "Welcome to the Platform!", "visible"]
+  },
+  "The user navigates to \"/settings\"|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Utilizing Designer Notes\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/settings"]
+  },
+  "Turn it off|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Utilizing Designer Notes\",\"phase\":\"WHEN\",\"designerNotes\":\"Designer Note: The notification control is implemented as a standard web checkbox.\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["checkbox", "notification control"]
+  },
+  "Verify the \"Save Changes\" button is enabled|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Utilizing Designer Notes\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Save Changes", "enabled"]
+  },
+  "The user navigates to \"/checkout\"|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Resolving pronouns via Step Sequence (Lookbehind)\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/checkout"]
+  },
+  "The user looks at the \"Submit\" button|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Resolving pronouns via Step Sequence (Lookbehind)\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Submit", "visible"]
+  },
+  "Click it|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Resolving pronouns via Step Sequence (Lookbehind)\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Submit"]
+  },
+  "The user should see the heading \"Order Confirmed\"|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Resolving pronouns via Step Sequence (Lookbehind)\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["heading", "Order Confirmed", "visible"]
+  },
+  "The user navigates to \"{{TEST_DYNAMIC_PATH}}\"|{\"feature\":\"Feature: Dynamic Data Injection\",\"scenario\":\"Scenario: Navigating and typing dynamic data\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["{{TEST_DYNAMIC_PATH}}"]
+  },
+  "The user enters \"{{TEST_DYNAMIC_USER}}\" into the \"Username\" field|{\"feature\":\"Feature: Dynamic Data Injection\",\"scenario\":\"Scenario: Navigating and typing dynamic data\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "fill_input",
+    "extractedArguments": ["textbox", "Username", "{{TEST_DYNAMIC_USER}}"]
+  },
+  "Click the \"Sign In\" button|{\"feature\":\"Feature: Dynamic Data Injection\",\"scenario\":\"Scenario: Navigating and typing dynamic data\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"]
+  },
+  "The user should see the heading \"Welcome Back, Wizard!\"|{\"feature\":\"Feature: Dynamic Data Injection\",\"scenario\":\"Scenario: Navigating and typing dynamic data\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["heading", "Welcome Back, Wizard!", "visible"]
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: Dynamic Data Injection\",\"scenario\":\"Scenario: Literal Braces (Escape Hatch)\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"]
+  },
+  "The user enters \"\\{{literal_string}}\" into the \"Username\" field|{\"feature\":\"Feature: Dynamic Data Injection\",\"scenario\":\"Scenario: Literal Braces (Escape Hatch)\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "fill_input",
+    "extractedArguments": ["textbox", "Username", "\\{{literal_string}}"]
+  },
+  "Click the \"Sign In\" button|{\"feature\":\"Feature: Dynamic Data Injection\",\"scenario\":\"Scenario: Literal Braces (Escape Hatch)\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"]
+  },
+  "The user should see the heading \"Welcome Back, Wizard!\"|{\"feature\":\"Feature: Dynamic Data Injection\",\"scenario\":\"Scenario: Literal Braces (Escape Hatch)\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["heading", "Welcome Back, Wizard!", "visible"]
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: User Authentication Journey\",\"scenario\":\"Scenario: User logs in successfully\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"]
+  },
+  "The user enters \"frontend_wizard\" into the \"Username\" field|{\"feature\":\"Feature: User Authentication Journey\",\"scenario\":\"Scenario: User logs in successfully\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "fill_input",
+    "extractedArguments": ["textbox", "Username", "frontend_wizard"]
+  },
+  "Smash the \"Sign In\" button|{\"feature\":\"Feature: User Authentication Journey\",\"scenario\":\"Scenario: User logs in successfully\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"]
+  },
+  "The user should see the heading \"Welcome Back, Wizard!\"|{\"feature\":\"Feature: User Authentication Journey\",\"scenario\":\"Scenario: User logs in successfully\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["heading", "Welcome Back, Wizard!", "visible"]
+  },
+  "The user navigates to \"/settings\"|{\"feature\":\"Feature: User Settings Management\",\"scenario\":\"Scenario: Toggling notifications enables the save button\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/settings"]
+  },
+  "Verify the \"Save Changes\" button is disabled|{\"feature\":\"Feature: User Settings Management\",\"scenario\":\"Scenario: Toggling notifications enables the save button\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Save Changes", "disabled"]
+  },
+  "Check the \"Enable Notifications\" checkbox|{\"feature\":\"Feature: User Settings Management\",\"scenario\":\"Scenario: Toggling notifications enables the save button\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["checkbox", "Enable Notifications"]
+  },
+  "Verify the \"Save Changes\" button is enabled|{\"feature\":\"Feature: User Settings Management\",\"scenario\":\"Scenario: Toggling notifications enables the save button\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Save Changes", "enabled"]
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: Missing an Opening GIVEN\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"]
+  },
+  "Verify the \"Sign In\" button is visible|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: Missing an Opening GIVEN\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Sign In", "visible"]
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: GIVEN has no complete WHEN/THEN pair\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"]
+  },
+  "The user enters \"frontend_wizard\" into the \"Username\" field|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: GIVEN has no complete WHEN/THEN pair\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "fill_input",
+    "extractedArguments": ["textbox", "Username", "frontend_wizard"]
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: WHEN is not paired with a subsequent THEN\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"]
+  },
+  "Verify the \"Sign In\" button is visible|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: WHEN is not paired with a subsequent THEN\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Sign In", "visible"]
+  },
+  "Click the \"Sign In\" button|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: WHEN is not paired with a subsequent THEN\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"]
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: GIVEN without a BDD code fence to use\",\"phase\":\"WHEN\",\"designerNotes\":\"Move the directive to WHEN from GIVEN so that the test passes but we see a\\nwarning emitted by the transpiler.\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"]
+  },
+  "Click the \"Sign In\" button|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: GIVEN without a BDD code fence to use\",\"phase\":\"WHEN\",\"designerNotes\":\"Move the directive to WHEN from GIVEN so that the test passes but we see a\\nwarning emitted by the transpiler.\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"]
+  },
+  "Verify the \"Sign In\" button is visible|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: GIVEN without a BDD code fence to use\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Sign In", "visible"]
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: WHEN without a BDD code fence to use\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"]
+  },
+  "Click the \"Sign In\" button|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: WHEN without a BDD code fence to use\",\"phase\":\"THEN\",\"designerNotes\":\"Move the directive to THEN from WHEN so that the test passes but we see a\\nwarning emitted by the transpiler.\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"]
+  },
+  "Verify the \"Sign In\" button is visible|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: WHEN without a BDD code fence to use\",\"phase\":\"THEN\",\"designerNotes\":\"Move the directive to THEN from WHEN so that the test passes but we see a\\nwarning emitted by the transpiler.\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Sign In", "visible"]
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: THEN without a BDD code fence to use\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"]
+  },
+  "Click the \"Sign In\" button|{\"feature\":\"Feature: BDD Structural Validation Warnings\",\"scenario\":\"Scenario: THEN without a BDD code fence to use\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"]
+  },
+  "Turn it off|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Utilizing Designer Notes\",\"phase\":\"WHEN\",\"designerNotes\":\"Designer Note: The notification control is implemented as a standard web\\ncheckbox.\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["checkbox", "notification"]
   }
 }

@@ -5,7 +5,7 @@ set -e
 
 function print_usage() {
   cat << EOU
-Usage: $0 [-h|--help][--verbose]
+Usage: $0 [-h|--help] [-v|--verbose]
 EOU
 }
 
@@ -16,8 +16,8 @@ function print_help() {
 Runs the transpiler and executes the generated tests.
 
 Options:
-  -h, --help   Print this help and exit
-  --verbose    Verbose logging
+  -h, --help       Print this help and exit
+  -v, --verbose    Verbose logging (shows transpiler logs and Playwright test steps)
 EOH
 }
 
@@ -29,7 +29,7 @@ while getopts :hv-: opt; do
       print_help
       exit 0
       ;;
-    verbose) verbose=true ;;
+    v | verbose) verbose=true ;;
     *)
       print_usage >&2
       exit 2
@@ -47,6 +47,7 @@ case $# in
 esac
 
 if $verbose; then
+  export PLAYWRIGHT_VERBOSE=true
   export TRANSPILER_VERBOSE=true
   echo "Verbose mode enabled."
 fi

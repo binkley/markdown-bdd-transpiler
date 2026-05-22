@@ -42,11 +42,9 @@ executed by **Playwright** and **Vitest**.
   screenshots whenever a test step fails, saving them locally to
   `test-results/`. The GitHub Actions CI pipeline is configured to securely
   upload these artifacts for easy debugging.
-- **Precision Traceability:** Generated Playwright actions are wrapped in
-  native `test.step()` blocks using the raw Markdown sentence as the label.
-  When a test fails, Playwright's logs and UI Mode point exactly to the
-  human-readable Markdown step that caused the error, eliminating the need to
-  debug generated code.
+- **Precision Traceability:** Every test execution and compilation warning
+  points directly to the exact file and line number in your Markdown source,
+  eliminating the need to debug generated code.
 - **Production-Grade Transpiler:** Structured compilation logging, API
   performance profiling, and an enforced "clean state" architecture that
   automatically deletes stale generated tests.
@@ -59,7 +57,7 @@ executed by **Playwright** and **Vitest**.
 2.  **Manifest (`manifest.json`)**: A JSON schema defining a highly generic
     set of Playwright A11y actions (e.g., `interact_with_element`,
     `verify_element_state`).
-3.  **Transpiler (`transpile.ts`)**: Crawls markdown, checks the cache, and
+3.  **Transpiler (`transpile.ts`)**: Crawls markdown using the `remark` AST parser to track strict file locations, checks the cache, and
     calls the Gemini API to map unregistered human language steps to the
     manifest constraints.
 4.  **Standard Library (`framework/standard-ui-steps.ts`)**: The physical
@@ -156,10 +154,25 @@ simply run:
 ```
 
 Use `./run.sh --help` for help.<br/>
-Use `./run.sh --verbose` for verbose logging:
 
-```Plaintext
+#### Diagnostic Logging (`--verbose`)
+
+If you need deeper insight into the compilation process, use the `--verbose`
+flag:
+
+```bash
+./run.sh --verbose
+# Or ./validate.sh --verbose
+```
+
+This outputs detailed runtime diagnostics, allowing you to track exactly which
+files are being processed, monitor AI cache misses, and profile the latency of
+the Gemini API:
+
+```text
 📄 Transpiling tests/login-journey.md -> .generated/login-journey.md.test.ts
+☁️  Cache miss: "Click the "Sign In" button"
+⚡ API returned in 1.42s
 📄 Transpiling tests/settings-journey.md -> .generated/settings-journey.md.test.ts
 ```
 
@@ -170,6 +183,24 @@ This script will:
 3. Automatically orchestrate network connections between them.
 4. Execute the test suite and output the results.
 5. Gracefully tear down the containers upon completion.
+
+---
+
+## 🔎 Precision Traceability
+
+The transpiler is designed to make debugging Markdown-driven tests as
+intuitive as writing them:
+
+- **Clickable Terminal Warnings:** Structural issues (like missing `GIVEN`
+  statements or unclosed code fences) are logged using modern TS ecosystem
+  standards (e.g., `⚠️ tests/login-journey.md:10 - warning: ...`). In VS Code
+  and most modern terminal emulators, these paths are natively clickable,
+  taking you directly to the exact line in your Markdown file.
+- **Playwright Integration:** Generated Playwright actions are wrapped in
+  native `test.step()` blocks. When a test fails, Playwright's HTML report, UI
+  Mode, and terminal logs point exactly to the human-readable Markdown step
+  that caused the error, including the source file and line number (e.g.,
+  `(login-journey.md:23)`).
 
 ---
 
@@ -414,16 +445,6 @@ static analysis, and securely publish the new version to
 ---
 
 ## 📝 TODO / Future Improvements
-
-#### Source Mapping / Line Number Tracking
-
-Currently, Playwright errors output the raw Markdown string via `test.step()`
-wrapping, which provides excellent traceability. However, if tests scale to
-massive files, it would be beneficial to track exact line numbers. The current
-AST parser (`marked`) does not track line numbers natively. Future iterations
-should explore injecting file/line metadata (e.g., `[login.md:14]`) into the
-generated steps or generating native JS Source Maps for perfect IDE/Playwright
-integration.
 
 #### Multi-LLM Provider Support
 
