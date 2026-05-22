@@ -412,3 +412,12 @@ integration.
 Implement an exponential backoff/retry loop inside `transpile.ts` to
 gracefully handle temporary `503 Service Unavailable` capacity spikes when
 using the highly demanded `gemini-2.5-flash-lite` model.
+
+#### Supply Chain Security (Socket.dev)
+
+Re-evaluate integrating the `@socketsecurity/cli` for advanced supply chain
+security scanning (malware, typo-squatting, install scripts) in the CI
+pipeline. The initial integration was reverted due to an intractable OAuth
+loop in Socket's account provisioning flow for solo/personal GitHub accounts.
+If their onboarding flow improves, the CLI should be re-added to `validate.sh`
+and `.github/workflows/ci.yml`.
