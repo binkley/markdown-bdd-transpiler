@@ -103,6 +103,13 @@ before running your test runner:
 npx markdown-bdd
 ```
 
+To see a full list of available command-line overrides and positional file
+targeting options, use the help flag:
+
+```bash
+npx markdown-bdd --help
+```
+
 _(Tip: We recommend adding `"pretest": "markdown-bdd"` to your `package.json`
 scripts)._
 

@@ -84,6 +84,9 @@ Options:
   -v, --verbose                     Enable detailed diagnostic logging
   -q, --quiet                       Suppress all non-error output (including structural warnings)
   -h, --help                        Print this help menu
+
+Arguments:
+  files                             Specific Markdown file(s) to process. If omitted, all files in the test directory will be bulk-processed.
 `);
     process.exit(0);
   }
