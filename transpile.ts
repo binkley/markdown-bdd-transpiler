@@ -22,11 +22,71 @@ interface TranspilerConfig {
   };
 }
 
-async function loadConfig(): Promise<TranspilerConfig> {
+interface ExecutionState {
+  config: TranspilerConfig;
+  verbose: boolean;
+  quiet: boolean;
+  targetFiles: string[];
+}
+
+async function loadConfig(): Promise<ExecutionState> {
   const argv = mri(process.argv.slice(2), {
-    alias: { c: 'config' },
+    alias: {
+      c: 'config',
+      h: 'help',
+      v: 'verbose',
+      q: 'quiet',
+      V: 'version',
+      'test-dir': 'testDir',
+      'out-dir': 'outDir',
+      'manifest-path': 'manifestPath',
+      'cache-path': 'cachePath',
+      'framework-import': 'frameworkImport',
+      'setup-injection': 'setupInjection',
+      'setup-file': 'setupFile',
+      'gemini-max-retries': 'gemini.maxRetries',
+      'gemini-initial-delay-ms': 'gemini.initialDelayMs',
+      'gemini-backoff-factor': 'gemini.backoffFactor'
+    },
     default: { config: 'bdd.config.json' }
   });
+
+  if (argv.version) {
+    const pkgContent = await fs.readFile(
+      path.resolve(process.cwd(), 'package.json'),
+      'utf-8'
+    );
+    const pkg = JSON.parse(pkgContent);
+    console.log(pkg.version);
+    process.exit(0);
+  }
+
+  if (argv.help) {
+    console.log(`
+Usage: markdown-bdd [options] [files...]
+
+An AI-augmented BDD testing framework that transpiles Markdown user journeys into Playwright tests.
+
+Options:
+  -c, --config <path>               Path to the configuration file (default: bdd.config.json)
+  --test-dir <path>                 Directory containing your Markdown feature files
+  --out-dir <path>                  Directory to output the generated .test.ts files
+  --manifest-path <path>            Path to the JSON manifest defining available UI steps
+  --cache-path <path>               File to deterministically cache AI resolutions
+  --framework-import <path>         Module path injected into generated tests for standard steps
+  --setup-file <path>               TypeScript/JavaScript file injected into every generated test
+  --setup-injection <code>          Raw string of code injected into every generated test
+  --gemini-max-retries <number>     Maximum API retries on failure (default: 3)
+  --gemini-initial-delay-ms <ms>    Base delay before the first retry (default: 1000)
+  --gemini-backoff-factor <number>  Exponential multiplier for each retry (default: 2.0)
+  
+  -V, --version                     Print the transpiler version and exit
+  -v, --verbose                     Enable detailed diagnostic logging
+  -q, --quiet                       Suppress all non-error output (including structural warnings)
+  -h, --help                        Print this help menu
+`);
+    process.exit(0);
+  }
 
   const defaultConfig: TranspilerConfig = {
     testDir: 'tests',
@@ -58,30 +118,48 @@ async function loadConfig(): Promise<TranspilerConfig> {
     }
   }
 
-  return {
-    testDir: argv.testDir || fileConfig.testDir || defaultConfig.testDir,
-    outDir: argv.outDir || fileConfig.outDir || defaultConfig.outDir,
+  const finalConfig: TranspilerConfig = {
+    testDir: argv.testDir ?? fileConfig.testDir ?? defaultConfig.testDir,
+    outDir: argv.outDir ?? fileConfig.outDir ?? defaultConfig.outDir,
     manifestPath:
-      argv.manifestPath ||
-      fileConfig.manifestPath ||
+      argv.manifestPath ??
+      fileConfig.manifestPath ??
       defaultConfig.manifestPath,
     cachePath:
-      argv.cachePath || fileConfig.cachePath || defaultConfig.cachePath,
+      argv.cachePath ?? fileConfig.cachePath ?? defaultConfig.cachePath,
     frameworkImport:
-      argv.frameworkImport ||
-      fileConfig.frameworkImport ||
+      argv.frameworkImport ??
+      fileConfig.frameworkImport ??
       defaultConfig.frameworkImport,
-    setupInjection: argv.setupInjection || fileConfig.setupInjection,
-    setupFile: argv.setupFile || fileConfig.setupFile,
+    setupInjection: argv.setupInjection ?? fileConfig.setupInjection,
+    setupFile: argv.setupFile ?? fileConfig.setupFile,
     gemini: {
-      ...defaultConfig.gemini,
-      ...fileConfig.gemini
+      maxRetries:
+        argv['gemini.maxRetries'] ??
+        fileConfig.gemini?.maxRetries ??
+        defaultConfig.gemini.maxRetries,
+      initialDelayMs:
+        argv['gemini.initialDelayMs'] ??
+        fileConfig.gemini?.initialDelayMs ??
+        defaultConfig.gemini.initialDelayMs,
+      backoffFactor:
+        argv['gemini.backoffFactor'] ??
+        fileConfig.gemini?.backoffFactor ??
+        defaultConfig.gemini.backoffFactor
     }
+  };
+
+  return {
+    config: finalConfig,
+    verbose: !!argv.verbose,
+    quiet: !!argv.quiet,
+    targetFiles: argv._
   };
 }
 
 async function main() {
-  const config = await loadConfig();
+  const state = await loadConfig();
+  const config = state.config;
 
   const manifestPath = path.resolve(process.cwd(), config.manifestPath);
   const cachePath = path.resolve(process.cwd(), config.cachePath);
@@ -101,20 +179,42 @@ async function main() {
     const cacheStr = await fs.readFile(cachePath, 'utf-8');
     cache = JSON.parse(cacheStr);
   } catch {
-    // Missing or invalid cache
+    if (state.verbose)
+      console.log('ℹ️  No existing cache found. Starting fresh.');
   }
 
-  let files: string[];
-  try {
-    files = await fs.readdir(testDir);
-  } catch {
-    console.log(`No "${config.testDir}" directory found.`);
-    return;
-  }
-  const mdFiles = files.filter((f) => f.endsWith('.md'));
+  let mdFiles: string[] = [];
+  const isTargetedRun = state.targetFiles.length > 0;
 
-  // Ensure a clean slate for generated tests
-  await fs.rm(outDir, { recursive: true, force: true });
+  if (isTargetedRun) {
+    // Process only the specific files provided by the user
+    for (const target of state.targetFiles) {
+      if (target.endsWith('.md')) {
+        mdFiles.push(target);
+      } else {
+        if (!state.quiet)
+          console.warn(`⚠️ Skipping non-markdown file: ${target}`);
+      }
+    }
+  } else {
+    // Bulk process the entire test directory
+    try {
+      const files = await fs.readdir(testDir);
+      // Map to absolute paths relative to testDir so the loops below work consistently
+      mdFiles = files
+        .filter((f) => f.endsWith('.md'))
+        .map((f) => path.join(testDir, f));
+    } catch {
+      if (!state.quiet)
+        console.log(`No "${config.testDir}" directory found.`);
+      return;
+    }
+
+    // Ensure a clean slate for generated tests during a bulk run
+    await fs.rm(outDir, { recursive: true, force: true });
+  }
+
+  // Ensure the outDir exists (whether bulk or targeted run)
   await fs.mkdir(outDir, { recursive: true });
 
   let cacheHits = 0;
@@ -124,13 +224,16 @@ async function main() {
   const isVerbose = process.env.TRANSPILER_VERBOSE === 'true';
 
   for (const mdFile of mdFiles) {
+    // Determine the actual path to read the file from
+    const filePath = path.resolve(process.cwd(), mdFile);
+    // Determine the base name (e.g., 'login-journey.md') to use for the output file
+    const baseName = path.basename(mdFile);
+
     if (isVerbose) {
       console.log(
-        `📄 Transpiling ${config.testDir}/${mdFile} -> ${config.outDir}/${mdFile}.test.ts`
+        `📄 Transpiling ${mdFile} -> ${config.outDir}/${baseName}.test.ts`
       );
     }
-
-    const filePath = path.join(testDir, mdFile);
     const content = await fs.readFile(filePath, 'utf-8');
 
     let currentContext = '';
@@ -164,10 +267,12 @@ async function main() {
 
     const checkPendingContext = () => {
       if (pendingContext) {
-        console.warn(
-          `⚠️ [WARNING] Scenario "${pendingScenarioName}": ` +
-            `Found "### ${pendingContext}" header without a corresponding \`\`\`bdd code fence.`
-        );
+        if (!state.quiet) {
+          console.warn(
+            `⚠️ [WARNING] Scenario "${pendingScenarioName}": ` +
+              `Found "### ${pendingContext}" header without a corresponding \`\`\`bdd code fence.`
+          );
+        }
         pendingContext = null;
       }
     };
@@ -210,7 +315,7 @@ async function main() {
           };
           searchTokens(token.items);
 
-          if (!hasBdd) {
+          if (!hasBdd && !state.quiet) {
             console.warn(
               `⚠️ [WARNING] Scenario "${currentScenario?.name}": ` +
                 `Found a bulleted list under "### ${pendingContext}" without a \`\`\`bdd code fence. ` +
@@ -230,8 +335,8 @@ async function main() {
               const stepText = trimmed.slice(2).trim();
 
               if (
-                /\{\{[^}]*$/.test(stepText) ||
-                /\{\{[^}]*\s/.test(stepText)
+                !state.quiet &&
+                (/\{\{[^}]*$/.test(stepText) || /\{\{[^}]*\s/.test(stepText))
               ) {
                 console.warn(
                   `⚠️ [WARNING] Scenario "${currentScenario?.name}": ` +
@@ -244,7 +349,8 @@ async function main() {
 
               let resolution = cache[cacheKey];
               if (!resolution) {
-                console.log(`\n☁️  Cache miss: "${stepText}"`);
+                if (state.verbose)
+                  console.log(`\n☁️  Cache miss: "${stepText}"`);
                 const callStart = performance.now();
 
                 let response;
@@ -290,9 +396,11 @@ async function main() {
                       const jitter = delay * 0.2 * Math.random();
                       const waitTime = Math.round(delay + jitter);
 
-                      console.warn(
-                        `    ⚠️  API Error (${e.message}). Retrying in ${waitTime}ms...`
-                      );
+                      if (!state.quiet) {
+                        console.warn(
+                          `    ⚠️  API Error (${e.message}). Retrying in ${waitTime}ms...`
+                        );
+                      }
                       await new Promise((resolve) =>
                         setTimeout(resolve, waitTime)
                       );
@@ -320,7 +428,8 @@ async function main() {
                   (performance.now() - callStart) /
                   1000
                 ).toFixed(2);
-                console.log(`⚡ API returned in ${callDuration}s`);
+                if (state.verbose)
+                  console.log(`⚡ API returned in ${callDuration}s`);
 
                 if (!response || !response.text) {
                   console.error(
@@ -442,7 +551,7 @@ async function main() {
       specCode += `});\n\n`;
     }
 
-    const outPath = path.join(outDir, `${mdFile}.test.ts`);
+    const outPath = path.join(outDir, `${baseName}.test.ts`);
     await fs.writeFile(outPath, specCode);
   }
 
@@ -451,9 +560,11 @@ async function main() {
   }
 
   const totalDuration = ((performance.now() - startTime) / 1000).toFixed(2);
-  console.log(
-    `\n✅ Transpilation Complete: ${cacheHits + apiCalls} steps processed (${cacheHits} cached, ${apiCalls} generated via AI) in ${totalDuration}s.`
-  );
+  if (!state.quiet) {
+    console.log(
+      `\n✅ Transpilation Complete: ${cacheHits + apiCalls} steps processed (${cacheHits} cached, ${apiCalls} generated via AI) in ${totalDuration}s.`
+    );
+  }
 }
 
 main().catch(console.error);
