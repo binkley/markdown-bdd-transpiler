@@ -3,5 +3,12 @@
   "outDir": ".generated",
   "manifestPath": "manifest.json",
   "cachePath": "bdd-cache.json",
-  "frameworkImport": "../framework/standard-ui-steps.js"
+  "frameworkImport": "../framework/standard-ui-steps.js",
+  "llm": {
+    "provider": "gemini",
+    "model": "gemini-2.5-flash-lite",
+    "maxRetries": 3,
+    "initialDelayMs": 1000,
+    "backoffFactor": 2.0
+  }
 }

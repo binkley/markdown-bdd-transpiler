@@ -27,8 +27,8 @@ executed by **Playwright** and **Vitest**.
   authors. Syntax highlighting and formatting work out-of-the-box in GitHub
   and all major editors.
 - **Semantic AI Translation:** Users can write naturally (e.g., "click the
-  button", "smash the button", "tap"). The transpiler uses Gemini to map
-  intent to deterministic UI actions.
+  button", "smash the button", "tap"). The transpiler uses the provider LLM to
+  map intent to deterministic UI actions.
 - **No Step-Definition Bloat:** Generic functions for the AI to intelligently
   infer implicit ARIA roles from human text (e.g., classifying a step as
   targeting a "link" or a "checkbox").
@@ -51,15 +51,54 @@ executed by **Playwright** and **Vitest**.
 
 ---
 
+## 🚀 Getting Started (1-Minute Setup)
+
+The transpiler includes an interactive initialization script to automatically
+scaffold your configuration and install the correct peer dependencies.
+
+### 1. Install the Transpiler
+
+```bash
+npm install --save-dev @binkley/markdown-bdd-transpiler
+```
+
+### 2. Run the Initialization Wizard
+
+```bash
+npx markdown-bdd init
+```
+
+This interactive script will:
+
+- Ask if you want to install Playwright (`@playwright/test`) and automatically
+  download the required browser binaries.
+- Prompt you to select your preferred AI Provider (Anthropic, Google Gemini,
+  or OpenAI).
+- Generate a clean `bdd.config.json` tailored to your choice.
+- Auto-install the necessary Vercel AI SDK provider adapter (e.g.,
+  `@ai-sdk/openai`).
+
+### 3. CI/CD Automation (Headless Setup)
+
+If you are automating the setup in a CI/CD pipeline, you can bypass the
+interactive prompts by providing the `-y`, `--provider`, and `--model` flags:
+
+```bash
+npx markdown-bdd init -y --provider openai --model gpt-4o-mini
+```
+
+---
+
 ## 🏗️ Architecture
 
 1.  **Authoring (`tests/*.md`)**: Stakeholders define features and scenarios.
 2.  **Manifest (`manifest.json`)**: A JSON schema defining a highly generic
     set of Playwright A11y actions (e.g., `interact_with_element`,
     `verify_element_state`).
-3.  **Transpiler (`transpile.ts`)**: Crawls markdown using the `remark` AST parser to track strict file locations, checks the cache, and
-    calls the Gemini API to map unregistered human language steps to the
-    manifest constraints.
+3.  **Transpiler (`transpile.ts`)**: Crawls markdown using the `remark` AST
+    parser to track strict file locations, checks the cache, and calls the
+    LLM provider API to map unregistered human language steps to the manifest
+    constraints.
 4.  **Standard Library (`framework/standard-ui-steps.ts`)**: The physical
     Playwright implementation of the manifest.
 5.  **Execution (`.generated/*.test.ts`)**: The transpiler outputs standard,
@@ -119,11 +158,12 @@ scripts)._
 
 - **Node.js** (v22+ recommended)
 - **Docker** and **Docker Compose**
-- A Google Gemini API Key.
+- An LLM provider API.
 
 ### 1. Environment Setup
 
-Export your Gemini API key in your terminal session:
+Export your LLM provider API key in your terminal session. An example for
+Google Gemini:
 
 ```bash
 export GOOGLE_API_KEY="your_api_key_here"
@@ -167,7 +207,7 @@ flag:
 
 This outputs detailed runtime diagnostics, allowing you to track exactly which
 files are being processed, monitor AI cache misses, and profile the latency of
-the Gemini API:
+the LLM provider API:
 
 ```text
 📄 Transpiling tests/login-journey.md -> .generated/login-journey.md.test.ts
@@ -356,9 +396,7 @@ parser will ignore everything outside the fences._
 
 ## ⚙️ Configuration (`bdd.config.json`)
 
-While the framework is designed to work out-of-the-box, it is fully
-configurable to match your project's architecture. You can define a
-`bdd.config.json` file in your project root:
+While the `init` script provides a great out-of-the-box setup, the framework is fully configurable to match your project's architecture.
 
 ```json
 {
@@ -366,9 +404,10 @@ configurable to match your project's architecture. You can define a
   "outDir": ".generated",
   "manifestPath": "manifest.json",
   "cachePath": "bdd-cache.json",
-  "frameworkImport": "../framework/standard-ui-steps.js",
   "setupInjection": "test.use({ extraHTTPHeaders: { 'x-mock-user': 'admin' } });",
-  "gemini": {
+  "llm": {
+    "provider": "gemini",
+    "model": "gemini-2.5-flash-lite",
     "maxRetries": 3,
     "initialDelayMs": 1000,
     "backoffFactor": 2.0
@@ -386,8 +425,10 @@ configurable to match your project's architecture. You can define a
   steps. (Default: `manifest.json`)
 - **`cachePath`**: The file where AI resolutions are deterministically cached
   to speed up future runs. (Default: `bdd-cache.json`)
-- **`frameworkImport`**: The module path injected into the generated tests to
-  import the standard Playwright UI functions.
+- **`frameworkImport`**: (Optional) The module path injected into the
+  generated tests. (Defaults to `@binkley/markdown-bdd-transpiler/framework`.
+  Only override this if you are building custom Playwright UI
+  implementations).
 - **`setupFile`**: (Optional) Path to a TypeScript/JavaScript file (e.g.,
   `tests/setup.ts`). The contents of this file are injected directly into
   every generated test file. This is the recommended way to inject global
@@ -396,7 +437,9 @@ configurable to match your project's architecture. You can define a
 - **`setupInjection`**: (Optional) A raw string of code injected at the top of
   every generated test file. (For complex setups, use `setupFile` instead to
   avoid stringifying multiline code in JSON).
-- **`gemini`**: Configures the Google Gemini API client behavior.
+- **`llm`**: Configures the third-party AI provider behavior.
+  - **`provider`**: The vendor to use (`gemini`, `openai`, or `anthropic`).
+  - **`model`**: The specific LLM version to use (e.g., `gpt-4o-mini`).
   - **`maxRetries`**: Maximum number of times to retry a failed API call
     before crashing. (Default: `3`)
   - **`initialDelayMs`**: Base delay before the first retry. (Default: `1000`)
@@ -404,7 +447,7 @@ configurable to match your project's architecture. You can define a
     Jitter is automatically applied. (Default: `2.0`)
 
 _Note: All configuration options can also be overridden via CLI flags (e.g.,
-`npx markdown-bdd-transpiler --testDir e2e/features`)._
+`npx markdown-bdd-transpiler --llm-provider openai`)._
 
 ---
 
@@ -445,14 +488,6 @@ static analysis, and securely publish the new version to
 ---
 
 ## 📝 TODO / Future Improvements
-
-#### Multi-LLM Provider Support
-
-Research and implement an abstraction layer to allow consumers to bring their
-own LLM provider (e.g., Anthropic Claude, OpenAI GPT-4o, local Ollama models).
-Currently, the transpiler is tightly coupled to the Google Gen AI SDK
-(`gemini-2.5-flash-lite`). Consumers should be able to specify their preferred
-provider and model via `bdd.config.json` if they do not have a Gemini API key.
 
 #### Supply Chain Security (Socket.dev)
 

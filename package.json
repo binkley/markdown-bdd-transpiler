@@ -38,15 +38,34 @@
   "dependencies": {
     "@google/genai": "^2.5.0",
     "@types/unist": "^3.0.3",
+    "ai": "^6.0.191",
     "mri": "^1.2.0",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
-    "unist-util-visit": "^5.1.0"
+    "unist-util-visit": "^5.1.0",
+    "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@playwright/test": "^1.60.0"
+    "@playwright/test": "^1.60.0",
+    "@ai-sdk/anthropic": "^1.1.0",
+    "@ai-sdk/google": "^1.1.0",
+    "@ai-sdk/openai": "^1.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@ai-sdk/anthropic": {
+      "optional": true
+    },
+    "@ai-sdk/google": {
+      "optional": true
+    },
+    "@ai-sdk/openai": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@ai-sdk/anthropic": "^3.0.79",
+    "@ai-sdk/google": "^3.0.79",
+    "@ai-sdk/openai": "^3.0.65",
     "@eslint/js": "^10.0.1",
     "@types/express": "^5.0.6",
     "@types/mdast": "^4.0.4",

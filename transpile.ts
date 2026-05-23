@@ -7,8 +7,18 @@ import { visit } from 'unist-util-visit';
 import type { Node, Parent } from 'unist';
 import type { Code, Heading, List, ListItem, Blockquote } from 'mdast';
 import mri from 'mri';
+import { generateObject } from 'ai';
+import { z } from 'zod';
+import { execSync } from 'child_process';
+import readline from 'readline';
 
-const ai = new GoogleGenAI({});
+interface LLMConfig {
+  provider: string;
+  model: string;
+  maxRetries: number;
+  initialDelayMs: number;
+  backoffFactor: number;
+}
 
 interface TranspilerConfig {
   testDir: string;
@@ -18,11 +28,7 @@ interface TranspilerConfig {
   frameworkImport: string;
   setupInjection?: string;
   setupFile?: string;
-  gemini: {
-    maxRetries: number;
-    initialDelayMs: number;
-    backoffFactor: number;
-  };
+  llm: LLMConfig;
 }
 
 interface ExecutionState {
@@ -32,14 +38,325 @@ interface ExecutionState {
   targetFiles: string[];
 }
 
+export interface AIResolution {
+  matchedFunction: string;
+  extractedArguments: string[];
+}
+
+export interface LLMProvider {
+  generateResolution(
+    systemInstruction: string,
+    stepText: string,
+    config: LLMConfig
+  ): Promise<AIResolution>;
+}
+
+// Common Zod schema used by Vercel AI
+const resolutionSchema = z.object({
+  matchedFunction: z.string(),
+  extractedArguments: z.array(z.string())
+});
+
+class VercelAIProvider implements LLMProvider {
+  constructor(
+    private modelFactory: any,
+    private defaultModelName: string
+  ) {}
+
+  async generateResolution(
+    systemInstruction: string,
+    stepText: string,
+    config: LLMConfig
+  ): Promise<AIResolution> {
+    const escapedContents = stepText.replace(/\\/g, '\\\\');
+
+    const { object } = await generateObject({
+      model: this.modelFactory(config.model || this.defaultModelName),
+      system: systemInstruction,
+      prompt: escapedContents,
+      schema: resolutionSchema
+    });
+
+    return object;
+  }
+}
+
+class GeminiProvider implements LLMProvider {
+  private ai: GoogleGenAI;
+
+  constructor() {
+    if (!process.env.GOOGLE_API_KEY) {
+      console.error(
+        `❌ [ERROR] Missing required environment variable: GOOGLE_API_KEY.`
+      );
+      console.error(
+        `   To use the Gemini provider, you must export your API key before running the transpiler.`
+      );
+      process.exit(1);
+    }
+    this.ai = new GoogleGenAI({});
+  }
+
+  async generateResolution(
+    systemInstruction: string,
+    stepText: string,
+    config: LLMConfig
+  ): Promise<AIResolution> {
+    const escapedContents = stepText.replace(/\\/g, '\\\\');
+    const response = await this.ai.models.generateContent({
+      model: config.model,
+      contents: escapedContents,
+      config: {
+        systemInstruction,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            matchedFunction: { type: Type.STRING },
+            extractedArguments: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING }
+            }
+          },
+          required: ['matchedFunction', 'extractedArguments']
+        }
+      }
+    });
+
+    if (!response || !response.text) {
+      throw new Error('Received empty response from Gemini');
+    }
+    return JSON.parse(response.text);
+  }
+}
+
+function getLLMProvider(config: LLMConfig): LLMProvider {
+  switch (config.provider.toLowerCase()) {
+    case 'gemini':
+      return new GeminiProvider();
+    case 'openai':
+      try {
+        const { openai } = require('@ai-sdk/openai');
+        return new VercelAIProvider(openai, 'gpt-4o-mini');
+      } catch (e: any) {
+        if (e.code === 'MODULE_NOT_FOUND') {
+          console.error(
+            `❌ [ERROR] You configured "openai" as your LLM provider, but the required adapter is not installed.`
+          );
+          console.error(
+            `   Please run: npm install --save-dev @ai-sdk/openai`
+          );
+          process.exit(1);
+        }
+        throw e;
+      }
+    case 'anthropic':
+      try {
+        const { anthropic } = require('@ai-sdk/anthropic');
+        return new VercelAIProvider(anthropic, 'claude-3-5-sonnet-latest');
+      } catch (e: any) {
+        if (e.code === 'MODULE_NOT_FOUND') {
+          console.error(
+            `❌ [ERROR] You configured "anthropic" as your LLM provider, but the required adapter is not installed.`
+          );
+          console.error(
+            `   Please run: npm install --save-dev @ai-sdk/anthropic`
+          );
+          process.exit(1);
+        }
+        throw e;
+      }
+    default:
+      console.error(
+        `❌ [ERROR] Unsupported LLM provider: "${config.provider}". Supported providers: "gemini", "openai", "anthropic"`
+      );
+      process.exit(1);
+  }
+}
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+interface InitOptions {
+  autoYes: boolean;
+  providerFlag?: string;
+  modelFlag?: string;
+}
+
+async function runInitCommand(options: InitOptions) {
+  console.log('🚀 Initializing AI-Augmented Markdown BDD Transpiler...');
+
+  const isHeadless =
+    options.autoYes || !!options.providerFlag || !!options.modelFlag;
+
+  // Strict Validation: All or Nothing for CI
+  if (
+    isHeadless &&
+    (!options.autoYes || !options.providerFlag || !options.modelFlag)
+  ) {
+    console.error(`❌ [ERROR] Incomplete automation flags provided.`);
+    console.error(
+      `   To run in headless CI mode, you must provide ALL of the following: '--yes', '--provider <name>', and '--model <name>'.`
+    );
+    console.error(
+      `   Example: npx markdown-bdd init -y --provider openai --model gpt-4o`
+    );
+    process.exit(1);
+  }
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  const question = (query: string): Promise<string> =>
+    new Promise((resolve) => rl.question(query, resolve));
+
+  try {
+    let installPlaywright = 'y';
+
+    if (!isHeadless) {
+      console.log(
+        '\nThis framework requires Playwright to execute the generated tests.'
+      );
+      installPlaywright = await question(
+        'Would you like to install @playwright/test now? (Y/n): '
+      );
+      installPlaywright = installPlaywright.trim().toLowerCase();
+    } else {
+      console.log('\n🤖 CI Mode: Automatically installing Playwright...');
+    }
+
+    if (
+      installPlaywright === '' ||
+      installPlaywright === 'y' ||
+      installPlaywright === 'yes'
+    ) {
+      console.log(`\n📦 Installing @playwright/test...`);
+      try {
+        execSync(`npm install --save-dev @playwright/test`, {
+          stdio: 'inherit'
+        });
+        console.log(`✅ Successfully installed Playwright.`);
+
+        console.log(`\n📦 Installing Playwright browsers...`);
+        execSync(`npx playwright install`, {
+          stdio: 'inherit'
+        });
+        console.log(`✅ Successfully installed Playwright browsers.`);
+      } catch {
+        console.error(
+          `❌ Failed to install Playwright. Please run 'npm install --save-dev @playwright/test' manually.`
+        );
+      }
+    }
+
+    let providerChoice = '';
+    let provider = '';
+    let model = '';
+    let installPkg = '';
+
+    if (isHeadless && options.providerFlag) {
+      console.log(
+        `\n🤖 CI Mode: Automatically configuring provider "${options.providerFlag}"...`
+      );
+      const normalized = options.providerFlag.toLowerCase();
+      if (normalized === 'anthropic') providerChoice = '1';
+      else if (normalized === 'gemini') providerChoice = '2';
+      else if (normalized === 'openai') providerChoice = '3';
+      else {
+        console.error(
+          `❌ [ERROR] Unsupported LLM provider: "${options.providerFlag}". Supported providers: "anthropic", "gemini", "openai"`
+        );
+        process.exit(1);
+      }
+    } else {
+      console.log('\n🗳️  Which AI provider would you like to use?');
+      console.log('1) Anthropic (Requires ANTHROPIC_API_KEY)');
+      console.log('2) Google Gemini (Requires GOOGLE_API_KEY)');
+      console.log('3) OpenAI (Requires OPENAI_API_KEY)');
+
+      while (true) {
+        providerChoice = await question('Select [1-3]: ');
+        providerChoice = providerChoice.trim();
+        if (['1', '2', '3'].includes(providerChoice)) {
+          break;
+        }
+        console.log('❌ Invalid selection. Please enter 1, 2, or 3.');
+      }
+    }
+
+    if (providerChoice === '1') {
+      provider = 'anthropic';
+      model = 'claude-3-5-sonnet-latest';
+      installPkg = '@ai-sdk/anthropic';
+    } else if (providerChoice === '2') {
+      provider = 'gemini';
+      model = 'gemini-2.5-flash-lite';
+      installPkg = '@ai-sdk/google';
+    } else if (providerChoice === '3') {
+      provider = 'openai';
+      model = 'gpt-4o-mini';
+      installPkg = '@ai-sdk/openai';
+    }
+
+    if (isHeadless && options.modelFlag) {
+      model = options.modelFlag;
+    }
+
+    const config = {
+      testDir: 'tests',
+      outDir: '.generated',
+      manifestPath: 'manifest.json',
+      cachePath: 'bdd-cache.json',
+      llm: {
+        provider,
+        model,
+        maxRetries: 3,
+        initialDelayMs: 1000,
+        backoffFactor: 2.0
+      }
+    };
+
+    const configPath = path.resolve(process.cwd(), 'bdd.config.json');
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+    console.log(`\n✅ Created configuration file at: ${configPath}`);
+
+    if (installPkg) {
+      console.log(
+        `\n📦 Installing necessary peer dependency: ${installPkg}...`
+      );
+      try {
+        execSync(`npm install --save-dev ${installPkg}`, {
+          stdio: 'inherit'
+        });
+        console.log(`✅ Successfully installed ${installPkg}`);
+      } catch {
+        console.error(
+          `❌ Failed to install ${installPkg}. Please run it manually.`
+        );
+      }
+    }
+
+    console.log('\n🎉 Initialization complete!');
+    console.log(
+      `Don't forget to export your API key (e.g., export ${provider === 'openai' ? 'OPENAI_API_KEY' : provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'GOOGLE_API_KEY'}="your-key") before running tests.`
+    );
+  } finally {
+    rl.close();
+  }
+}
+
 async function loadConfig(): Promise<ExecutionState> {
-  const argv = mri(process.argv.slice(2), {
+  const args = process.argv.slice(2);
+  const argv = mri(args, {
     alias: {
       c: 'config',
       h: 'help',
       v: 'verbose',
       q: 'quiet',
       V: 'version',
+      y: 'yes',
       'test-dir': 'testDir',
       'out-dir': 'outDir',
       'manifest-path': 'manifestPath',
@@ -47,12 +364,50 @@ async function loadConfig(): Promise<ExecutionState> {
       'framework-import': 'frameworkImport',
       'setup-injection': 'setupInjection',
       'setup-file': 'setupFile',
-      'gemini-max-retries': 'gemini.maxRetries',
-      'gemini-initial-delay-ms': 'gemini.initialDelayMs',
-      'gemini-backoff-factor': 'gemini.backoffFactor'
+      'llm-provider': 'llm.provider',
+      'llm-model': 'llm.model',
+      'llm-max-retries': 'llm.maxRetries',
+      'llm-initial-delay-ms': 'llm.initialDelayMs',
+      'llm-backoff-factor': 'llm.backoffFactor'
     },
     default: { config: 'bdd.config.json' }
   });
+
+  if (args[0] === 'init') {
+    if (argv.help) {
+      console.log(`
+Usage: markdown-bdd init [options]
+
+Scaffolds a new project by generating 'bdd.config.json' and installing required dependencies.
+When run without options, it launches an interactive prompt.
+
+CI Automation Options:
+  To bypass all interactive prompts in a headless environment (like CI/CD), 
+  you must provide ALL of the following flags:
+  
+  -y, --yes                 Automatically install @playwright/test and browser binaries
+  --provider <name>         Automatically configure the specified AI provider 
+                            (Supported: 'anthropic', 'gemini', 'openai')
+  --model <name>            Specify the exact LLM model to use (e.g., 'gpt-4o')
+
+Example (Automated setup for Gemini):
+  npx markdown-bdd init -y --provider gemini --model gemini-2.5-flash-lite
+
+Options:
+  -h, --help                Print this help menu
+`);
+      process.exit(0);
+    }
+
+    const initOptions: InitOptions = {
+      autoYes: !!argv.yes,
+      providerFlag:
+        argv.provider || argv['llm-provider'] || argv['llm.provider'],
+      modelFlag: argv.model || argv['llm-model'] || argv['llm.model']
+    };
+    await runInitCommand(initOptions);
+    process.exit(0);
+  }
 
   if (argv.version) {
     const pkgContent = await fs.readFile(
@@ -79,9 +434,11 @@ Options:
   --framework-import <path>         Module path injected into generated tests for standard steps
   --setup-file <path>               TypeScript/JavaScript file injected into every generated test
   --setup-injection <code>          Raw string of code injected into every generated test
-  --gemini-max-retries <number>     Maximum API retries on failure (default: 3)
-  --gemini-initial-delay-ms <ms>    Base delay before the first retry (default: 1000)
-  --gemini-backoff-factor <number>  Exponential multiplier for each retry (default: 2.0)
+  --llm-provider <string>           AI provider (e.g., anthropic, gemini, openai)
+  --llm-model <string>              Specific AI model (e.g., gemini-2.5-flash-lite)
+  --llm-max-retries <number>        Maximum API retries on failure (default: 3)
+  --llm-initial-delay-ms <ms>       Base delay before the first retry (default: 1000)
+  --llm-backoff-factor <number>     Exponential multiplier for each retry (default: 2.0)
   
   -V, --version                     Print the transpiler version and exit
   -v, --verbose                     Enable detailed diagnostic logging
@@ -94,20 +451,15 @@ Arguments:
     process.exit(0);
   }
 
-  const defaultConfig: TranspilerConfig = {
+  const defaultConfig: Partial<TranspilerConfig> = {
     testDir: 'tests',
     outDir: '.generated',
     manifestPath: 'manifest.json',
     cachePath: 'bdd-cache.json',
-    frameworkImport: '../framework/standard-ui-steps.js',
-    gemini: {
-      maxRetries: 3,
-      initialDelayMs: 1000,
-      backoffFactor: 2.0
-    }
+    frameworkImport: '@binkley/markdown-bdd-transpiler/framework'
   };
 
-  let fileConfig: Partial<TranspilerConfig> = {};
+  let fileConfig: any = {};
   try {
     const configContent = await fs.readFile(
       path.resolve(process.cwd(), argv.config),
@@ -124,34 +476,54 @@ Arguments:
     }
   }
 
+  // Graceful migration check
+  if (fileConfig.gemini && !fileConfig.llm) {
+    console.warn(
+      `⚠️ [WARNING] The "gemini" block in ${argv.config} is deprecated.`
+    );
+    console.warn(
+      `Please update your config to use the explicit "llm" block.`
+    );
+    fileConfig.llm = {
+      provider: 'gemini',
+      model: 'gemini-2.5-flash-lite',
+      ...fileConfig.gemini
+    };
+  }
+
+  if (!fileConfig.llm) {
+    console.error(
+      `❌ [ERROR] Missing required 'llm' configuration block in ${argv.config}.`
+    );
+    console.error(
+      `Please explicitly define your LLM provider and model. Example:\n{\n  "llm": {\n    "provider": "gemini",\n    "model": "gemini-2.5-flash-lite",\n    "maxRetries": 3,\n    "initialDelayMs": 1000,\n    "backoffFactor": 2.0\n  }\n}`
+    );
+    process.exit(1);
+  }
+
   const finalConfig: TranspilerConfig = {
-    testDir: argv.testDir ?? fileConfig.testDir ?? defaultConfig.testDir,
-    outDir: argv.outDir ?? fileConfig.outDir ?? defaultConfig.outDir,
+    testDir: argv.testDir ?? fileConfig.testDir ?? defaultConfig.testDir!,
+    outDir: argv.outDir ?? fileConfig.outDir ?? defaultConfig.outDir!,
     manifestPath:
       argv.manifestPath ??
       fileConfig.manifestPath ??
-      defaultConfig.manifestPath,
+      defaultConfig.manifestPath!,
     cachePath:
-      argv.cachePath ?? fileConfig.cachePath ?? defaultConfig.cachePath,
+      argv.cachePath ?? fileConfig.cachePath ?? defaultConfig.cachePath!,
     frameworkImport:
       argv.frameworkImport ??
       fileConfig.frameworkImport ??
-      defaultConfig.frameworkImport,
+      defaultConfig.frameworkImport!,
     setupInjection: argv.setupInjection ?? fileConfig.setupInjection,
     setupFile: argv.setupFile ?? fileConfig.setupFile,
-    gemini: {
-      maxRetries:
-        argv['gemini.maxRetries'] ??
-        fileConfig.gemini?.maxRetries ??
-        defaultConfig.gemini.maxRetries,
+    llm: {
+      provider: argv['llm.provider'] ?? fileConfig.llm.provider,
+      model: argv['llm.model'] ?? fileConfig.llm.model,
+      maxRetries: argv['llm.maxRetries'] ?? fileConfig.llm.maxRetries ?? 3,
       initialDelayMs:
-        argv['gemini.initialDelayMs'] ??
-        fileConfig.gemini?.initialDelayMs ??
-        defaultConfig.gemini.initialDelayMs,
+        argv['llm.initialDelayMs'] ?? fileConfig.llm.initialDelayMs ?? 1000,
       backoffFactor:
-        argv['gemini.backoffFactor'] ??
-        fileConfig.gemini?.backoffFactor ??
-        defaultConfig.gemini.backoffFactor
+        argv['llm.backoffFactor'] ?? fileConfig.llm.backoffFactor ?? 2.0
     }
   };
 
@@ -166,6 +538,7 @@ Arguments:
 async function main() {
   const state = await loadConfig();
   const config = state.config;
+  const llmProvider = getLLMProvider(config.llm);
 
   const manifestPath = path.resolve(process.cwd(), config.manifestPath);
   const cachePath = path.resolve(process.cwd(), config.cachePath);
@@ -442,71 +815,50 @@ async function main() {
                 console.log(`\n☁️  Cache miss: "${stepText}"`);
               const callStart = performance.now();
 
-              let response;
               let attempt = 0;
-              const { maxRetries, initialDelayMs, backoffFactor } =
-                config.gemini;
 
               try {
-                while (attempt <= maxRetries) {
+                while (attempt <= config.llm.maxRetries) {
                   try {
-                    // Remark unescapes markdown escapes, so a user typing \\{{ in a code block
-                    // becomes \{{ in the AST. When we send \{{ to Gemini via JSON, it might
-                    // treat it as a JSON escape or get confused. We explicitly re-escape backslashes
-                    // to ensure Gemini sees the literal backslash.
-                    const escapedContents = stepText.replace(/\\/g, '\\\\');
+                    const systemInstruction = [
+                      `You are an AI compiler for BDD tests. Map the user's step to a function in the provided manifest.`,
+                      `Never evaluate or replace {{VARIABLES}}. Always extract them exactly as written in the text.`,
+                      `CRITICAL RULE: If you see a literal string that begins with a backslash followed by braces, e.g., \\{{something}}, you MUST include the backslash in the extracted argument. DO NOT drop the backslash. Output "\\\\{{something}}" exactly.`,
+                      `\n--- MANIFEST ---`,
+                      manifestStr,
+                      `\n--- CONTEXT ---`,
+                      `Feature: ${currentFeature?.name || 'Unknown'}`,
+                      `Scenario: ${currentScenario?.name || 'Unknown'}`,
+                      `Phase: ${currentContext}`,
+                      designerNotes ? `Designer Notes: ${designerNotes}` : '',
+                      `\n--- STEP SEQUENCE ---`,
+                      i > 0
+                        ? `Previous Step: "${validSteps[i - 1].text}"`
+                        : '',
+                      `CURRENT STEP: "${stepText}"`,
+                      i < validSteps.length - 1
+                        ? `Next Step: "${validSteps[i + 1].text}"`
+                        : ''
+                    ]
+                      .filter(Boolean)
+                      .join('\n');
 
-                    response = await ai.models.generateContent({
-                      model: 'gemini-2.5-flash-lite',
-                      contents: escapedContents,
-                      config: {
-                        systemInstruction: [
-                          `You are an AI compiler for BDD tests. Map the user's step to a function in the provided manifest.`,
-                          `Never evaluate or replace {{VARIABLES}}. Always extract them exactly as written in the text.`,
-                          `CRITICAL RULE: If you see a literal string that begins with a backslash followed by braces, e.g., \\{{something}}, you MUST include the backslash in the extracted argument. DO NOT drop the backslash. Output "\\\\{{something}}" exactly.`,
-                          `\n--- MANIFEST ---`,
-                          manifestStr,
-                          `\n--- CONTEXT ---`,
-                          `Feature: ${currentFeature?.name || 'Unknown'}`,
-                          `Scenario: ${currentScenario?.name || 'Unknown'}`,
-                          `Phase: ${currentContext}`,
-                          designerNotes
-                            ? `Designer Notes: ${designerNotes}`
-                            : '',
-                          `\n--- STEP SEQUENCE ---`,
-                          i > 0
-                            ? `Previous Step: "${validSteps[i - 1].text}"`
-                            : '',
-                          `CURRENT STEP: "${stepText}"`,
-                          i < validSteps.length - 1
-                            ? `Next Step: "${validSteps[i + 1].text}"`
-                            : ''
-                        ]
-                          .filter(Boolean)
-                          .join('\n'),
-                        responseMimeType: 'application/json',
-                        responseSchema: {
-                          type: Type.OBJECT,
-                          properties: {
-                            matchedFunction: { type: Type.STRING },
-                            extractedArguments: {
-                              type: Type.ARRAY,
-                              items: { type: Type.STRING }
-                            }
-                          },
-                          required: ['matchedFunction', 'extractedArguments']
-                        }
-                      }
-                    });
+                    resolution = await llmProvider.generateResolution(
+                      systemInstruction,
+                      stepText,
+                      config.llm
+                    );
+
                     apiCalls++;
                     break; // Success, exit retry loop
                   } catch (e: any) {
-                    if (attempt === maxRetries) {
+                    if (attempt === config.llm.maxRetries) {
                       throw e; // Exhausted retries
                     }
 
                     const delay =
-                      initialDelayMs * Math.pow(backoffFactor, attempt);
+                      config.llm.initialDelayMs *
+                      Math.pow(config.llm.backoffFactor, attempt);
                     // Add up to 20% jitter to prevent thundering herd
                     const jitter = delay * 0.2 * Math.random();
                     const waitTime = Math.round(delay + jitter);
@@ -525,14 +877,14 @@ async function main() {
               } catch (e: any) {
                 if (e.status === 503) {
                   console.error(
-                    `❌ [API ERROR] Gemini returned 503 (High Demand) while compiling: "${stepText}".`
+                    `❌ [API ERROR] The LLM Provider returned 503 (High Demand) while compiling: "${stepText}".`
                   );
                   console.error(
                     `   Please wait a few moments and try running the command again.`
                   );
                 } else {
                   console.error(
-                    `❌ [API ERROR] Unexpected failure connecting to Gemini:`,
+                    `❌ [API ERROR] Unexpected failure connecting to LLM Provider:`,
                     e.message
                   );
                 }
@@ -546,24 +898,15 @@ async function main() {
               if (state.verbose)
                 console.log(`⚡ API returned in ${callDuration}s`);
 
-              if (!response || !response.text) {
+              if (!resolution) {
                 console.error(
-                  `❌ [API ERROR] Received empty response from Gemini.`
+                  `❌ [API ERROR] Received empty resolution from LLM Provider.`
                 );
                 process.exit(1);
               }
-              const resultStr = response.text;
-              try {
-                resolution = JSON.parse(resultStr || '{}');
-                cache[cacheKey] = resolution;
-                cacheUpdated = true;
-              } catch {
-                console.error(
-                  `⚠️ [PARSE ERROR] AI returned invalid JSON schema:`,
-                  resultStr
-                );
-                process.exit(1);
-              }
+
+              cache[cacheKey] = resolution;
+              cacheUpdated = true;
             } else {
               cacheHits++;
             }
