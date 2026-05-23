@@ -15,6 +15,7 @@ services:
       dockerfile: Dockerfile.test
     environment:
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - PLAYWRIGHT_VERBOSE=${PLAYWRIGHT_VERBOSE:-}
       - TEST_BASE_URL=http://demo-app:5173
       - TEST_DYNAMIC_PATH=${TEST_DYNAMIC_PATH:-}
