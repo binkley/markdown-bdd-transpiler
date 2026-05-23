@@ -78,6 +78,9 @@ This interactive script will:
 - Auto-install the necessary Vercel AI SDK provider adapter (e.g.,
   `@ai-sdk/openai`).
 
+_Tip: To change provider or model, you an edit `bdd.config.json` or you can
+rerun `npx markdown-bdd init`._
+
 ### 3. CI/CD Automation (Headless Setup)
 
 If you are automating the setup in a CI/CD pipeline, you can bypass the
@@ -147,8 +150,8 @@ targeting options, use the help flag:
 npx markdown-bdd --help
 ```
 
-_(Tip: We recommend adding `"pretest": "markdown-bdd"` to your `package.json`
-scripts)._
+_Tip: We recommend adding `"pretest": "markdown-bdd"` to your `package.json`
+scripts._
 
 ---
 

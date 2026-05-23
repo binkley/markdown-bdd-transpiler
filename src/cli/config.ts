@@ -137,21 +137,6 @@ Arguments:
     }
   }
 
-  // Graceful migration check
-  if (fileConfig.gemini && !fileConfig.llm) {
-    console.warn(
-      `⚠️ [WARNING] The "gemini" block in ${argv.config} is deprecated.`
-    );
-    console.warn(
-      `Please update your config to use the explicit "llm" block.`
-    );
-    fileConfig.llm = {
-      provider: 'gemini',
-      model: 'gemini-2.5-flash-lite',
-      ...fileConfig.gemini
-    };
-  }
-
   if (!fileConfig.llm) {
     console.error(
       `❌ [ERROR] Missing required 'llm' configuration block in ${argv.config}.`
