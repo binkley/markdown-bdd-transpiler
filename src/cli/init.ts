@@ -133,6 +133,7 @@ export async function runInitCommand(options: InitOptions) {
       llm: {
         provider,
         model,
+        concurrency: 5,
         maxRetries: 3,
         initialDelayMs: 1000,
         backoffFactor: 2.0

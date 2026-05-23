@@ -4,6 +4,7 @@ export interface LLMConfig {
   maxRetries: number;
   initialDelayMs: number;
   backoffFactor: number;
+  concurrency?: number;
 }
 
 export interface TranspilerConfig {

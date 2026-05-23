@@ -27,6 +27,7 @@ export async function loadConfig(): Promise<ExecutionState> {
       'setup-file': 'setupFile',
       'llm-provider': 'llm.provider',
       'llm-model': 'llm.model',
+      'llm-concurrency': 'llm.concurrency',
       'llm-max-retries': 'llm.maxRetries',
       'llm-initial-delay-ms': 'llm.initialDelayMs',
       'llm-backoff-factor': 'llm.backoffFactor'
@@ -97,6 +98,7 @@ Options:
   --setup-injection <code>          Raw string of code injected into every generated test
   --llm-provider <string>           AI provider (e.g., anthropic, gemini, openai)
   --llm-model <string>              Specific AI model (e.g., gemini-2.5-flash-lite)
+  --llm-concurrency <number>        Max parallel AI requests (default: 5)
   --llm-max-retries <number>        Maximum API retries on failure (default: 3)
   --llm-initial-delay-ms <ms>       Base delay before the first retry (default: 1000)
   --llm-backoff-factor <number>     Exponential multiplier for each retry (default: 2.0)
@@ -165,6 +167,7 @@ Arguments:
     llm: {
       provider: argv['llm.provider'] ?? fileConfig.llm.provider,
       model: argv['llm.model'] ?? fileConfig.llm.model,
+      concurrency: argv['llm.concurrency'] ?? fileConfig.llm.concurrency ?? 5,
       maxRetries: argv['llm.maxRetries'] ?? fileConfig.llm.maxRetries ?? 3,
       initialDelayMs:
         argv['llm.initialDelayMs'] ?? fileConfig.llm.initialDelayMs ?? 1000,

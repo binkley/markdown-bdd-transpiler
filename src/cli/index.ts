@@ -103,7 +103,6 @@ export async function main() {
       }
     }
 
-    // 2. Resolve steps via LLM
     const { apiCalls } = await resolveFeatures(
       features,
       manifestStr,
