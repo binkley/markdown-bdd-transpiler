@@ -85,9 +85,9 @@ class GeminiProvider implements LLMProvider {
   private ai: GoogleGenAI;
 
   constructor() {
-    if (!process.env.GOOGLE_API_KEY) {
+    if (!process.env.GOOGLE_API_KEY && !process.env.GEMINI_API_KEY) {
       console.error(
-        `❌ [ERROR] Missing required environment variable: GOOGLE_API_KEY.`
+        `❌ [ERROR] Missing required environment variable: GOOGLE_API_KEY or GEMINI_API_KEY.`
       );
       console.error(
         `   To use the Gemini provider, you must export your API key before running the transpiler.`
