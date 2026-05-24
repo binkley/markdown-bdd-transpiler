@@ -503,6 +503,15 @@ static analysis, and securely publish the new version to
 
 ## 📝 TODO / Future Improvements
 
+#### Automated Changelogs (Release Orchestration)
+
+Currently, releases are handled locally via `npm run release` and GitHub
+Release UI notes. To further mature the project, evaluate integrating an
+automated release orchestrator (like Google's `release-please` GitHub Action
+or `conventional-changelog`). This would automatically maintain a physical
+`CHANGELOG.md` file in the repository, driven entirely by Conventional
+Commits, removing the need for manual release scripting.
+
 #### Expand Test Coverage to CLI Orchestration
 
 Currently, the pure-logic pipeline (`parser` and `compiler`) is strictly
