@@ -15,8 +15,8 @@ native Markdown.
 
 Traditional BDD frameworks (like Cucumber) often suffer from "step-definition
 bloat," requiring extensive engineering work to map rigid phrases to code via
-Regex. This project solves that by utilizing the **Google Gen AI SDK
-(`gemini-2.5-flash`)** as a semantic translation layer at compile-time. It
+Regex.' This project solves that by asking an AI to work out the correct test
+code from the Markdown as a semantic translation layer at compile-time. It
 maps human language variations to a standardized UI action manifest natively
 executed by **Playwright** and **Vitest**.
 
