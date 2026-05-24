@@ -141,11 +141,11 @@ function npm_version() {
 }
 
 log_step "🎯 Validating for release..."
-VALIDATE_FLAGS=("--push")
-if $quiet; then VALIDATE_FLAGS=("--push" "--quiet"); fi
-if $verbose; then VALIDATE_FLAGS=("--push" "--verbose"); fi
+VALIDATE_FLAGS=()
+if $quiet; then VALIDATE_FLAGS=("--" "--quiet"); fi
+if $verbose; then VALIDATE_FLAGS=("--" "--verbose"); fi
 
-$run ./validate.sh "${VALIDATE_FLAGS[@]}"
+$run npm run validate:push "${VALIDATE_FLAGS[@]}"
 # Because of 'set -e' at top, this bails out if validation fails before we
 # call either npm or git.
 
@@ -154,7 +154,7 @@ npm_version
 
 log_step "📦 Pushing commit and tag (v$new_version) to origin..."
 # Tell git to skip pre-push hook since we did this manually above with
-# ./validate.sh.
+# npm run validate:push.
 if $quiet; then
   $run git push --follow-tags --no-verify > /dev/null 2>&1
 else
