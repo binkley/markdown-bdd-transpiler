@@ -510,6 +510,23 @@ unit test natively due to its heavy reliance on global state (`process.argv`,
    `child_process.execSync` against a `test-fixtures/` directory to validate
    the CLI output and exit codes precisely as a user would experience them.
 
+#### Pluggable Test Framework Emitters
+
+Currently, the transpiler hardcodes Playwright test generation syntax
+(`test.describe`, `test.step`). To increase adoption, the `emitPlaywright`
+logic should be abstracted into a generic `Emitter` interface. This would
+allow consumers to specify a `--framework` flag to target alternative E2E
+ecosystems (e.g., Cypress, WebdriverIO, Puppeteer).
+
+#### Prompt Debugging & Dry Runs (Observability)
+
+When the AI hallucinates or maps a step incorrectly, maintainers currently
+lack visibility into the exact textual context sent to the LLM. Implementing a
+`--dry-run` or `--dump-prompts` feature that saves the templated payloads to
+`.generated/prompts/` would massively improve observability, allowing
+developers to manually inspect and tune their `manifest.json` or Designer
+Notes.
+
 #### Supply Chain Security (Socket.dev)
 
 Re-evaluate integrating the `@socketsecurity/cli` for advanced supply chain
