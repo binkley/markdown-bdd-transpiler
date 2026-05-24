@@ -45,9 +45,10 @@ executed by **Playwright** and **Vitest**.
 - **Precision Traceability:** Every test execution and compilation warning
   points directly to the exact file and line number in your Markdown source,
   eliminating the need to debug generated code.
-- **Production-Grade Transpiler:** Structured compilation logging, API
-  performance profiling, and an enforced "clean state" architecture that
-  automatically deletes stale generated tests.
+- **Production-Grade Transpiler:** Structured compilation logging, concurrent
+  API request orchestration (`p-limit`), high-demand automated retries, and an
+  enforced "clean state" architecture that automatically deletes stale generated
+  tests.
 
 ---
 
