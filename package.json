@@ -44,7 +44,8 @@
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
     "unist-util-visit": "^5.1.0",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "zod-to-json-schema": "^3.25.2"
   },
   "peerDependencies": {
     "@ai-sdk/anthropic": "^1.1.0",
@@ -84,6 +85,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "postbuild": "tsx scripts/generate-schema.js",
     "demo": "tsx demo-app.ts",
     "format": "prettier --write .",
     "lint": "npm run lint:js && npm run lint:sh",

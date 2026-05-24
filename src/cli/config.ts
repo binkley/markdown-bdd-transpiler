@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import mri from 'mri';
 import { runInitCommand } from './init.js';
+import { transpilerConfigSchema } from './schema.js';
 import type {
   ExecutionState,
   TranspilerConfig,
@@ -121,14 +122,6 @@ Arguments:
     process.exit(0);
   }
 
-  const defaultConfig: Partial<TranspilerConfig> = {
-    testDir: 'tests',
-    outDir: '.generated',
-    manifestPath: 'manifest.json',
-    cachePath: 'bdd-cache.json',
-    frameworkImport: '@binkley/markdown-bdd-transpiler/framework'
-  };
-
   let fileConfig: any = {};
   try {
     const configContent = await fs.readFile(
@@ -146,45 +139,48 @@ Arguments:
     }
   }
 
-  if (!fileConfig.llm) {
+  // Merge CLI overrides over file config
+  const mergedConfig: Record<string, any> = { ...fileConfig };
+
+  if (argv.testDir) mergedConfig.testDir = argv.testDir;
+  if (argv.outDir) mergedConfig.outDir = argv.outDir;
+  if (argv.manifestPath) mergedConfig.manifestPath = argv.manifestPath;
+  if (argv.cachePath) mergedConfig.cachePath = argv.cachePath;
+  if (argv.frameworkImport)
+    mergedConfig.frameworkImport = argv.frameworkImport;
+  if (argv.setupInjection) mergedConfig.setupInjection = argv.setupInjection;
+  if (argv.setupFile) mergedConfig.setupFile = argv.setupFile;
+
+  // Handle nested LLM merges safely
+  if (!mergedConfig.llm) mergedConfig.llm = {};
+  if (argv['llm.provider']) mergedConfig.llm.provider = argv['llm.provider'];
+  if (argv['llm.model']) mergedConfig.llm.model = argv['llm.model'];
+  if (argv['llm.concurrency'])
+    mergedConfig.llm.concurrency = Number(argv['llm.concurrency']);
+  if (argv['llm.maxRetries'])
+    mergedConfig.llm.maxRetries = Number(argv['llm.maxRetries']);
+  if (argv['llm.initialDelayMs'])
+    mergedConfig.llm.initialDelayMs = Number(argv['llm.initialDelayMs']);
+  if (argv['llm.backoffFactor'])
+    mergedConfig.llm.backoffFactor = Number(argv['llm.backoffFactor']);
+
+  // Validate the merged result against the Zod schema
+  const parseResult = transpilerConfigSchema.safeParse(mergedConfig);
+
+  if (!parseResult.success) {
     console.error(
-      `❌ [ERROR] Missing required 'llm' configuration block in ${argv.config}.`
+      `❌ [ERROR] Configuration validation failed in ${argv.config}.`
     );
-    console.error(
-      `Please explicitly define your LLM provider and model. Example:\n{\n  "llm": {\n    "provider": "gemini",\n    "model": "gemini-2.5-flash-lite",\n    "maxRetries": 3,\n    "initialDelayMs": 1000,\n    "backoffFactor": 2.0\n  }\n}`
-    );
+    for (const issue of parseResult.error.issues) {
+      const pathStr =
+        issue.path.length > 0 ? `${issue.path.join('.')}: ` : '';
+      console.error(`   - ${pathStr}${issue.message}`);
+    }
     process.exit(1);
   }
 
-  const finalConfig: TranspilerConfig = {
-    testDir: argv.testDir ?? fileConfig.testDir ?? defaultConfig.testDir!,
-    outDir: argv.outDir ?? fileConfig.outDir ?? defaultConfig.outDir!,
-    manifestPath:
-      argv.manifestPath ??
-      fileConfig.manifestPath ??
-      defaultConfig.manifestPath!,
-    cachePath:
-      argv.cachePath ?? fileConfig.cachePath ?? defaultConfig.cachePath!,
-    frameworkImport:
-      argv.frameworkImport ??
-      fileConfig.frameworkImport ??
-      defaultConfig.frameworkImport!,
-    setupInjection: argv.setupInjection ?? fileConfig.setupInjection,
-    setupFile: argv.setupFile ?? fileConfig.setupFile,
-    llm: {
-      provider: argv['llm.provider'] ?? fileConfig.llm.provider,
-      model: argv['llm.model'] ?? fileConfig.llm.model,
-      concurrency: argv['llm.concurrency'] ?? fileConfig.llm.concurrency ?? 5,
-      maxRetries: argv['llm.maxRetries'] ?? fileConfig.llm.maxRetries ?? 3,
-      initialDelayMs:
-        argv['llm.initialDelayMs'] ?? fileConfig.llm.initialDelayMs ?? 1000,
-      backoffFactor:
-        argv['llm.backoffFactor'] ?? fileConfig.llm.backoffFactor ?? 2.0
-    }
-  };
-
   return {
-    config: finalConfig,
+    config: parseResult.data as TranspilerConfig,
     verbose: !!argv.verbose,
     quiet: !!argv.quiet || process.env.TRANSPILER_QUIET === 'true',
     targetFiles: argv._
