@@ -187,6 +187,13 @@ npm run demo &
 npm test
 ```
 
+You can see a full list of NPM scripts with help:
+
+```bash
+npm run help
+# Or npm run ?
+```
+
 ### 3. Docker Execution (Recommended)
 
 To run the application and the test suite in a clean, isolated environment,

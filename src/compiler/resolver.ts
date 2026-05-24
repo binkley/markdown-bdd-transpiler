@@ -1,4 +1,4 @@
-import pLimit from 'p-limit';
+import type { LimitFunction } from 'p-limit';
 import type { Feature, LLMProvider, LLMConfig } from '../types/index.js';
 import type { CacheManager } from './cache.js';
 
@@ -8,13 +8,10 @@ export async function resolveFeatures(
   llmProvider: LLMProvider,
   llmConfig: LLMConfig,
   cache: CacheManager,
+  limit: LimitFunction,
   options: { verbose: boolean; quiet: boolean; baseName: string }
 ): Promise<{ apiCalls: number }> {
   let apiCalls = 0;
-
-  // Create a concurrency limiter based on config, defaulting to 5
-  const limit = pLimit(llmConfig.concurrency || 5);
-
   for (const feature of features) {
     for (const scenario of feature.scenarios) {
       // We will map over the steps and process them concurrently

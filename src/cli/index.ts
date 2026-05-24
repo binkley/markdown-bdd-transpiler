@@ -5,6 +5,7 @@ import { getLLMProvider } from '../llm/factory.js';
 import { CacheManager } from '../compiler/cache.js';
 import { parseMarkdown } from '../parser/ast.js';
 import { resolveFeatures } from '../compiler/resolver.js';
+import pLimit from 'p-limit';
 import { emitPlaywright } from '../compiler/playwright.js';
 
 export async function main() {
@@ -61,8 +62,6 @@ export async function main() {
   const isVerbose =
     process.env.TRANSPILER_VERBOSE === 'true' || state.verbose;
 
-  let totalApiCalls = 0;
-
   // Let's also load setupFile if needed
   let setupContent = '';
   if (config.setupFile) {
@@ -79,7 +78,10 @@ export async function main() {
     }
   }
 
-  for (const mdFile of mdFiles) {
+  // Create the global concurrency limiter
+  const limit = pLimit(config.llm.concurrency || 5);
+
+  const filePromises = mdFiles.map(async (mdFile) => {
     const filePath = path.resolve(process.cwd(), mdFile);
     const baseName = path.basename(mdFile);
 
@@ -109,9 +111,9 @@ export async function main() {
       llmProvider,
       config.llm,
       cache,
+      limit,
       { verbose: isVerbose, quiet: state.quiet, baseName }
     );
-    totalApiCalls += apiCalls;
 
     // 3. Emit Playwright code
     const { specCode, warnings: emitWarnings } = emitPlaywright(
@@ -131,7 +133,13 @@ export async function main() {
       const outPath = path.join(outDir, `${baseName}.test.ts`);
       await fs.writeFile(outPath, specCode);
     }
-  }
+
+    return apiCalls;
+  });
+
+  // Execute all files concurrently
+  const apiCallResults = await Promise.all(filePromises);
+  const totalApiCalls = apiCallResults.reduce((sum, calls) => sum + calls, 0);
 
   await cache.save();
 
