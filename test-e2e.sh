@@ -5,7 +5,7 @@ set -e
 
 function print_usage() {
   cat << EOU
-Usage: $0 [-h|--help] [-v|--verbose]
+Usage: $0 [-h|--help] [-q|--quiet] [-v|--verbose]
 EOU
 }
 
@@ -17,18 +17,22 @@ Runs the transpiler and executes the generated tests.
 
 Options:
   -h, --help       Print this help and exit
+  -q, --quiet      Suppress non-error output
   -v, --verbose    Verbose logging (shows transpiler logs and Playwright test steps)
 EOH
 }
 
 verbose=false
-while getopts :hv-: opt; do
+quiet=false
+
+while getopts :hqv-: opt; do
   [[ $opt == - ]] && opt=${OPTARG%%=*} OPTARG=${OPTARG#*=}
   case $opt in
     h | help)
       print_help
       exit 0
       ;;
+    q | quiet) quiet=true ;;
     v | verbose) verbose=true ;;
     *)
       print_usage >&2
@@ -38,6 +42,11 @@ while getopts :hv-: opt; do
 done
 shift $((OPTIND - 1))
 
+if $quiet && $verbose; then
+  echo "❌ Error: Cannot use --quiet and --verbose simultaneously." >&2
+  exit 2
+fi
+
 case $# in
   0) ;;
   *)
@@ -46,20 +55,40 @@ case $# in
     ;;
 esac
 
+function log_step() {
+  if ! $quiet; then echo -e "$1"; fi
+}
+
+function log_debug() {
+  if $verbose; then echo -e "   🔍 $1"; fi
+}
+
+DOCKER_FLAGS=""
 if $verbose; then
   export PLAYWRIGHT_VERBOSE=true
   export TRANSPILER_VERBOSE=true
-  echo "Verbose mode enabled."
+  log_debug "Verbose mode enabled."
+elif $quiet; then
+  export PLAYWRIGHT_REPORTER="dot"
+  export TRANSPILER_QUIET=true
+  DOCKER_FLAGS="--quiet"
 fi
 
 # Ensure the environment is cleanly torn down when the script exits (success
 # or failure)
-trap 'echo -e "\nCleaning up test environment..."; docker compose down' EXIT
+trap 'log_step "\nCleaning up test environment..."; docker compose down > /dev/null 2>&1' EXIT
 
-echo "Building Docker Compose test environment..."
-docker compose build
+log_step "Building Docker Compose test environment..."
+if $quiet; then
+  docker compose build --quiet > /dev/null 2>&1
+else
+  docker compose build
+fi
 
-echo -e "\nRunning test suite..."
-# 'run' will automatically start the demo-app dependency and wait for it to be
-# healthy
-docker compose run --rm test-runner
+log_step "\nRunning test suite..."
+# 'run' will automatically start the demo-app dependency and wait for it to be healthy
+if $quiet; then
+  docker compose run $DOCKER_FLAGS --rm test-runner
+else
+  docker compose run --rm test-runner
+fi

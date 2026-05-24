@@ -501,7 +501,7 @@ Currently, the pure-logic pipeline (`parser` and `compiler`) is strictly
 unit-tested using the native `node:test` runner with >95% coverage. However,
 the CLI orchestration layer (`src/cli/config.ts`, `init.ts`) is difficult to
 unit test natively due to its heavy reliance on global state (`process.argv`,
-`process.exit`, file system reads).  Future iterations should explore:
+`process.exit`, file system reads). Future iterations should explore:
 
 1. **Functional Core, Imperative Shell:** Refactoring the config layer to
    return typed `Result` objects rather than calling `process.exit()`,

@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './.generated',
   timeout: 30000,
   fullyParallel: true,
-  reporter: 'list',
+  reporter: process.env.PLAYWRIGHT_REPORTER || 'list',
   use: {
     // Fail tests quickly if action takes too long
     actionTimeout: 10000,

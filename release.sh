@@ -5,7 +5,7 @@ set -e
 
 function print_usage() {
   cat << EOU
-Usage: $0 [-h|--help] [-n|--dry-run] [-y|--yes] <patch|minor|major>
+Usage: $0 [-h|--help] [-n|--dry-run] [-y|--yes] [-q|--quiet] [-v|--verbose] <patch|minor|major>
 EOU
 }
 
@@ -24,13 +24,17 @@ Options:
   -h, --help      Print this help and exit
   -n, --dry-run   Simulate the release process without making any changes or pushing.
   -y, --yes       Skip confirmation prompt and proceed immediately.
+  -q, --quiet     Suppress non-error output
+  -v, --verbose   Show detailed execution logs
 EOH
 }
 
 confirm=true
 dry_run=false
+quiet=false
+verbose=false
 
-while getopts :hny-: opt; do
+while getopts :hnyqv-: opt; do
   [[ $opt == - ]] && opt=${OPTARG%%=*} OPTARG=${OPTARG#*=}
   case $opt in
     h | help)
@@ -44,6 +48,12 @@ while getopts :hny-: opt; do
     y | yes)
       confirm=false
       ;;
+    q | quiet)
+      quiet=true
+      ;;
+    v | verbose)
+      verbose=true
+      ;;
     *)
       print_usage >&2
       exit 2
@@ -51,6 +61,11 @@ while getopts :hny-: opt; do
   esac
 done
 shift $((OPTIND - 1))
+
+if $quiet && $verbose; then
+  echo "❌ Error: Cannot use --quiet and --verbose simultaneously." >&2
+  exit 2
+fi
 
 case $# in
   1)
@@ -71,10 +86,14 @@ case $# in
     ;;
 esac
 
+function log_step() {
+  if ! $quiet; then echo "$1"; fi
+}
+
 run=
 if $dry_run; then
   run="echo"
-  echo "🔍 DRY RUN. No changes will be made."
+  log_step "🔍 DRY RUN. No changes will be made."
 fi
 
 # Ensure the working directory is clean before bumping
@@ -115,23 +134,31 @@ fi
 function npm_version() {
   local message="Release and publish NPM version '%s'"
   if $dry_run; then
-    echo "npm --message \"$message\" --sign-git-tag version \"$release_type"\"
+    log_step "npm --message \"$message\" --sign-git-tag version \"$release_type"\"
   else
     npm --message "$message" --sign-git-tag version "$release_type" > /dev/null
   fi
 }
 
-echo "🎯 Validating for release..."
-$run ./validate.sh --push
+log_step "🎯 Validating for release..."
+VALIDATE_FLAGS=("--push")
+if $quiet; then VALIDATE_FLAGS=("--push" "--quiet"); fi
+if $verbose; then VALIDATE_FLAGS=("--push" "--verbose"); fi
+
+$run ./validate.sh "${VALIDATE_FLAGS[@]}"
 # Because of 'set -e' at top, this bails out if validation fails before we
 # call either npm or git.
 
-echo "🚀 Bumping '$release_type' release ($old_version -> $new_version)..."
+log_step "🚀 Bumping '$release_type' release ($old_version -> $new_version)..."
 npm_version
 
-echo "📦 Pushing commit and tag (v$new_version) to origin..."
+log_step "📦 Pushing commit and tag (v$new_version) to origin..."
 # Tell git to skip pre-push hook since we did this manually above with
 # ./validate.sh.
-$run git push --follow-tags --no-verify
+if $quiet; then
+  $run git push --follow-tags --no-verify > /dev/null 2>&1
+else
+  $run git push --follow-tags --no-verify
+fi
 
-echo "✅ Release v$new_version triggered! GitHub Actions will now build and publish to NPM."
+log_step "✅ Release v$new_version triggered! GitHub Actions will now build and publish to NPM."

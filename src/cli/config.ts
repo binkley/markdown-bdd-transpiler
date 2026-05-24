@@ -35,6 +35,13 @@ export async function loadConfig(): Promise<ExecutionState> {
     default: { config: 'bdd.config.json' }
   });
 
+  if (argv.quiet && argv.verbose) {
+    console.error(
+      '❌ [ERROR] Cannot use --quiet and --verbose simultaneously.'
+    );
+    process.exit(2);
+  }
+
   if (args[0] === 'init') {
     if (argv.help) {
       console.log(`
@@ -179,7 +186,7 @@ Arguments:
   return {
     config: finalConfig,
     verbose: !!argv.verbose,
-    quiet: !!argv.quiet,
+    quiet: !!argv.quiet || process.env.TRANSPILER_QUIET === 'true',
     targetFiles: argv._
   };
 }

@@ -5,7 +5,7 @@ set -e
 
 function print_usage() {
   cat << EOU
-Usage: $0 [-h|--help] [-c|--commit] [-p|--push]
+Usage: $0 [-h|--help] [-c|--commit] [-p|--push] [-q|--quiet] [-v|--verbose]
 EOU
 }
 
@@ -19,13 +19,17 @@ Options:
   -h, --help      Print this help and exit
   -c, --commit    Run fast checks (Formatting, JS/SH Linting, Type-checking, Unit Tests).
   -p, --push      Run full checks (Fast checks + Dockerized E2E Playwright tests).
+  -q, --quiet     Suppress non-error output.
+  -v, --verbose   Show detailed execution logs.
 EOH
 }
 
 run_fast=false
 run_full=false
+quiet=false
+verbose=false
 
-while getopts :hcp-: opt; do
+while getopts :hcpqv-: opt; do
   [[ $opt == - ]] && opt=${OPTARG%%=*} OPTARG=${OPTARG#*=}
   case $opt in
     h | help)
@@ -39,6 +43,12 @@ while getopts :hcp-: opt; do
       run_fast=true
       run_full=true
       ;;
+    q | quiet)
+      quiet=true
+      ;;
+    v | verbose)
+      verbose=true
+      ;;
     *)
       print_usage >&2
       exit 2
@@ -47,36 +57,67 @@ while getopts :hcp-: opt; do
 done
 shift $((OPTIND - 1))
 
+if $quiet && $verbose; then
+  echo "❌ Error: Cannot use --quiet and --verbose simultaneously." >&2
+  exit 2
+fi
+
 if ! $run_fast && ! $run_full; then
   echo "❌ Error: You must specify an action flag (-c or -p)." >&2
   print_usage >&2
   exit 2
 fi
 
-echo "🔍 Starting validation sequence..."
+function log_step() {
+  if ! $quiet; then echo "$1"; fi
+}
+
+log_step "🔍 Starting validation sequence..."
+
+# Determine tool flags
+PRETTIER_FLAGS=("--check" ".")
+ESLINT_FLAGS=(".")
+NPM_FLAGS=()
+if $quiet; then
+  PRETTIER_FLAGS=("--check" "--log-level" "silent" ".")
+  ESLINT_FLAGS=("--quiet" ".")
+  NPM_FLAGS=("--silent")
+elif $verbose; then
+  PRETTIER_FLAGS=("--check" "--log-level" "debug" ".")
+  ESLINT_FLAGS=("--debug" ".")
+  NPM_FLAGS=("--loglevel" "verbose")
+fi
 
 if $run_fast; then
-  echo "🧹 Checking formatting..."
-  npx prettier --check .
+  log_step "🧹 Checking formatting..."
+  npx prettier "${PRETTIER_FLAGS[@]}"
 
-  echo "🚨 Linting code..."
-  npm run lint:js
+  log_step "🚨 Linting code..."
+  npx eslint "${ESLINT_FLAGS[@]}"
 
-  echo "ʦ Type-checking..."
-  npm run type-check
+  log_step "ʦ Type-checking..."
+  npm run type-check "${NPM_FLAGS[@]}"
 
-  echo "🐚 Linting shell scripts..."
-  npm run lint:sh
+  log_step "🐚 Linting shell scripts..."
+  npm run lint:sh "${NPM_FLAGS[@]}"
 
-  echo "🧪 Running Unit Tests..."
-  npm run test:unit
+  log_step "🧪 Running Unit Tests..."
+  npm run test:unit "${NPM_FLAGS[@]}"
 fi
 
 if $run_full; then
-  echo "🐳 Running E2E tests in Docker..."
+  log_step "🐳 Running E2E tests in Docker..."
   export TEST_DYNAMIC_PATH="/login"
   export TEST_DYNAMIC_USER="frontend_wizard"
-  npm run test:e2e
+
+  E2E_FLAGS=()
+  if $quiet; then
+    E2E_FLAGS=("--quiet")
+  elif $verbose; then
+    E2E_FLAGS=("--verbose")
+  fi
+
+  ./test-e2e.sh "${E2E_FLAGS[@]}"
 fi
 
-echo "✅ All checks passed successfully!"
+log_step "✅ All checks passed successfully!"
