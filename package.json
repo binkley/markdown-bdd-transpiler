@@ -90,8 +90,12 @@
     "lint:js": "eslint .",
     "lint:sh": "shellcheck *.sh",
     "prepare": "husky",
-    "pretest": "npm run build && node ./dist/transpile.js",
-    "test": "playwright test",
+    "transpile": "node ./dist/transpile.js",
+    "pretest:playwright": "npm run build && npm run transpile",
+    "test:playwright": "playwright test",
+    "test:unit": "node --experimental-test-coverage --test-coverage-lines=97 --test-coverage-functions=95 --import tsx --test 'src/**/*.spec.ts'",
+    "test:e2e": "./test-e2e.sh",
+    "test": "npm run test:unit && npm run test:e2e",
     "type-check": "tsc --noEmit"
   }
 }

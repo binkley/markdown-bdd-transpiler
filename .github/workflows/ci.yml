@@ -26,7 +26,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        # Only needed for static checks; run.sh handles its own Docker builds
+        # Only needed for static checks; test-e2e.sh handles its own Docker builds
         run: npm ci
 
       - name: Format Check
@@ -47,7 +47,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TEST_DYNAMIC_PATH: '/login'
           TEST_DYNAMIC_USER: 'frontend_wizard'
-        run: ./run.sh
+        run: ./test-e2e.sh
 
       - name: Upload Test Artifacts
         if: failure()

@@ -9,4 +9,4 @@ RUN npm ci
 # Copy the rest of the workspace (including transpile.ts, standard-ui-steps, and BDD files)
 COPY . .
 
-CMD ["npm", "test"]
+CMD ["npm", "run", "test:playwright"]

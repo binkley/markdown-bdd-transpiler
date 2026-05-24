@@ -122,7 +122,7 @@ function npm_version() {
 }
 
 echo "🎯 Validating for release..."
-$run ./validate.sh
+$run ./validate.sh --push
 # Because of 'set -e' at top, this bails out if validation fails before we
 # call either npm or git.
 

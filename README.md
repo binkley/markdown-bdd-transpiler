@@ -193,10 +193,10 @@ To run the application and the test suite in a clean, isolated environment,
 simply run:
 
 ```bash
-./run.sh
+./test-e2e.sh
 ```
 
-Use `./run.sh --help` for help.<br/>
+Use `./test-e2e.sh --help` for help.
 
 #### Diagnostic Logging (`--verbose`)
 
@@ -204,7 +204,7 @@ If you need deeper insight into the compilation process, use the `--verbose`
 flag:
 
 ```bash
-./run.sh --verbose
+./test-e2e.sh --verbose
 # Or ./validate.sh --verbose
 ```
 
@@ -263,7 +263,7 @@ Whenever you run `git push`, the hook automatically executes the
 1. **Formatting:** `npx prettier --check .`
 2. **Linting:** `npm run lint`
 3. **Type-Checking:** `npm run type-check`
-4. **E2E Tests:** Executes `./run.sh` inside Docker.
+4. **E2E Tests:** Executes `./test-e2e.sh` inside Docker.
 
 If any of these steps fail, the push is aborted.
 
@@ -443,6 +443,8 @@ While the `init` script provides a great out-of-the-box setup, the framework is 
 - **`llm`**: Configures the third-party AI provider behavior.
   - **`provider`**: The vendor to use (`gemini`, `openai`, or `anthropic`).
   - **`model`**: The specific LLM version to use (e.g., `gpt-4o-mini`).
+  - **`concurrency`**: Max parallel network requests to the LLM. (Default:
+    `5`)
   - **`maxRetries`**: Maximum number of times to retry a failed API call
     before crashing. (Default: `3`)
   - **`initialDelayMs`**: Base delay before the first retry. (Default: `1000`)
@@ -456,11 +458,12 @@ _Note: All configuration options can also be overridden via CLI flags (e.g.,
 
 ## 🛠️ Development Commands
 
-- `npm run type-check`: Validates TypeScript structural integrity.
-- `npm run lint`: Runs ESLint for code quality.
 - `npm run format`: Runs Prettier to standardize codebase formatting.
-- `npm run pretest`: Manually triggers the transpilation step without running
-  Vitest.
+- `npm run lint`: Runs ESLint for code quality.
+- `npm run pretest:playwright`: Manually triggers the transpilation step
+  without running Playwright.
+- `npm run test:unit`: Run the native `node:test` suite with code coverage.
+- `npm run type-check`: Validates TypeScript structural integrity.
 
 ---
 
@@ -491,6 +494,21 @@ static analysis, and securely publish the new version to
 ---
 
 ## 📝 TODO / Future Improvements
+
+#### Expand Test Coverage to CLI Orchestration
+
+Currently, the pure-logic pipeline (`parser` and `compiler`) is strictly
+unit-tested using the native `node:test` runner with >95% coverage. However,
+the CLI orchestration layer (`src/cli/config.ts`, `init.ts`) is difficult to
+unit test natively due to its heavy reliance on global state (`process.argv`,
+`process.exit`, file system reads).  Future iterations should explore:
+
+1. **Functional Core, Imperative Shell:** Refactoring the config layer to
+   return typed `Result` objects rather than calling `process.exit()`,
+   allowing native unit testing.
+2. **Blackbox E2E Tests:** Introducing a suite of tests that use
+   `child_process.execSync` against a `test-fixtures/` directory to validate
+   the CLI output and exit codes precisely as a user would experience them.
 
 #### Supply Chain Security (Socket.dev)
 
