@@ -94,15 +94,25 @@ export async function main() {
     const relativeFilePath = path.relative(process.cwd(), filePath);
 
     // 1. Parse
-    const { features, warnings: parseWarnings } = parseMarkdown(
-      content,
-      relativeFilePath
-    );
+    const {
+      features,
+      warnings: parseWarnings,
+      errors: parseErrors
+    } = parseMarkdown(content, relativeFilePath);
 
     for (const w of parseWarnings) {
       if (!state.quiet || w.includes('❌')) {
         console.warn(w);
       }
+    }
+
+    if (parseErrors.length > 0) {
+      for (const e of parseErrors) {
+        console.error(e);
+      }
+      throw new Error(
+        `Transpilation failed for ${mdFile} due to parsing errors.`
+      );
     }
 
     const { apiCalls } = await resolveFeatures(

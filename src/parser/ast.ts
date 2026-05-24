@@ -7,6 +7,7 @@ import type { Feature, Scenario, RawStep } from '../types/index.js';
 export interface ParseResult {
   features: Feature[];
   warnings: string[];
+  errors: string[];
 }
 
 function getText(node: Node): string {
@@ -25,6 +26,7 @@ export function parseMarkdown(
 ): ParseResult {
   const features: Feature[] = [];
   const warnings: string[] = [];
+  const errors: string[] = [];
 
   let currentFeature = null as Feature | null;
   let currentScenario = null as Scenario | null;
@@ -50,6 +52,11 @@ export function parseMarkdown(
   const logEvent = (line: number | string | undefined, message: string) => {
     const fileRef = line ? `${relativeFilePath}:${line}` : relativeFilePath;
     warnings.push(`⚠️ ${fileRef} - warning: ${message}`);
+  };
+
+  const logError = (line: number | string | undefined, message: string) => {
+    const fileRef = line ? `${relativeFilePath}:${line}` : relativeFilePath;
+    errors.push(`❌ ${fileRef} - error: ${message}`);
   };
 
   const checkPendingContext = () => {
@@ -154,11 +161,25 @@ export function parseMarkdown(
       for (let i = 0; i < validSteps.length; i++) {
         const step = validSteps[i];
 
-        if (/\{\{[^}]*$/.test(step.text) || /\{\{[^}]*\s/.test(step.text)) {
-          logEvent(
+        // Strip escaped variables so they don't trigger errors
+        const unescapedText = step.text.replace(/\\\{\{.*\}\}/g, '');
+
+        if (/\{\{[^}]*$/.test(unescapedText)) {
+          logError(
             step.sourceLine,
-            `Scenario "${currentScenario?.name}": Possible malformed variable in step "${step.text}". Ensure it is enclosed in double braces, e.g., {{VARIABLE_NAME}}`
+            `Scenario "${currentScenario?.name}": Unclosed variable braces in step "${step.text}". Ensure it is enclosed in double braces, e.g., {{VARIABLE_NAME}}`
           );
+        } else {
+          const variableMatches = unescapedText.matchAll(/\{\{([^}]*)\}\}/g);
+          for (const match of variableMatches) {
+            const innerText = match[1];
+            if (!/^\s*[A-Za-z0-9_]+\s*$/.test(innerText)) {
+              logError(
+                step.sourceLine,
+                `Scenario "${currentScenario?.name}": Invalid environment variable syntax in step "${step.text}". Variables must only contain letters, numbers, and underscores.`
+              );
+            }
+          }
         }
 
         if (!currentScenario) {
@@ -187,5 +208,5 @@ export function parseMarkdown(
 
   checkPendingContext();
 
-  return { features, warnings };
+  return { features, warnings, errors };
 }

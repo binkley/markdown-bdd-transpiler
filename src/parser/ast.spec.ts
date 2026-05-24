@@ -91,21 +91,25 @@ Another non-step
   assert.equal(p2.stepText, 'another valid step');
 });
 
-test('parseMarkdown warns on malformed variables', () => {
+test('parseMarkdown flags malformed variables as errors', () => {
   const markdown = `
 # Feature
 ## Scenario
 ### GIVEN
 \`\`\`bdd
 * valid {{VAR}} step
-* invalid {{VAR step
-* invalid VAR}} step
+* unclosed {{VAR step
+* invalid {{VAR-HYPHEN}} step
 \`\`\`
 `;
   const result = parseMarkdown(markdown, 'test.md');
-  assert.equal(result.warnings.length, 1);
+  assert.equal(result.errors.length, 2);
   assert.match(
-    result.warnings[0],
-    /Possible malformed variable in step "invalid \{\{VAR step"/
+    result.errors[0],
+    /Unclosed variable braces in step "unclosed \{\{VAR step"/
+  );
+  assert.match(
+    result.errors[1],
+    /Invalid environment variable syntax in step "invalid \{\{VAR-HYPHEN\}\} step"/
   );
 });
