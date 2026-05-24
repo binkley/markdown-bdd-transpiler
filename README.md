@@ -47,8 +47,8 @@ executed by **Playwright** and **Vitest**.
   eliminating the need to debug generated code.
 - **Production-Grade Transpiler:** Structured compilation logging, concurrent
   API request orchestration (`p-limit`), high-demand automated retries, and an
-  enforced "clean state" architecture that automatically deletes stale generated
-  tests.
+  enforced "clean state" architecture that automatically deletes stale
+  generated tests.
 
 ---
 
@@ -266,7 +266,8 @@ To prevent broken code from being pushed to the remote repository, this
 project utilizes a **Husky `pre-push` hook**.
 
 Whenever you run `git push`, the hook automatically executes the
-`./scripts/validate.sh` script. This script performs the following checks in sequence:
+`./scripts/validate.sh` script. This script performs the following checks in
+sequence:
 
 1. **Formatting:** `npx prettier --check .`
 2. **Linting:** `npm run lint`
@@ -407,7 +408,8 @@ parser will ignore everything outside the fences._
 
 ## ⚙️ Configuration (`bdd.config.json`)
 
-While the `init` script provides a great out-of-the-box setup, the framework is fully configurable to match your project's architecture.
+While the `init` script provides a great out-of-the-box setup, the framework
+is fully configurable to match your project's architecture.
 
 ```json
 {
