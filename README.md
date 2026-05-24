@@ -193,10 +193,10 @@ To run the application and the test suite in a clean, isolated environment,
 simply run:
 
 ```bash
-./test-e2e.sh
+./scripts/test-e2e.sh
 ```
 
-Use `./test-e2e.sh --help` for help.
+Use `./scripts/test-e2e.sh --help` for help.
 
 #### Diagnostic Logging (`--verbose`)
 
@@ -204,8 +204,8 @@ If you need deeper insight into the compilation process, use the `--verbose`
 flag:
 
 ```bash
-./test-e2e.sh --verbose
-# Or ./validate.sh --verbose
+./scripts/test-e2e.sh --verbose
+# Or ./scripts/validate.sh --verbose
 ```
 
 This outputs detailed runtime diagnostics, allowing you to track exactly which
@@ -258,12 +258,12 @@ To prevent broken code from being pushed to the remote repository, this
 project utilizes a **Husky `pre-push` hook**.
 
 Whenever you run `git push`, the hook automatically executes the
-`./validate.sh` script. This script performs the following checks in sequence:
+`./scripts/validate.sh` script. This script performs the following checks in sequence:
 
 1. **Formatting:** `npx prettier --check .`
 2. **Linting:** `npm run lint`
 3. **Type-Checking:** `npm run type-check`
-4. **E2E Tests:** Executes `./test-e2e.sh` inside Docker.
+4. **E2E Tests:** Executes `./scripts/test-e2e.sh` inside Docker.
 
 If any of these steps fail, the push is aborted.
 

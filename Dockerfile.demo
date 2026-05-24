@@ -10,7 +10,7 @@ RUN npm ci --ignore-scripts
 COPY demo-app.ts tsconfig.demo.json ./
 
 # Compile the TypeScript to JavaScript using tsconfig.demo.json
-RUN npx tsc -p tsconfig.demo.json
+RUN npx tsc --project tsconfig.demo.json
 
 EXPOSE 5173
 

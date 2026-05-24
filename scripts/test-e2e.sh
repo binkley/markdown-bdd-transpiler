@@ -74,9 +74,17 @@ elif $quiet; then
   DOCKER_FLAGS="--quiet"
 fi
 
+# Provide default dynamic data for the demo app tests
+export TEST_DYNAMIC_PATH="${TEST_DYNAMIC_PATH:-/login}"
+export TEST_DYNAMIC_USER="${TEST_DYNAMIC_USER:-frontend_wizard}"
+
 # Ensure the environment is cleanly torn down when the script exits (success
 # or failure)
-trap 'log_step "\nCleaning up test environment..."; docker compose down > /dev/null 2>&1' EXIT
+function cleanup() {
+  log_step "\nCleaning up test environment..."
+  docker compose down > /dev/null 2>&1
+}
+trap cleanup EXIT
 
 log_step "Building Docker Compose test environment..."
 if $quiet; then
@@ -86,7 +94,8 @@ else
 fi
 
 log_step "\nRunning test suite..."
-# 'run' will automatically start the demo-app dependency and wait for it to be healthy
+# 'run' will automatically start the demo-app dependency and wait for it to be
+# healthy
 if $quiet; then
   docker compose run $DOCKER_FLAGS --rm test-runner
 else

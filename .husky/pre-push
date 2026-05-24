@@ -1,1 +1,1 @@
-./validate.sh --push
+./scripts/validate.sh --push

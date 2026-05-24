@@ -47,7 +47,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TEST_DYNAMIC_PATH: '/login'
           TEST_DYNAMIC_USER: 'frontend_wizard'
-        run: ./test-e2e.sh
+        run: ./scripts/test-e2e.sh
 
       - name: Upload Test Artifacts
         if: failure()

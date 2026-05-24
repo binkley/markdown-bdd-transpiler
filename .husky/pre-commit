@@ -1,1 +1,1 @@
-./validate.sh --commit
+./scripts/validate.sh --commit

@@ -75,17 +75,17 @@ function log_step() {
 log_step "🔍 Starting validation sequence..."
 
 # Determine tool flags
-PRETTIER_FLAGS=("--check" ".")
 ESLINT_FLAGS=(".")
 NPM_FLAGS=()
+PRETTIER_FLAGS=("--check" ".")
 if $quiet; then
-  PRETTIER_FLAGS=("--check" "--log-level" "silent" ".")
   ESLINT_FLAGS=("--quiet" ".")
   NPM_FLAGS=("--silent")
+  PRETTIER_FLAGS=("--check" "--log-level" "silent" ".")
 elif $verbose; then
-  PRETTIER_FLAGS=("--check" "--log-level" "debug" ".")
   ESLINT_FLAGS=("--debug" ".")
   NPM_FLAGS=("--loglevel" "verbose")
+  PRETTIER_FLAGS=("--check" "--log-level" "debug" ".")
 fi
 
 if $run_fast; then
@@ -107,8 +107,6 @@ fi
 
 if $run_full; then
   log_step "🐳 Running E2E tests in Docker..."
-  export TEST_DYNAMIC_PATH="/login"
-  export TEST_DYNAMIC_USER="frontend_wizard"
 
   E2E_FLAGS=()
   if $quiet; then
@@ -117,7 +115,7 @@ if $run_full; then
     E2E_FLAGS=("--verbose")
   fi
 
-  ./test-e2e.sh "${E2E_FLAGS[@]}"
+  ./scripts/test-e2e.sh "${E2E_FLAGS[@]}"
 fi
 
 log_step "✅ All checks passed successfully!"
