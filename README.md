@@ -270,9 +270,12 @@ Whenever you run `git push`, the hook automatically executes the
 sequence:
 
 1. **Formatting:** `npx prettier --check .`
-2. **Linting:** `npm run lint`
+2. **Linting:** `npm run lint` (ESLint for TS, Shellcheck for bash)
 3. **Type-Checking:** `npm run type-check`
-4. **E2E Tests:** Executes `./scripts/test-e2e.sh` inside Docker.
+4. **Unit Tests:** `npm run test:unit`
+5. **E2E Tests:** Runs the full Playwright suite in Docker (`test-e2e.sh`).
+6. **Security Audit:** Runs `npm audit --audit-level=moderate` to block pushes
+   if vulnerabilities are detected in the dependency tree.
 
 If any of these steps fail, the push is aborted.
 
