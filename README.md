@@ -79,7 +79,7 @@ This interactive script will:
 - Auto-install the necessary Vercel AI SDK provider adapter (e.g.,
   `@ai-sdk/openai`).
 
-_Tip: To change provider or model, you an edit `bdd.config.json` or you can
+_Tip: To change provider or model, you can edit `bdd.config.json` or you can
 rerun `npx markdown-bdd init`._
 
 ### 3. CI/CD Automation (Headless Setup)
@@ -514,6 +514,15 @@ or `conventional-changelog`). This would automatically maintain a physical
 `CHANGELOG.md` file in the repository, driven entirely by Conventional
 Commits, removing the need for manual release scripting.
 
+#### Cache Management
+
+Clearing `bdd-cache.json` is done manually by directly deleting, editing, or
+replacing the file. Better would be to provide options to `transpile.ts` for
+this. For example, `npm run transpiler -- --clear-llm-cache` should remove all
+entries or even the cache file. We could also provide an `--ignore-llm-cache`
+option to bypass it during transpilation, and replace existing lines as new
+LLM mappings come.
+
 #### Expand Test Coverage to CLI Orchestration
 
 Currently, the pure-logic pipeline (`parser` and `compiler`) is strictly
@@ -528,6 +537,12 @@ unit test natively due to its heavy reliance on global state (`process.argv`,
 2. **Blackbox E2E Tests:** Introducing a suite of tests that use
    `child_process.execSync` against a `test-fixtures/` directory to validate
    the CLI output and exit codes precisely as a user would experience them.
+
+#### Grow Our Library for Playwright Support
+
+We have a limited number of mappings in `manifest.json`. Research what other
+ARIA roles could be supported, and enhance our test BDD markdown sources
+covering these.
 
 #### Pluggable Test Framework Emitters
 
