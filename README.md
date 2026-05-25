@@ -7,7 +7,10 @@ alt="Creative Commons Public Domain Dedication"
 align="right" width="10%" height="auto"/>
 </a>
 
-[![CI Pipeline](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml/badge.svg)](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml)
+[![ci](https://img.shields.io/github/actions/workflow/status/binkley/markdown-bdd-transpiler/ci.yml?branch=main&label=ci)](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@binkley/markdown-bdd-transpiler.svg)](https://www.npmjs.com/package/@binkley/markdown-bdd-transpiler)
+[![node version](https://img.shields.io/node/v/@binkley/markdown-bdd-transpiler.svg)](https://nodejs.org)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
 A modern, Behavior-Driven Development (BDD) testing framework that allows
 non-technical stakeholders to author End-to-End (E2E) user journeys using
