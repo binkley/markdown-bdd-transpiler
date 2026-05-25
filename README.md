@@ -518,8 +518,8 @@ Commits, removing the need for manual release scripting.
 
 Clearing `bdd-cache.json` is done manually by directly deleting, editing, or
 replacing the file. Better would be to provide options to `transpile.ts` for
-this. For example, `npm run transpiler -- --clear-llm-cache` should remove all
-entries or even the cache file. We could also provide an `--ignore-llm-cache`
+this. For example, `npm run transpiler -- --clear-bdd-cache` should remove all
+entries or even the cache file. We could also provide an `--ignore-bdd-cache`
 option to bypass it during transpilation, and replace existing lines as new
 LLM mappings come.
 
