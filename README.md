@@ -505,6 +505,33 @@ static analysis, and securely publish the new version to
 
 ## 📝 TODO / Future Improvements
 
+#### Advanced LLM Telemetry & Interactive Feedback Loop
+
+To transition the transpiler from a "dumb translator" to an active testing
+assistant, we can operationalize the metadata returned by modern LLMs:
+
+1. **Interactive Confidence-Gating:** Parse the LLM's confidence scores. For
+   high confidence, transpile automatically. For medium confidence, enter an
+   interactive CLI mode to prompt the author ("Did you mean X? [Y/n]"). For
+   low confidence, hard-fail with an actionable reason.
+2. **Automated Test Flakiness Prediction:** Ask the LLM to return a
+   `flakiness_risk` metric. The transpiler can proactively wrap high-risk
+   actions in a `test.step` with longer timeouts or explicit `.waitFor()`
+   conditions.
+3. **Smart Fallbacks (Dynamic Routing):** If a fast/cheap model (like Gemini
+   Flash) fails with a "length" finish reason or low confidence, automatically
+   route that specific step to a larger, reasoning-focused model (e.g., Gemini
+   1.5 Pro).
+4. **Semantic Cache Expansion:** Request the LLM to return
+   `semantic_equivalents` for successful mappings (e.g., "tap the link",
+   "select the link"). Proactively populate `bdd-cache.json` with these to
+   drastically reduce API dependency over time.
+5. **Manifest Gap Analysis:** Aggregate when the LLM successfully understands
+   a step but reports a `missing_capability` against the provided
+   `manifest.json`. Print an end-of-run report to guide maintainers on which
+   Playwright ARIA actions to implement next (e.g., "Authors attempted
+   drag-and-drop 14 times").
+
 #### Automated Changelogs (Release Orchestration)
 
 Currently, releases are handled locally via `npm run release` and GitHub
@@ -516,12 +543,18 @@ Commits, removing the need for manual release scripting.
 
 #### Cache Management
 
-Clearing `bdd-cache.json` is done manually by directly deleting, editing, or
-replacing the file. Better would be to provide options to `transpile.ts` for
-this. For example, `npm run transpiler -- --clear-bdd-cache` should remove all
-entries or even the cache file. We could also provide an `--ignore-bdd-cache`
-option to bypass it during transpilation, and replace existing lines as new
-LLM mappings come.
+Clearing `bdd-cache.json` is currently done manually by directly deleting,
+editing, or replacing the file. To improve developer experience, we should
+provide native CLI options to `transpile.ts`. For example:
+
+- `npx markdown-bdd --clear-cache` to wipe the file entirely.
+- `npx markdown-bdd --ignore-cache` to temporarily bypass it, forcing the AI
+  to re-evaluate steps (useful when testing a new LLM model).
+- **Automatic Invalidation (Future):** Hash the contents of `manifest.json` and
+  store it in the cache. If the manifest changes, automatically bust the cache.
+- **Granular Pruning:** Implement a command (e.g., `npx markdown-bdd prune`) to
+  remove orphaned cache entries that no longer appear in any `.md` file, keeping
+  the cache lean.
 
 #### Expand Test Coverage to CLI Orchestration
 
@@ -540,9 +573,19 @@ unit test natively due to its heavy reliance on global state (`process.argv`,
 
 #### Grow Our Library for Playwright Support
 
-We have a limited number of mappings in `manifest.json`. Research what other
-ARIA roles could be supported, and enhance our test BDD markdown sources
-covering these.
+We currently have a limited number of mappings in `manifest.json`. A framework
+like this lives and dies by the breadth of its underlying capabilities. Future
+iterations should focus on:
+
+1. **Expanding ARIA Support:** Research and implement broader ARIA roles for
+   `WHEN` actions (e.g., `combobox`, `dialog`, `tab`, `slider`).
+2. **Rich Assertions:** Expand the library for `THEN` verification steps. UI
+   testing requires verifying list lengths, exact text counts, and complex
+   visibility states beyond simple element presence.
+3. **Compound/Parametrized Selectors:** Support finding elements _within_
+   other elements (e.g., "Click the 'Delete' button in the 'User Summary'
+   row"). This requires enhancing the manifest to support chained Playwright
+   locators.
 
 #### Pluggable Test Framework Emitters
 
