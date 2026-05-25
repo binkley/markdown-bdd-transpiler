@@ -9,7 +9,7 @@ export async function resolveFeatures(
   llmConfig: LLMConfig,
   cache: CacheManager,
   limit: LimitFunction,
-  options: { verbose: boolean; quiet: boolean; baseName: string }
+  options: { verbose: boolean; quiet: boolean; sourceFile: string }
 ): Promise<{ apiCalls: number }> {
   let apiCalls = 0;
   for (const feature of features) {
@@ -40,6 +40,8 @@ export async function resolveFeatures(
                     `You are an AI compiler for BDD tests. Map the user's step to a function in the provided manifest.`,
                     `Never evaluate or replace {{VARIABLES}}. Always extract them exactly as written in the text.`,
                     `CRITICAL RULE: If you see a literal string that begins with a backslash followed by braces, e.g., \\{{something}}, you MUST include the backslash in the extracted argument. DO NOT drop the backslash. Output "\\\\{{something}}" exactly.`,
+                    `CRITICAL RULE: Never wrap extracted arguments in extra quotes. If the text says navigate to "/settings" or "{{FOO}}", the extracted argument should be /settings or {{FOO}}, NOT "/settings" or "{{FOO}}".`,
+                    `CRITICAL RULE: You MUST map exactly ALL required parameters for the matched function as defined in the manifest. For example, 'fill_input' explicitly requires exactly THREE parameters: ["aria_role", "accessible_name", "value_to_type"]. For the step 'The user enters "{{VAR}}" into the "Username" field', the arguments array MUST be EXACTLY ["textbox", "Username", "{{VAR}}"]. If you drop "Username", the transpiler will crash.`,
                     `\n--- MANIFEST ---`,
                     manifestStr,
                     `\n--- CONTEXT ---`,
@@ -124,7 +126,11 @@ export async function resolveFeatures(
             return currentResolution;
           });
 
-          cache.set(cacheKey, resolution);
+          cache.set(cacheKey, {
+            matchedFunction: resolution.matchedFunction,
+            extractedArguments: resolution.extractedArguments,
+            sourceFile: options.sourceFile
+          });
         }
 
         const argsStr = (resolution.extractedArguments || [])
@@ -132,7 +138,7 @@ export async function resolveFeatures(
           .join(', ');
         const argsCall = argsStr ? `, ${argsStr}` : '';
 
-        const stepLabel = `${stepText} (${options.baseName}:${sourceLine})`;
+        const stepLabel = `${stepText} (${options.sourceFile}:${sourceLine})`;
 
         return (
           `    await test.step(${JSON.stringify(stepLabel)}, async () => {\n` +

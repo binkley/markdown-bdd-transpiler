@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import mri from 'mri';
+import { parseArgs } from 'util';
 import { runInitCommand } from './init.js';
 import { transpilerConfigSchema } from './schema.js';
 import type {
@@ -11,29 +11,38 @@ import type {
 
 export async function loadConfig(): Promise<ExecutionState> {
   const args = process.argv.slice(2);
-  const argv = mri(args, {
-    alias: {
-      c: 'config',
-      h: 'help',
-      v: 'verbose',
-      q: 'quiet',
-      V: 'version',
-      y: 'yes',
-      'test-dir': 'testDir',
-      'out-dir': 'outDir',
-      'manifest-path': 'manifestPath',
-      'cache-path': 'cachePath',
-      'framework-import': 'frameworkImport',
-      'setup-injection': 'setupInjection',
-      'setup-file': 'setupFile',
-      'llm-provider': 'llm.provider',
-      'llm-model': 'llm.model',
-      'llm-concurrency': 'llm.concurrency',
-      'llm-max-retries': 'llm.maxRetries',
-      'llm-initial-delay-ms': 'llm.initialDelayMs',
-      'llm-backoff-factor': 'llm.backoffFactor'
-    },
-    default: { config: 'bdd.config.json' }
+  const options = {
+    config: { type: 'string', short: 'c', default: 'bdd.config.json' },
+    help: { type: 'boolean', short: 'h', default: false },
+    verbose: { type: 'boolean', short: 'v', default: false },
+    quiet: { type: 'boolean', short: 'q', default: false },
+    version: { type: 'boolean', short: 'V', default: false },
+    yes: { type: 'boolean', short: 'y', default: false },
+    'test-dir': { type: 'string' },
+    'out-dir': { type: 'string' },
+    'manifest-path': { type: 'string' },
+    'cache-path': { type: 'string' },
+    'clear-cache': { type: 'boolean', default: false },
+    'ignore-cache': { type: 'boolean', default: false },
+    'update-cache': { type: 'boolean', default: false },
+    'framework-import': { type: 'string' },
+    'setup-injection': { type: 'string' },
+    'setup-file': { type: 'string' },
+    'llm-provider': { type: 'string' },
+    'llm-model': { type: 'string' },
+    'llm-concurrency': { type: 'string' },
+    'llm-max-retries': { type: 'string' },
+    'llm-initial-delay-ms': { type: 'string' },
+    'llm-backoff-factor': { type: 'string' },
+    provider: { type: 'string' },
+    model: { type: 'string' }
+  } as const;
+
+  const { values: argv, positionals } = parseArgs({
+    args,
+    options,
+    strict: false,
+    allowPositionals: true
   });
 
   if (argv.quiet && argv.verbose) {
@@ -43,7 +52,7 @@ export async function loadConfig(): Promise<ExecutionState> {
     process.exit(2);
   }
 
-  if (args[0] === 'init') {
+  if (positionals[0] === 'init') {
     if (argv.help) {
       console.log(`
 Usage: markdown-bdd init [options]
@@ -72,8 +81,8 @@ Options:
     const initOptions: InitOptions = {
       autoYes: !!argv.yes,
       providerFlag:
-        argv.provider || argv['llm-provider'] || argv['llm.provider'],
-      modelFlag: argv.model || argv['llm-model'] || argv['llm.model']
+        (argv.provider as string) || (argv['llm-provider'] as string),
+      modelFlag: (argv.model as string) || (argv['llm-model'] as string)
     };
     await runInitCommand(initOptions);
     process.exit(0);
@@ -101,6 +110,9 @@ Options:
   --out-dir <path>                  Directory to output the generated .test.ts files
   --manifest-path <path>            Path to the JSON manifest defining available UI steps
   --cache-path <path>               File to deterministically cache AI resolutions
+  --clear-cache                     Instantly deletes the cache file and exits without transpiling
+  --ignore-cache                    Forces the AI to re-evaluate all steps without saving to cache
+  --update-cache                    Forces the AI to re-evaluate all steps and saves the results to cache
   --framework-import <path>         Module path injected into generated tests for standard steps
   --setup-file <path>               TypeScript/JavaScript file injected into every generated test
   --setup-injection <code>          Raw string of code injected into every generated test
@@ -123,17 +135,18 @@ Arguments:
   }
 
   let fileConfig: any = {};
+  const configPath = (argv.config as string) || 'bdd.config.json';
   try {
     const configContent = await fs.readFile(
-      path.resolve(process.cwd(), argv.config),
+      path.resolve(process.cwd(), configPath),
       'utf-8'
     );
     fileConfig = JSON.parse(configContent);
-    console.log(`\n⚙️  Loaded configuration from ${argv.config}`);
+    console.log(`\n⚙️  Loaded configuration from ${configPath}`);
   } catch (error: any) {
     if (error.code !== 'ENOENT') {
       console.error(
-        `⚠️ Failed to parse config file ${argv.config}:`,
+        `⚠️ Failed to parse config file ${configPath}:`,
         error.message
       );
     }
@@ -153,23 +166,23 @@ Arguments:
 
   // Handle nested LLM merges safely
   if (!mergedConfig.llm) mergedConfig.llm = {};
-  if (argv['llm.provider']) mergedConfig.llm.provider = argv['llm.provider'];
-  if (argv['llm.model']) mergedConfig.llm.model = argv['llm.model'];
-  if (argv['llm.concurrency'])
-    mergedConfig.llm.concurrency = Number(argv['llm.concurrency']);
-  if (argv['llm.maxRetries'])
-    mergedConfig.llm.maxRetries = Number(argv['llm.maxRetries']);
-  if (argv['llm.initialDelayMs'])
-    mergedConfig.llm.initialDelayMs = Number(argv['llm.initialDelayMs']);
-  if (argv['llm.backoffFactor'])
-    mergedConfig.llm.backoffFactor = Number(argv['llm.backoffFactor']);
+  if (argv['llm-provider']) mergedConfig.llm.provider = argv['llm-provider'];
+  if (argv['llm-model']) mergedConfig.llm.model = argv['llm-model'];
+  if (argv['llm-concurrency'])
+    mergedConfig.llm.concurrency = Number(argv['llm-concurrency']);
+  if (argv['llm-max-retries'])
+    mergedConfig.llm.maxRetries = Number(argv['llm-max-retries']);
+  if (argv['llm-initial-delay-ms'])
+    mergedConfig.llm.initialDelayMs = Number(argv['llm-initial-delay-ms']);
+  if (argv['llm-backoff-factor'])
+    mergedConfig.llm.backoffFactor = Number(argv['llm-backoff-factor']);
 
   // Validate the merged result against the Zod schema
   const parseResult = transpilerConfigSchema.safeParse(mergedConfig);
 
   if (!parseResult.success) {
     console.error(
-      `❌ [ERROR] Configuration validation failed in ${argv.config}.`
+      `❌ [ERROR] Configuration validation failed in ${configPath}.`
     );
     for (const issue of parseResult.error.issues) {
       const pathStr =
@@ -183,6 +196,14 @@ Arguments:
     config: parseResult.data as TranspilerConfig,
     verbose: !!argv.verbose,
     quiet: !!argv.quiet || process.env.TRANSPILER_QUIET === 'true',
-    targetFiles: argv._
+    clearCache:
+      !!argv['clear-cache'] || process.env.TRANSPILER_CLEAR_CACHE === 'true',
+    ignoreCache:
+      !!argv['ignore-cache'] ||
+      process.env.TRANSPILER_IGNORE_CACHE === 'true',
+    updateCache:
+      !!argv['update-cache'] ||
+      process.env.TRANSPILER_UPDATE_CACHE === 'true',
+    targetFiles: positionals
   };
 }

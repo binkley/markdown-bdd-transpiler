@@ -1,1 +1,1 @@
-./scripts/validate.sh --commit
+npm run validate:commit

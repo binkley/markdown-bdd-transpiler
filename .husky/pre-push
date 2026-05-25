@@ -1,1 +1,1 @@
-./scripts/validate.sh --push
+npm run validate:push

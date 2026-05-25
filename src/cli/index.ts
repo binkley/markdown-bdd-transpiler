@@ -26,7 +26,21 @@ export async function main() {
     process.exit(1);
   }
 
-  const cache = new CacheManager(cachePath, state.verbose);
+  const cache = new CacheManager(
+    cachePath,
+    state.verbose,
+    state.ignoreCache,
+    state.updateCache
+  );
+
+  if (state.clearCache) {
+    await cache.clear();
+    if (!state.quiet) {
+      console.log('ℹ️  Exiting because --clear-cache was provided.');
+    }
+    process.exit(0);
+  }
+
   await cache.load();
 
   let mdFiles: string[] = [];
@@ -52,10 +66,10 @@ export async function main() {
         console.log(`No "${config.testDir}" directory found.`);
       return;
     }
-
-    await fs.rm(outDir, { recursive: true, force: true });
   }
 
+  // Unconditionally clear the output directory to prevent Playwright from running stale tests
+  await fs.rm(outDir, { recursive: true, force: true });
   await fs.mkdir(outDir, { recursive: true });
 
   const startTime = performance.now();
@@ -122,7 +136,7 @@ export async function main() {
       config.llm,
       cache,
       limit,
-      { verbose: isVerbose, quiet: state.quiet, baseName }
+      { verbose: isVerbose, quiet: state.quiet, sourceFile: relativeFilePath }
     );
 
     // 3. Emit Playwright code

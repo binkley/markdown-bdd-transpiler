@@ -412,6 +412,36 @@ parser will ignore everything outside the fences._
 
 ---
 
+## 🧠 Cache Management
+
+The transpiler ships with dedicated NPM scripts and built-in CLI flags to
+manage `bdd-cache.json` and improve the developer experience:
+
+- `npm run cache:clear` Instantly wipes the cache file to an empty state
+  without invoking the AI or transpiling.
+- `npm run cache:refresh` Wipes the cache entirely and immediately transpiles
+  all files, forcing the AI to rebuild the cache from scratch.
+- `npm run cache:update -- <files...>` Reads the current cache, forces the AI
+  to re-evaluate the targeted files, and explicitly overwrites their cache
+  entries while preserving untouched steps. This is perfect for surgical cache
+  repairs (e.g., `npm run cache:update -- tests/login.md`).
+- `npm run cache:ignore -- <files...>` Temporarily bypasses the cache, forcing
+  the AI to re-evaluate steps without saving them back to disk. This is a
+  "dry-run" mode useful when testing a new LLM model without polluting your
+  stable cache file.
+
+**Advanced Orchestration:**
+
+If you want to manage the cache and run the Playwright test suite in a single
+command, you can pass the underlying transpiler flags (`--refresh-cache`,
+`--ignore-cache`, `--update-cache`) directly to the E2E script using the `-t:`
+or `--transpiler:` prefix:
+
+```bash
+# Update the cache for login.md and immediately run its tests in Docker
+./scripts/test-e2e.sh -t:update-cache tests/login.md
+```
+
 ## ⚙️ Configuration (`bdd.config.json`)
 
 While the `init` script provides a great out-of-the-box setup, the framework
@@ -549,18 +579,16 @@ Commits, removing the need for manual release scripting.
 
 #### Cache Management
 
-Clearing `bdd-cache.json` is currently done manually by directly deleting,
-editing, or replacing the file. To improve developer experience, we should
-provide native CLI options to `transpile.ts`. For example:
-
-- `npx markdown-bdd --clear-cache` to wipe the file entirely.
-- `npx markdown-bdd --ignore-cache` to temporarily bypass it, forcing the AI
-  to re-evaluate steps (useful when testing a new LLM model).
-- **Automatic Invalidation (Future):** Hash the contents of `manifest.json` and
-  store it in the cache. If the manifest changes, automatically bust the cache.
-- **Granular Pruning:** Implement a command (e.g., `npx markdown-bdd prune`) to
-  remove orphaned cache entries that no longer appear in any `.md` file, keeping
-  the cache lean.
+- **Cache Metadata Schema:** Refactor the internal `bdd-cache.json` schema to
+  decouple the pure AI payload from system metadata. Injecting the origin
+  `sourceFile` into the cache entry will allow us to audit the cache against
+  the filesystem, easily identifying stale entries from deleted or modified
+  markdown files.
+- **Automatic Invalidation:** Hash the contents of `manifest.json` and store
+  it in the cache. If the manifest changes, automatically bust the cache.
+- **Granular Pruning:** Implement a command (e.g., `npx markdown-bdd prune`)
+  to remove orphaned cache entries that no longer appear in any `.md` file,
+  keeping the cache lean.
 
 #### Expand Test Coverage to CLI Orchestration
 

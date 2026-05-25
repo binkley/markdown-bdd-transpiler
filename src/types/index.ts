@@ -22,12 +22,16 @@ export interface ExecutionState {
   config: TranspilerConfig;
   verbose: boolean;
   quiet: boolean;
+  ignoreCache: boolean;
+  clearCache: boolean;
+  updateCache: boolean;
   targetFiles: string[];
 }
 
 export interface AIResolution {
   matchedFunction: string;
   extractedArguments: string[];
+  sourceFile?: string;
 }
 
 export interface LLMProvider {
