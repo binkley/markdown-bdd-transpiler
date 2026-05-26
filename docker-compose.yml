@@ -22,6 +22,7 @@ services:
       - TEST_DYNAMIC_USER=${TEST_DYNAMIC_USER:-}
       - TRANSPILER_VERBOSE=${TRANSPILER_VERBOSE:-false}
     volumes:
+      - ./.generated:/app/.generated
       - ./test-results:/app/test-results
     depends_on:
       demo-app:

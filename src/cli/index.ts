@@ -69,8 +69,15 @@ export async function main() {
   }
 
   // Unconditionally clear the output directory to prevent Playwright from running stale tests
-  await fs.rm(outDir, { recursive: true, force: true });
+  // Instead of deleting the directory itself (which fails if it's a Docker volume mount point),
+  // we ensure it exists and then delete all its contents.
   await fs.mkdir(outDir, { recursive: true });
+  const files = await fs.readdir(outDir);
+  await Promise.all(
+    files.map((file) =>
+      fs.rm(`${outDir}/${file}`, { recursive: true, force: true })
+    )
+  );
 
   const startTime = performance.now();
   const isVerbose =
