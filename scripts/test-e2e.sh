@@ -138,7 +138,7 @@ export TEST_DYNAMIC_USER="${TEST_DYNAMIC_USER:-frontend_wizard}"
 # Ensure the environment is cleanly torn down when the script exits
 function cleanup() {
   log_step "\nCleaning up test environment..."
-  docker compose down > /dev/null 2>&1
+  docker compose down --remove-orphans -v > /dev/null 2>&1
 }
 trap cleanup EXIT
 
