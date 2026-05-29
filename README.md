@@ -263,27 +263,23 @@ intuitive as writing them:
 This repository is configured to ensure code quality through rigorous static
 analysis and automated E2E testing using GitHub Actions.
 
-### Husky Pre-Push Hook
+### Husky Git Hooks
 
 To prevent broken code from being pushed to the remote repository, this
-project utilizes a **Husky `pre-push` hook**.
+project utilizes **Husky hooks**.
 
-Whenever you run `git push`, the hook automatically executes the
-`./scripts/validate.sh` script. This script performs the following checks in
-sequence:
+- **Pre-Commit (`npm run validate:commit`)**: Runs fast local checks including
+  formatting (`prettier`), linting (`eslint`, `shellcheck`), type-checking
+  (`tsc`), and unit tests (`node:test`).
+- **Pre-Push (`npm run validate:push`)**: Runs the strict pipeline which
+  includes all pre-commit checks, plus a dependency security audit (`npm
+audit`), and executes the full Playwright E2E suite inside Docker
+  (`test-e2e.sh`).
 
-1. **Formatting:** `npx prettier --check .`
-2. **Linting:** `npm run lint` (ESLint for TS, Shellcheck for bash)
-3. **Type-Checking:** `npm run type-check`
-4. **Unit Tests:** `npm run test:unit`
-5. **E2E Tests:** Runs the full Playwright suite in Docker (`test-e2e.sh`).
-6. **Security Audit:** Runs `npm audit --audit-level=moderate` to block pushes
-   if vulnerabilities are detected in the dependency tree.
+If any of these steps fail, the git action is aborted.
 
-If any of these steps fail, the push is aborted.
-
-_Tip: If formatting fails, simply run `npm run format` to auto-fix the issues
-before pushing again._
+_Tip: If formatting fails during a commit, run `npm run format` to auto-fix
+the issues before attempting to commit again._
 
 ---
 
@@ -433,13 +429,20 @@ manage `bdd-cache.json` and improve the developer experience:
 **Advanced Orchestration:**
 
 If you want to manage the cache and run the Playwright test suite in a single
-command, you can pass the underlying transpiler flags (`--refresh-cache`,
-`--ignore-cache`, `--update-cache`) directly to the E2E script using the `-t:`
-or `--transpiler:` prefix:
+command, you can pass the underlying transpiler flags (`--ignore-cache`,
+`--update-cache`) directly to the E2E script using the `-t:` or
+`--transpiler:` prefix:
 
 ```bash
 # Update the cache for login.md and immediately run its tests in Docker
 ./scripts/test-e2e.sh -t:update-cache tests/login.md
+```
+
+To perform a full cache refresh alongside Docker execution, chain the
+commands:
+
+```bash
+npm run cache:clear && ./scripts/test-e2e.sh
 ```
 
 ## ⚙️ Configuration (`bdd.config.json`)
@@ -505,11 +508,16 @@ _Note: All configuration options can also be overridden via CLI flags (e.g.,
 ## 🛠️ Development Commands
 
 - `npm run format`: Runs Prettier to standardize codebase formatting.
-- `npm run lint`: Runs ESLint for code quality.
-- `npm run pretest:playwright`: Manually triggers the transpilation step
-  without running Playwright.
-- `npm run test:unit`: Run the native `node:test` suite with code coverage.
-- `npm run type-check`: Validates TypeScript structural integrity.
+- `npm run lint`: Runs ESLint for TS and Shellcheck for bash files.
+- `npm run type-check`: Validates TypeScript structural integrity without
+  emitting files.
+- `npm run test:unit`: Runs the native `node:test` suite with code coverage.
+- `npm run test:e2e`: Boots Docker and runs the full Playwright integration
+  suite.
+- `npm run cache:update`: Surgically re-transpile specific files.
+- `npm run profile`: Benchmark the execution time of any arbitrary NPM
+  command.
+- `npm run profile:e2e`: Benchmark the Dockerized E2E test pipeline.
 
 ---
 
@@ -518,23 +526,16 @@ _Note: All configuration options can also be overridden via CLI flags (e.g.,
 This project uses **NPM Trusted Publishing (OIDC)** via GitHub Actions. There
 are no hardcoded NPM tokens required to publish to the registry.
 
-To publish a new version of the transpiler:
-
-1. Update the `"version"` field in `package.json`.
-2. Commit the version bump to the `main` branch.
-3. Create and push a new Git tag matching the `v*.*.*` format (e.g.,
-   `v1.0.0`).
+To publish a new version of the transpiler, use the included release script.
+This script will automatically run the tests, bump the version in
+`package.json`, create the git tag, and push to origin:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+npm run release -- patch # Or minor, major
 ```
 
-_(Tip: You can also use the included `./release.sh <patch|minor|major>` script
-to automate this)._
-
-The GitHub Action will automatically trigger, build the project, run all
-static analysis, and securely publish the new version to
+The GitHub Action will automatically trigger upon seeing the new tag, build
+the project, run all static analysis, and securely publish the new version to
 `@binkley/markdown-bdd-transpiler` on NPM using provenance.
 
 ---
@@ -568,43 +569,6 @@ assistant, we can operationalize the metadata returned by modern LLMs:
    Playwright ARIA actions to implement next (e.g., "Authors attempted
    drag-and-drop 14 times").
 
-#### Automated Changelogs (Release Orchestration)
-
-Currently, releases are handled locally via `npm run release` and GitHub
-Release UI notes. To further mature the project, evaluate integrating an
-automated release orchestrator (like Google's `release-please` GitHub Action
-or `conventional-changelog`). This would automatically maintain a physical
-`CHANGELOG.md` file in the repository, driven entirely by Conventional
-Commits, removing the need for manual release scripting.
-
-#### Cache Management
-
-- **Cache Metadata Schema:** Refactor the internal `bdd-cache.json` schema to
-  decouple the pure AI payload from system metadata. Injecting the origin
-  `sourceFile` into the cache entry will allow us to audit the cache against
-  the filesystem, easily identifying stale entries from deleted or modified
-  markdown files.
-- **Automatic Invalidation:** Hash the contents of `manifest.json` and store
-  it in the cache. If the manifest changes, automatically bust the cache.
-- **Granular Pruning:** Implement a command (e.g., `npx markdown-bdd prune`)
-  to remove orphaned cache entries that no longer appear in any `.md` file,
-  keeping the cache lean.
-
-#### Expand Test Coverage to CLI Orchestration
-
-Currently, the pure-logic pipeline (`parser` and `compiler`) is strictly
-unit-tested using the native `node:test` runner with >95% coverage. However,
-the CLI orchestration layer (`src/cli/config.ts`, `init.ts`) is difficult to
-unit test natively due to its heavy reliance on global state (`process.argv`,
-`process.exit`, file system reads). Future iterations should explore:
-
-1. **Functional Core, Imperative Shell:** Refactoring the config layer to
-   return typed `Result` objects rather than calling `process.exit()`,
-   allowing native unit testing.
-2. **Blackbox E2E Tests:** Introducing a suite of tests that use
-   `child_process.execSync` against a `test-fixtures/` directory to validate
-   the CLI output and exit codes precisely as a user would experience them.
-
 #### Grow Our Library for Playwright Support
 
 We currently have a limited number of mappings in `manifest.json`. A framework
@@ -637,12 +601,3 @@ lack visibility into the exact textual context sent to the LLM. Implementing a
 `.generated/prompts/` would massively improve observability, allowing
 developers to manually inspect and tune their `manifest.json` or Designer
 Notes.
-
-#### Supply Chain Security (Socket.dev)
-
-Re-evaluate integrating the `@socketsecurity/cli` for advanced supply chain
-security scanning (malware, typo-squatting, install scripts) in the CI
-pipeline. The initial integration was reverted due to an intractable OAuth
-loop in Socket's account provisioning flow for solo/personal GitHub accounts.
-If their onboarding flow improves, the CLI should be re-added to `validate.sh`
-and `.github/workflows/ci.yml`.
