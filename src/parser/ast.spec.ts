@@ -113,3 +113,40 @@ test('parseMarkdown flags malformed variables as errors', () => {
     /Invalid environment variable syntax in step "invalid \{\{VAR-HYPHEN\}\} step"/
   );
 });
+
+test('parseMarkdown flags an error if a Scenario appears before a Feature', () => {
+  const markdown = `
+## Scenario: Missing Feature
+### GIVEN
+\`\`\`bdd
+* Navigate to "/login"
+\`\`\`
+`;
+  const result = parseMarkdown(markdown, 'test.md');
+
+  assert.equal(result.features.length, 0);
+  assert.equal(result.errors.length, 2);
+  assert.match(
+    result.errors[0],
+    /Cannot define a Scenario \("Scenario: Missing Feature"\) before defining a Feature/
+  );
+  assert.match(result.errors[1], /Found actionable BDD step/);
+});
+
+test('parseMarkdown flags an error if a bdd block appears before a Scenario', () => {
+  const markdown = `
+# Feature: Missing Scenario
+\`\`\`bdd
+* Navigate to "/login"
+\`\`\`
+`;
+  const result = parseMarkdown(markdown, 'test.md');
+
+  assert.equal(result.features.length, 1);
+  assert.equal(result.features[0].scenarios.length, 0);
+  assert.equal(result.errors.length, 1);
+  assert.match(
+    result.errors[0],
+    /Found actionable BDD step \("Navigate to "\/login""\) before defining a Scenario/
+  );
+});

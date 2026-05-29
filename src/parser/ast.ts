@@ -43,10 +43,14 @@ export function parseMarkdown(
 
   const openScenario = (name: string, line?: number) => {
     if (!currentFeature) {
-      openFeature('BDD Feature', line);
+      logError(
+        line,
+        `Cannot define a Scenario ("${name}") before defining a Feature. Please add a "# Feature" heading first.`
+      );
+      return;
     }
     currentScenario = { name, steps: [], phases: [], line };
-    currentFeature!.scenarios.push(currentScenario);
+    currentFeature.scenarios.push(currentScenario);
   };
 
   const logEvent = (line: number | string | undefined, message: string) => {
@@ -183,17 +187,21 @@ export function parseMarkdown(
         }
 
         if (!currentScenario) {
-          openScenario('BDD Scenario');
+          logError(
+            step.sourceLine,
+            `Found actionable BDD step ("${step.text}") before defining a Scenario. Please add a "## Scenario" heading first.`
+          );
+          continue; // Skip processing this step since there's no scenario to attach it to
         }
 
         const richContextStr = JSON.stringify({
           feature: currentFeature?.name || 'Unknown Feature',
-          scenario: currentScenario?.name || 'Unknown Scenario',
+          scenario: currentScenario.name,
           phase: currentContext,
           designerNotes: designerNotes || undefined
         });
 
-        currentScenario!.steps.push(
+        currentScenario.steps.push(
           JSON.stringify({
             stepText: step.text,
             sourceLine: step.sourceLine,
