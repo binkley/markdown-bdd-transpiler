@@ -104,24 +104,18 @@ fi
 
 old_version=$(node -p "require('./package.json').version")
 
-# Calculate the new version safely using a subshell $(...) By doing this work
-# inside a subshell, the 'trap' is strictly isolated.  The EXIT trap acts like
-# a 'finally {}' block: it guarantees the files are restored whether the
-# subshell exits cleanly, errors out, or is interrupted.
-new_version=$(
-  set -e # Ensure the subshell aborts on errors
-  trap 'git restore package.json package-lock.json >/dev/null 2>&1' EXIT INT TERM
+log_step "🔍 Analyzing Git history to calculate next '$release_type' version..."
+# We use standard-version's dry-run mode purely to extract the predicted new version number
+# so we can show it to the user in the confirmation prompt.
+new_version=$(npx standard-version --release-as "$release_type" --dry-run | grep "bumping version in package.json from" | awk '{print $9}')
 
-  npm --sign-git-tag --no-git-tag-version version "$release_type" > /dev/null
-
-  # "Return" the value to the parent shell by echoing it.
-  node -p "require('./package.json').version"
-
-  # The subshell closes here, triggering the EXIT trap to restore the files.
-)
+if [[ -z "$new_version" ]]; then
+  echo "❌ Error: Failed to calculate new version. Is the workspace clean?" >&2
+  exit 1
+fi
 
 if $confirm; then
-  read -r -p "🗳️  Ready to release ($old_version -> $new_version) [y/N]: " answer
+  read -r -p "🗳️  Ready to release ($old_version -> $new_version) and generate CHANGELOG? [y/N]: " answer
   case $answer in
     y* | Y*) ;;
     *)
@@ -131,12 +125,18 @@ if $confirm; then
   esac
 fi
 
-function npm_version() {
-  local message="Release and publish NPM version '%s'"
+function apply_version_bump() {
+  local release_msg="chore(release): %s"
+
   if $dry_run; then
-    log_step "npm --message \"$message\" --sign-git-tag version \"$release_type"\"
+    log_step "npx standard-version --release-as \"$release_type\" --sign --message \"$release_msg\" --dry-run"
+    npx standard-version --release-as "$release_type" --sign --message "$release_msg" --dry-run
   else
-    npm --message "$message" --sign-git-tag version "$release_type" > /dev/null
+    if $quiet; then
+      npx standard-version --release-as "$release_type" --sign --message "$release_msg" > /dev/null
+    else
+      npx standard-version --release-as "$release_type" --sign --message "$release_msg"
+    fi
   fi
 }
 
@@ -150,7 +150,7 @@ $run npm run validate:push "${VALIDATE_FLAGS[@]}"
 # call either npm or git.
 
 log_step "🚀 Bumping '$release_type' release ($old_version -> $new_version)..."
-npm_version
+apply_version_bump
 
 log_step "📦 Pushing commit and tag (v$new_version) to origin..."
 # Tell git to skip pre-push hook since we did this manually above with

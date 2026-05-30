@@ -1,0 +1,12 @@
+{
+  "types": [
+    { "type": "feat", "section": "✨ Features" },
+    { "type": "docs", "section": "📚 Documentation" },
+    { "type": "refactor", "section": "🛠 Architecture" },
+    { "type": "build", "section": "🧱 Build" },
+    { "type": "test", "section": "🧪 Testing", "hidden": true },
+    { "type": "ci", "section": "🤖 CI/CD", "hidden": true },
+    { "type": "fix", "section": "🐛 Bug Fixes" },
+    { "type": "chore", "section": "🧹 Chores", "hidden": true }
+  ]
+}
