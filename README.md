@@ -471,9 +471,9 @@ is fully configurable to match your project's architecture.
 ```json
 {
   "testDir": "tests",
-  "outDir": ".generated",
   "manifestPath": "manifest.json",
   "cachePath": "bdd-cache.json",
+  "outDir": ".generated",
   "banner": "test.use({ extraHTTPHeaders: { 'x-mock-user': 'admin' } });",
   "bannerFile": "tests/setup.ts",
   "strict": false,
@@ -492,24 +492,24 @@ is fully configurable to match your project's architecture.
 
 - **`testDir`**: The directory containing your Markdown (`.md`) feature files.
   (Default: `tests`)
-- **`outDir`**: The directory where the transpiler will output the generated
-  Playwright `.test.ts` files. (Default: `.generated`)
 - **`manifestPath`**: The path to your JSON manifest defining the available UI
   steps. (Default: `manifest.json`)
 - **`cachePath`**: The file where AI resolutions are deterministically cached
   to speed up future runs. (Default: `bdd-cache.json`)
-- **`frameworkImport`**: (Optional) The module path injected into the
-  generated tests. (Defaults to `@binkley/markdown-bdd-transpiler/framework`.
-  Only override this if you are building custom Playwright UI
-  implementations).
+- **`outDir`**: The directory where the transpiler will output the generated
+  Playwright `.test.ts` files. (Default: `.generated`)
+- **`banner`**: (Optional) A raw string of code injected at the top of
+  every generated test file. (For complex setups, use `bannerFile` instead to
+  avoid stringifying multiline code in JSON).
 - **`bannerFile`**: (Optional) Path to a TypeScript/JavaScript file (e.g.,
   `tests/setup.ts`). The contents of this file are injected directly into
   every generated test file. This is the recommended way to inject global
   Playwright `test.use({})` blocks to mock headers, cookies, or authentication
   state.
-- **`banner`**: (Optional) A raw string of code injected at the top of
-  every generated test file. (For complex setups, use `bannerFile` instead to
-  avoid stringifying multiline code in JSON).
+- **`frameworkImport`**: (Optional) The module path injected into the
+  generated tests. (Defaults to `@binkley/markdown-bdd-transpiler/framework`.
+  Only override this if you are building custom Playwright UI
+  implementations).
 - **`llm`**: Configures the third-party AI provider behavior.
   - **`provider`**: The vendor to use (`gemini`, `openai`, or `anthropic`).
   - **`model`**: The specific LLM version to use (e.g., `gpt-4o-mini`).
