@@ -1,5 +1,8 @@
 {
   "releaseCommitMessageFormat": "chore(release): v{{currentTag}}",
+  "scripts": {
+    "postchangelog": "npm run format -- CHANGELOG.md manifest.json package.json package-lock.json"
+  },
   "types": [
     { "type": "feat", "section": "✨ Features" },
     { "type": "docs", "section": "📚 Documentation" },
