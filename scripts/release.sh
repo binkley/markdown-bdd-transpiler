@@ -126,16 +126,14 @@ if $confirm; then
 fi
 
 function apply_version_bump() {
-  local release_msg="chore(release): %s"
-
   if $dry_run; then
-    log_step "npx standard-version --release-as \"$release_type\" --sign --message \"$release_msg\" --dry-run"
-    npx standard-version --release-as "$release_type" --sign --message "$release_msg" --dry-run
+    log_step "npx standard-version --release-as \"$release_type\" --sign --dry-run"
+    npx standard-version --release-as "$release_type" --sign --dry-run
   else
     if $quiet; then
-      npx standard-version --release-as "$release_type" --sign --message "$release_msg" > /dev/null
+      npx standard-version --release-as "$release_type" --sign > /dev/null
     else
-      npx standard-version --release-as "$release_type" --sign --message "$release_msg"
+      npx standard-version --release-as "$release_type" --sign
     fi
   fi
 }
