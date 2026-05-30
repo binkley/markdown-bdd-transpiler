@@ -1,4 +1,4 @@
-import { test, before, after } from 'node:test';
+import { test } from 'node:test';
 import assert from 'node:assert';
 import fs from 'fs/promises';
 import path from 'path';
@@ -6,40 +6,27 @@ import { CacheManager } from './cache.js';
 
 const testCachePath = path.join(process.cwd(), '.test-cache.json');
 
-const originalLog = console.log;
-const originalError = console.error;
-
-before(() => {
-  console.log = () => {};
-  console.error = () => {};
-});
-
-after(() => {
-  console.log = originalLog;
-  console.error = originalError;
-});
-
 async function cleanup() {
   await fs.rm(testCachePath, { force: true });
 }
 
 test('loads and saves cache properly', async (t) => {
   t.after(cleanup);
-  const cache = new CacheManager(testCachePath, false);
+  const cache = new CacheManager(testCachePath);
   cache.set('foo', 'bar');
   assert.strictEqual(cache.get('foo'), 'bar');
   assert.strictEqual(cache.cacheHits, 1);
 
   await cache.save();
 
-  const loadedCache = new CacheManager(testCachePath, false);
+  const loadedCache = new CacheManager(testCachePath);
   await loadedCache.load();
   assert.strictEqual(loadedCache.get('foo'), 'bar');
 });
 
 test('handles missing cache file on load', async (t) => {
   t.after(cleanup);
-  const cache = new CacheManager(testCachePath, true);
+  const cache = new CacheManager(testCachePath);
   await cache.load();
   assert.strictEqual(cache.get('nonexistent'), undefined);
 });
@@ -47,7 +34,7 @@ test('handles missing cache file on load', async (t) => {
 test('clear() deletes the cache file', async (t) => {
   t.after(cleanup);
   await fs.writeFile(testCachePath, JSON.stringify({ old: 'data' }));
-  const cache = new CacheManager(testCachePath, true);
+  const cache = new CacheManager(testCachePath);
   await cache.clear();
 
   let fileExists = true;
@@ -61,7 +48,7 @@ test('clear() deletes the cache file', async (t) => {
 
 test('clear() gracefully handles missing file', async (t) => {
   t.after(cleanup);
-  const cache = new CacheManager(testCachePath, false);
+  const cache = new CacheManager(testCachePath);
   await cache.clear();
   assert.ok(true);
 });
@@ -70,7 +57,7 @@ test('ignoreCache prevents loading, getting, setting, and saving', async (t) => 
   t.after(cleanup);
   await fs.writeFile(testCachePath, JSON.stringify({ hidden: 'data' }));
 
-  const cache = new CacheManager(testCachePath, true, true);
+  const cache = new CacheManager(testCachePath, true);
   await cache.load();
 
   assert.strictEqual(cache.get('hidden'), undefined);
@@ -92,7 +79,7 @@ test('updateCache forces cache miss but allows saving new data', async (t) => {
   );
 
   // ignoreCache = false, updateCache = true
-  const cache = new CacheManager(testCachePath, false, false, true);
+  const cache = new CacheManager(testCachePath, false, true);
   await cache.load();
 
   // Should force a miss for existing data
@@ -113,11 +100,12 @@ test('updateCache forces cache miss but allows saving new data', async (t) => {
   assert.strictEqual(diskJson.untouched, 'data');
   assert.strictEqual(diskJson.existing, 'new_value');
 });
+
 test('clear() catches and logs errors', async (t) => {
   t.after(cleanup);
   // Attempting to remove the current working directory without recursive: true
   // will throw an EISDIR or EPERM error, hitting the catch block in CacheManager.clear()
-  const cache = new CacheManager(process.cwd(), true);
+  const cache = new CacheManager(process.cwd());
   await cache.clear();
   assert.ok(true);
 });

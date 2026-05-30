@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import { logger } from '../utils/logger.js';
 
 export class CacheManager {
   private cache: Record<string, any> = {};
@@ -7,7 +8,6 @@ export class CacheManager {
 
   constructor(
     private cachePath: string,
-    private isVerbose: boolean,
     private ignoreCache: boolean = false,
     private updateCache: boolean = false
   ) {}
@@ -15,19 +15,15 @@ export class CacheManager {
   async clear() {
     try {
       await fs.rm(this.cachePath, { force: true });
-      if (this.isVerbose) {
-        console.log(`ℹ️  Cleared cache at ${this.cachePath}`);
-      }
+      logger.debug(`ℹ️  Cleared cache at ${this.cachePath}`);
     } catch (e: any) {
-      console.error(`⚠️ Failed to clear cache: ${e.message}`);
+      logger.warn(`⚠️ Failed to clear cache: ${e.message}`);
     }
   }
 
   async load() {
     if (this.ignoreCache) {
-      if (this.isVerbose) {
-        console.log('ℹ️  Ignoring cache file as requested (--ignore-cache).');
-      }
+      logger.debug('ℹ️  Ignoring cache file as requested (--ignore-cache).');
       return;
     }
 
@@ -35,9 +31,7 @@ export class CacheManager {
       const cacheStr = await fs.readFile(this.cachePath, 'utf-8');
       this.cache = JSON.parse(cacheStr);
     } catch {
-      if (this.isVerbose) {
-        console.log('ℹ️  No existing cache found. Starting fresh.');
-      }
+      logger.debug('ℹ️  No existing cache found. Starting fresh.');
     }
   }
 

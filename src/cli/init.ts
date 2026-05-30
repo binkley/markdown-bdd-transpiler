@@ -3,9 +3,10 @@ import path from 'path';
 import { execSync } from 'child_process';
 import readline from 'readline';
 import type { InitOptions } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 export async function runInitCommand(options: InitOptions) {
-  console.log('🚀 Initializing AI-Augmented Markdown BDD Transpiler...');
+  logger.info('🚀 Initializing AI-Augmented Markdown BDD Transpiler...');
 
   const isHeadless =
     options.autoYes || !!options.providerFlag || !!options.modelFlag;
@@ -15,11 +16,11 @@ export async function runInitCommand(options: InitOptions) {
     isHeadless &&
     (!options.autoYes || !options.providerFlag || !options.modelFlag)
   ) {
-    console.error(`❌ [ERROR] Incomplete automation flags provided.`);
-    console.error(
+    logger.error(`❌ [ERROR] Incomplete automation flags provided.`);
+    logger.error(
       `   To run in headless CI mode, you must provide ALL of the following: '--yes', '--provider <name>', and '--model <name>'.`
     );
-    console.error(
+    logger.error(
       `   Example: npx markdown-bdd init -y --provider openai --model gpt-4o`
     );
     process.exit(1);
@@ -37,7 +38,7 @@ export async function runInitCommand(options: InitOptions) {
     let installPlaywright = 'y';
 
     if (!isHeadless) {
-      console.log(
+      logger.info(
         '\nThis framework requires Playwright to execute the generated tests.'
       );
       installPlaywright = await question(
@@ -45,7 +46,7 @@ export async function runInitCommand(options: InitOptions) {
       );
       installPlaywright = installPlaywright.trim().toLowerCase();
     } else {
-      console.log('\n🤖 CI Mode: Automatically installing Playwright...');
+      logger.info('\n🤖 CI Mode: Automatically installing Playwright...');
     }
 
     if (
@@ -53,20 +54,20 @@ export async function runInitCommand(options: InitOptions) {
       installPlaywright === 'y' ||
       installPlaywright === 'yes'
     ) {
-      console.log(`\n📦 Installing @playwright/test...`);
+      logger.info(`\n📦 Installing @playwright/test...`);
       try {
         execSync(`npm install --save-dev @playwright/test`, {
           stdio: 'inherit'
         });
-        console.log(`✅ Successfully installed Playwright.`);
+        logger.info(`✅ Successfully installed Playwright.`);
 
-        console.log(`\n📦 Installing Playwright browsers...`);
+        logger.info(`\n📦 Installing Playwright browsers...`);
         execSync(`npx playwright install`, {
           stdio: 'inherit'
         });
-        console.log(`✅ Successfully installed Playwright browsers.`);
+        logger.info(`✅ Successfully installed Playwright browsers.`);
       } catch {
-        console.error(
+        logger.error(
           `❌ Failed to install Playwright. Please run 'npm install --save-dev @playwright/test' manually.`
         );
       }
@@ -78,7 +79,7 @@ export async function runInitCommand(options: InitOptions) {
     let installPkg = '';
 
     if (isHeadless && options.providerFlag) {
-      console.log(
+      logger.info(
         `\n🤖 CI Mode: Automatically configuring provider "${options.providerFlag}"...`
       );
       const normalized = options.providerFlag.toLowerCase();
@@ -86,16 +87,16 @@ export async function runInitCommand(options: InitOptions) {
       else if (normalized === 'gemini') providerChoice = '2';
       else if (normalized === 'openai') providerChoice = '3';
       else {
-        console.error(
+        logger.error(
           `❌ [ERROR] Unsupported LLM provider: "${options.providerFlag}". Supported providers: "anthropic", "gemini", "openai"`
         );
         process.exit(1);
       }
     } else {
-      console.log('\n🗳️  Which AI provider would you like to use?');
-      console.log('1) Anthropic (Requires ANTHROPIC_API_KEY)');
-      console.log('2) Google Gemini (Requires GOOGLE_API_KEY)');
-      console.log('3) OpenAI (Requires OPENAI_API_KEY)');
+      logger.info('\n🗳️  Which AI provider would you like to use?');
+      logger.info('1) Anthropic (Requires ANTHROPIC_API_KEY)');
+      logger.info('2) Google Gemini (Requires GOOGLE_API_KEY)');
+      logger.info('3) OpenAI (Requires OPENAI_API_KEY)');
 
       while (true) {
         providerChoice = await question('Select [1-3]: ');
@@ -103,7 +104,7 @@ export async function runInitCommand(options: InitOptions) {
         if (['1', '2', '3'].includes(providerChoice)) {
           break;
         }
-        console.log('❌ Invalid selection. Please enter 1, 2, or 3.');
+        logger.info('❌ Invalid selection. Please enter 1, 2, or 3.');
       }
     }
 
@@ -142,26 +143,26 @@ export async function runInitCommand(options: InitOptions) {
 
     const configPath = path.resolve(process.cwd(), 'bdd.config.json');
     await fs.writeFile(configPath, JSON.stringify(config, null, 2));
-    console.log(`\n✅ Created configuration file at: ${configPath}`);
+    logger.info(`\n✅ Created configuration file at: ${configPath}`);
 
     if (installPkg) {
-      console.log(
+      logger.info(
         `\n📦 Installing necessary peer dependency: ${installPkg}...`
       );
       try {
         execSync(`npm install --save-dev ${installPkg}`, {
           stdio: 'inherit'
         });
-        console.log(`✅ Successfully installed ${installPkg}`);
+        logger.info(`✅ Successfully installed ${installPkg}`);
       } catch {
-        console.error(
+        logger.error(
           `❌ Failed to install ${installPkg}. Please run it manually.`
         );
       }
     }
 
-    console.log('\n🎉 Initialization complete!');
-    console.log(
+    logger.info('\n🎉 Initialization complete!');
+    logger.info(
       `Don't forget to export your API key (e.g., export ${provider === 'openai' ? 'OPENAI_API_KEY' : provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'GOOGLE_API_KEY'}="your-key") before running tests.`
     );
   } finally {

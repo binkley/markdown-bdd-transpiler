@@ -132,12 +132,12 @@ function log_debug() {
 DOCKER_FLAGS=""
 if $verbose; then
   PLAYWRIGHT_ARGS+=("--reporter=line")
-  TRANSPILED_ARGS+=("--verbose")
+  TRANSPILER_ARGS+=("--verbose")
   log_debug "Verbose mode enabled."
 elif $quiet; then
   DOCKER_FLAGS="--quiet"
   PLAYWRIGHT_ARGS+=("--reporter=dot")
-  TRANSPILED_ARGS+=("--quiet")
+  TRANSPILER_ARGS+=("--quiet")
 fi
 
 # Provide default dynamic data for the demo app tests

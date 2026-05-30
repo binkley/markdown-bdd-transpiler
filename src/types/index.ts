@@ -20,10 +20,8 @@ export interface TranspilerConfig {
 
 export interface ExecutionState {
   config: TranspilerConfig;
-  verbose: boolean;
-  quiet: boolean;
-  ignoreCache: boolean;
   clearCache: boolean;
+  ignoreCache: boolean;
   updateCache: boolean;
   targetFiles: string[];
 }

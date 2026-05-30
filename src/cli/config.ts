@@ -8,6 +8,7 @@ import type {
   TranspilerConfig,
   InitOptions
 } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 export async function loadConfig(): Promise<ExecutionState> {
   const args = process.argv.slice(2);
@@ -46,7 +47,7 @@ export async function loadConfig(): Promise<ExecutionState> {
   });
 
   if (argv.quiet && argv.verbose) {
-    console.error(
+    logger.error(
       '❌ [ERROR] Cannot use --quiet and --verbose simultaneously.'
     );
     process.exit(2);
@@ -142,12 +143,11 @@ Arguments:
       'utf-8'
     );
     fileConfig = JSON.parse(configContent);
-    console.log(`\n⚙️  Loaded configuration from ${configPath}`);
+    logger.info(`\n⚙️  Loaded configuration from ${configPath}`);
   } catch (error: any) {
     if (error.code !== 'ENOENT') {
-      console.error(
-        `⚠️ Failed to parse config file ${configPath}:`,
-        error.message
+      logger.warn(
+        `⚠️ Failed to parse config file ${configPath}: ${error.message}`
       );
     }
   }
@@ -181,21 +181,19 @@ Arguments:
   const parseResult = transpilerConfigSchema.safeParse(mergedConfig);
 
   if (!parseResult.success) {
-    console.error(
+    logger.error(
       `❌ [ERROR] Configuration validation failed in ${configPath}.`
     );
     for (const issue of parseResult.error.issues) {
       const pathStr =
         issue.path.length > 0 ? `${issue.path.join('.')}: ` : '';
-      console.error(`   - ${pathStr}${issue.message}`);
+      logger.error(`   - ${pathStr}${issue.message}`);
     }
     process.exit(1);
   }
 
   return {
     config: parseResult.data as TranspilerConfig,
-    verbose: !!argv.verbose,
-    quiet: !!argv.quiet || process.env.TRANSPILER_QUIET === 'true',
     clearCache:
       !!argv['clear-cache'] || process.env.TRANSPILER_CLEAR_CACHE === 'true',
     ignoreCache:

@@ -1,6 +1,7 @@
 import type { LimitFunction } from 'p-limit';
 import type { Feature, LLMProvider, LLMConfig } from '../types/index.js';
 import type { CacheManager } from './cache.js';
+import { logger } from '../utils/logger.js';
 
 export async function resolveFeatures(
   features: Feature[],
@@ -9,7 +10,7 @@ export async function resolveFeatures(
   llmConfig: LLMConfig,
   cache: CacheManager,
   limit: LimitFunction,
-  options: { verbose: boolean; quiet: boolean; sourceFile: string }
+  options: { sourceFile: string }
 ): Promise<{ apiCalls: number }> {
   let apiCalls = 0;
   for (const feature of features) {
@@ -25,7 +26,7 @@ export async function resolveFeatures(
         let resolution = cache.get(cacheKey);
 
         if (!resolution) {
-          if (options.verbose) console.log(`\n☁️  Cache miss: "${stepText}"`);
+          logger.debug(`\n☁️  Cache miss: "${stepText}"`);
 
           resolution = await limit(async () => {
             const callStart = performance.now();
@@ -78,11 +79,9 @@ export async function resolveFeatures(
                   const jitter = delay * 0.2 * Math.random();
                   const waitTime = Math.round(delay + jitter);
 
-                  if (!options.quiet) {
-                    console.warn(
-                      `    ⚠️  API Error (${e.message}). Retrying in ${waitTime}ms...`
-                    );
-                  }
+                  logger.warn(
+                    `    ⚠️  API Error (${e.message}). Retrying in ${waitTime}ms...`
+                  );
                   await new Promise((resolve) =>
                     setTimeout(resolve, waitTime)
                   );
@@ -91,17 +90,17 @@ export async function resolveFeatures(
               }
             } catch (e: any) {
               if (e.status === 429) {
-                console.error(
+                logger.error(
                   `❌ [API ERROR] Rate Limit Exceeded after ${llmConfig.maxRetries} retries: "${stepText}".`
                 );
                 process.exit(1);
               } else if (e.status === 503) {
-                console.error(
+                logger.error(
                   `❌ [API ERROR] The LLM Provider returned 503 (High Demand) while compiling: "${stepText}".`
                 );
                 process.exit(1);
               } else {
-                console.error(
+                logger.error(
                   `❌ [API ERROR] Unexpected failure connecting to LLM Provider:`,
                   e.message
                 );
@@ -113,11 +112,10 @@ export async function resolveFeatures(
               (performance.now() - callStart) /
               1000
             ).toFixed(2);
-            if (options.verbose)
-              console.log(`⚡ API returned in ${callDuration}s`);
+            logger.debug(`⚡ API returned in ${callDuration}s`);
 
             if (!currentResolution) {
-              console.error(
+              logger.error(
                 `❌ [API ERROR] Received empty resolution from LLM Provider.`
               );
               process.exit(1);
