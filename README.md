@@ -212,6 +212,21 @@ simply run:
 
 Use `./scripts/test-e2e.sh --help` for help.
 
+#### Strict Mode (`--strict`)
+
+By default, the transpiler emits formatting and logic warnings (e.g., missing
+a `THEN` block) without failing the build. To enforce rigid BDD hygiene in
+CI/CD environments, you can fail the pipeline immediately if any warnings are
+detected:
+
+```bash
+./scripts/test-e2e.sh --strict
+```
+
+As you author markdown BDD tests, you can set a higher threshold using
+`--max-warnings=N` instead, progressively lowering the number over time. Both
+settings can also be configured permanently in `bdd.config.json`.
+
 #### Diagnostic Logging (`--verbose`)
 
 If you need deeper insight into the compilation process, use the `--verbose`

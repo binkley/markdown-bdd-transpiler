@@ -5,7 +5,7 @@ set -e
 
 function print_usage() {
   cat << EOU
-Usage: $0 [-h|--help] [-p|--playwright <OPTION>] [-q|--quiet] [-t|--transpiler <OPTION>] [-v|--verbose] [FILE...]
+Usage: $0 [-h|--help] [-s|--strict] [--max-warnings=<N>] [-p|--playwright <OPTION>] [-q|--quiet] [-t|--transpiler <OPTION>] [-v|--verbose] [FILE...]
 EOU
 }
 
@@ -18,9 +18,11 @@ This script acts as a "Porcelain" orchestrator, routing arguments to the
 underlying "Plumbing" tools (Transpiler and Playwright).
 
 Options:
-  -h, --help       Print this help and exit
-  -q, --quiet      Suppress non-error output
-  -v, --verbose    Verbose logging
+  -h, --help                 Print this help and exit
+  -q, --quiet                Suppress non-error output
+  -v, --verbose              Verbose logging
+  -s, --strict               Fail the build if any BDD warnings are detected
+  --max-warnings=<N>         Fail the build if the warning count exceeds <N>
 
 Tool Routing:
   -p, --playwright <OPTION>
@@ -72,7 +74,7 @@ function process_routed_arg() {
   done
 }
 
-while getopts :hqvp:t:-: opt; do
+while getopts :hqvp:t:s-: opt; do
   [[ $opt == - ]] && opt=${OPTARG%%=*} OPTARG=${OPTARG#*=}
   case $opt in
     h | help)
@@ -84,6 +86,12 @@ while getopts :hqvp:t:-: opt; do
       ;;
     q | quiet)
       quiet=true
+      ;;
+    s | strict)
+      TRANSPILER_ARGS+=("--strict")
+      ;;
+    max-warnings)
+      TRANSPILER_ARGS+=("--max-warnings=$OPTARG")
       ;;
     t | transpiler)
       process_routed_arg "TRANSPILER_ARGS" "$OPTARG"

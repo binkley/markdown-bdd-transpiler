@@ -15,6 +15,8 @@ export interface TranspilerConfig {
   frameworkImport: string;
   setupInjection?: string;
   setupFile?: string;
+  strict: boolean;
+  maxWarnings?: number;
   llm: LLMConfig;
 }
 

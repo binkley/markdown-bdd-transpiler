@@ -66,6 +66,20 @@ export const transpilerConfigSchema = z
       .describe(
         'TypeScript/JavaScript file injected into every generated test'
       ),
+    strict: z
+      .boolean()
+      .default(false)
+      .describe(
+        'Fail the build if any warnings are detected (equivalent to maxWarnings: 0)'
+      ),
+    maxWarnings: z
+      .number()
+      .int()
+      .nonnegative()
+      .optional()
+      .describe(
+        'Maximum number of warnings allowed before failing the build'
+      ),
     llm: llmConfigSchema
   })
   .strict(); // strict() prevents users from adding random misspelled keys

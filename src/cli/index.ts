@@ -181,12 +181,19 @@ export async function main() {
       await fs.writeFile(outPath, specCode);
     }
 
-    return apiCalls;
+    return { apiCalls, warnings: parseWarnings.length + emitWarnings.length };
   });
 
   // Execute all files concurrently
-  const apiCallResults = await Promise.all(filePromises);
-  const totalApiCalls = apiCallResults.reduce((sum, calls) => sum + calls, 0);
+  const fileResults = await Promise.all(filePromises);
+  const totalApiCalls = fileResults.reduce(
+    (sum, res) => sum + res.apiCalls,
+    0
+  );
+  const totalWarnings = fileResults.reduce(
+    (sum, res) => sum + res.warnings,
+    0
+  );
 
   await cache.save();
 
@@ -194,4 +201,16 @@ export async function main() {
   logger.info(
     `\n✅ Transpilation Complete: ${cache.cacheHits + totalApiCalls} steps processed (${cache.cacheHits} cached, ${totalApiCalls} generated via AI) in ${totalDuration}s.`
   );
+
+  const effectiveMaxWarnings = config.strict ? 0 : config.maxWarnings;
+
+  if (
+    effectiveMaxWarnings !== undefined &&
+    totalWarnings > effectiveMaxWarnings
+  ) {
+    logger.error(
+      `\n❌ Build failed: Found ${totalWarnings} warnings (max allowed: ${effectiveMaxWarnings}).`
+    );
+    process.exit(1);
+  }
 }

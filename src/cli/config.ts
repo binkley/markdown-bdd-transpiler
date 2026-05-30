@@ -15,28 +15,30 @@ export async function loadConfig(): Promise<ExecutionState> {
   const options = {
     config: { type: 'string', short: 'c', default: 'bdd.config.json' },
     help: { type: 'boolean', short: 'h', default: false },
-    verbose: { type: 'boolean', short: 'v', default: false },
+    model: { type: 'string' },
+    provider: { type: 'string' },
     quiet: { type: 'boolean', short: 'q', default: false },
+    strict: { type: 'boolean', default: false },
+    verbose: { type: 'boolean', short: 'v', default: false },
     version: { type: 'boolean', short: 'V', default: false },
     yes: { type: 'boolean', short: 'y', default: false },
-    'test-dir': { type: 'string' },
-    'out-dir': { type: 'string' },
-    'manifest-path': { type: 'string' },
     'cache-path': { type: 'string' },
     'clear-cache': { type: 'boolean', default: false },
-    'ignore-cache': { type: 'boolean', default: false },
-    'update-cache': { type: 'boolean', default: false },
     'framework-import': { type: 'string' },
-    'setup-injection': { type: 'string' },
-    'setup-file': { type: 'string' },
-    'llm-provider': { type: 'string' },
-    'llm-model': { type: 'string' },
-    'llm-concurrency': { type: 'string' },
-    'llm-max-retries': { type: 'string' },
-    'llm-initial-delay-ms': { type: 'string' },
+    'ignore-cache': { type: 'boolean', default: false },
     'llm-backoff-factor': { type: 'string' },
-    provider: { type: 'string' },
-    model: { type: 'string' }
+    'llm-concurrency': { type: 'string' },
+    'llm-initial-delay-ms': { type: 'string' },
+    'llm-max-retries': { type: 'string' },
+    'llm-model': { type: 'string' },
+    'llm-provider': { type: 'string' },
+    'manifest-path': { type: 'string' },
+    'max-warnings': { type: 'string' },
+    'out-dir': { type: 'string' },
+    'setup-file': { type: 'string' },
+    'setup-injection': { type: 'string' },
+    'test-dir': { type: 'string' },
+    'update-cache': { type: 'boolean', default: false }
   } as const;
 
   const { values: argv, positionals } = parseArgs({
@@ -117,6 +119,8 @@ Options:
   --framework-import <path>         Module path injected into generated tests for standard steps
   --setup-file <path>               TypeScript/JavaScript file injected into every generated test
   --setup-injection <code>          Raw string of code injected into every generated test
+  --strict                          Fail the build if any warnings are detected (equivalent to maxWarnings: 0)
+  --max-warnings <number>           Maximum number of warnings allowed before failing the build
   --llm-provider <string>           AI provider (e.g., anthropic, gemini, openai)
   --llm-model <string>              Specific AI model (e.g., gemini-2.5-flash-lite)
   --llm-concurrency <number>        Max parallel AI requests (default: 5)
@@ -163,6 +167,9 @@ Arguments:
     mergedConfig.frameworkImport = argv.frameworkImport;
   if (argv.setupInjection) mergedConfig.setupInjection = argv.setupInjection;
   if (argv.setupFile) mergedConfig.setupFile = argv.setupFile;
+  if (argv.strict) mergedConfig.strict = argv.strict;
+  if (argv['max-warnings'])
+    mergedConfig.maxWarnings = Number(argv['max-warnings']);
 
   // Handle nested LLM merges safely
   if (!mergedConfig.llm) mergedConfig.llm = {};
