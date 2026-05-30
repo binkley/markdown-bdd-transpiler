@@ -56,11 +56,11 @@ export const transpilerConfigSchema = z
       .describe(
         'Module path injected into generated tests for standard steps'
       ),
-    setupInjection: z
+    banner: z
       .string()
       .optional()
       .describe('Raw string of code injected into every generated test'),
-    setupFile: z
+    bannerFile: z
       .string()
       .optional()
       .describe(

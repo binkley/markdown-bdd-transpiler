@@ -81,15 +81,15 @@ export class Transpiler {
     const startTime = performance.now();
 
     let setupContent = '';
-    if (config.setupFile) {
+    if (config.bannerFile) {
       try {
         setupContent = await fs.readFile(
-          path.resolve(process.cwd(), config.setupFile),
+          path.resolve(process.cwd(), config.bannerFile),
           'utf-8'
         );
       } catch (e: any) {
         logger.error(
-          `⚠️ [WARNING] Failed to read setupFile "${config.setupFile}":`,
+          `⚠️ [WARNING] Failed to read bannerFile "${config.bannerFile}":`,
           e.message
         );
       }

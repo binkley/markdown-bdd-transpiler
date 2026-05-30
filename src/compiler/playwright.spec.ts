@@ -101,7 +101,7 @@ test('emitPlaywright injects setup strings correctly', () => {
     features,
     {
       frameworkImport: '@binkley/bdd',
-      setupInjection: 'console.log("injected config");'
+      banner: 'console.log("injected config");'
     },
     'console.log("injected file");'
   );

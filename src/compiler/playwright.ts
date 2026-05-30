@@ -2,14 +2,14 @@ import type { Feature } from '../types/index.js';
 
 export function emitPlaywright(
   features: Feature[],
-  config: { frameworkImport: string; setupInjection?: string },
+  config: { frameworkImport: string; banner?: string },
   setupContent?: string
 ): { specCode: string; warnings: string[] } {
   let specCode = `import { test } from '@playwright/test';\n`;
   specCode += `import * as steps from '${config.frameworkImport}';\n\n`;
   const warnings: string[] = [];
 
-  const mergedSetup = [config.setupInjection, setupContent]
+  const mergedSetup = [config.banner, setupContent]
     .filter(Boolean)
     .join('\n');
 

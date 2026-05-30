@@ -36,8 +36,8 @@ export async function loadConfig(): Promise<ExecutionState> {
     'manifest-path': { type: 'string' },
     'max-warnings': { type: 'string' },
     'out-dir': { type: 'string' },
-    'setup-file': { type: 'string' },
-    'setup-injection': { type: 'string' },
+    'banner-file': { type: 'string' },
+    banner: { type: 'string' },
     'test-dir': { type: 'string' },
     'update-cache': { type: 'boolean', default: false }
   } as const;
@@ -118,8 +118,8 @@ Options:
   --ignore-cache                    Forces the AI to re-evaluate all steps without saving to cache
   --update-cache                    Forces the AI to re-evaluate all steps and saves the results to cache
   --framework-import <path>         Module path injected into generated tests for standard steps
-  --setup-file <path>               TypeScript/JavaScript file injected into every generated test
-  --setup-injection <code>          Raw string of code injected into every generated test
+  --banner-file <path>              TypeScript/JavaScript file injected into every generated test
+  --banner <code>                   Raw string of code injected into every generated test
   --strict                          Fail the build if any warnings are detected (equivalent to maxWarnings: 0)
   --max-warnings <number>           Maximum number of warnings allowed before failing the build
   --llm-provider <string>           AI provider (e.g., anthropic, gemini, openai)
@@ -166,8 +166,8 @@ Arguments:
   if (argv.cachePath) mergedConfig.cachePath = argv.cachePath;
   if (argv.frameworkImport)
     mergedConfig.frameworkImport = argv.frameworkImport;
-  if (argv.setupInjection) mergedConfig.setupInjection = argv.setupInjection;
-  if (argv.setupFile) mergedConfig.setupFile = argv.setupFile;
+  if (argv.banner) mergedConfig.banner = argv.banner;
+  if (argv['banner-file']) mergedConfig.bannerFile = argv['banner-file'];
   if (argv.strict) mergedConfig.strict = argv.strict;
   if (argv['max-warnings'])
     mergedConfig.maxWarnings = Number(argv['max-warnings']);

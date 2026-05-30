@@ -474,7 +474,8 @@ is fully configurable to match your project's architecture.
   "outDir": ".generated",
   "manifestPath": "manifest.json",
   "cachePath": "bdd-cache.json",
-  "setupInjection": "test.use({ extraHTTPHeaders: { 'x-mock-user': 'admin' } });",
+  "banner": "test.use({ extraHTTPHeaders: { 'x-mock-user': 'admin' } });",
+  "bannerFile": "tests/setup.ts",
   "strict": false,
   "maxWarnings": 5,
   "llm": {
@@ -501,13 +502,13 @@ is fully configurable to match your project's architecture.
   generated tests. (Defaults to `@binkley/markdown-bdd-transpiler/framework`.
   Only override this if you are building custom Playwright UI
   implementations).
-- **`setupFile`**: (Optional) Path to a TypeScript/JavaScript file (e.g.,
+- **`bannerFile`**: (Optional) Path to a TypeScript/JavaScript file (e.g.,
   `tests/setup.ts`). The contents of this file are injected directly into
   every generated test file. This is the recommended way to inject global
   Playwright `test.use({})` blocks to mock headers, cookies, or authentication
   state.
-- **`setupInjection`**: (Optional) A raw string of code injected at the top of
-  every generated test file. (For complex setups, use `setupFile` instead to
+- **`banner`**: (Optional) A raw string of code injected at the top of
+  every generated test file. (For complex setups, use `bannerFile` instead to
   avoid stringifying multiline code in JSON).
 - **`llm`**: Configures the third-party AI provider behavior.
   - **`provider`**: The vendor to use (`gemini`, `openai`, or `anthropic`).

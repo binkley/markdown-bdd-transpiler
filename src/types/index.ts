@@ -13,8 +13,8 @@ export interface TranspilerConfig {
   manifestPath: string;
   cachePath: string;
   frameworkImport: string;
-  setupInjection?: string;
-  setupFile?: string;
+  banner?: string;
+  bannerFile?: string;
   strict: boolean;
   maxWarnings?: number;
   llm: LLMConfig;
