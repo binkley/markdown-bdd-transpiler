@@ -9,6 +9,7 @@ import type {
   InitOptions
 } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+import { TranspilerError } from '../utils/errors.js';
 
 export async function loadConfig(): Promise<ExecutionState> {
   const args = process.argv.slice(2);
@@ -188,15 +189,13 @@ Arguments:
   const parseResult = transpilerConfigSchema.safeParse(mergedConfig);
 
   if (!parseResult.success) {
-    logger.error(
-      `❌ [ERROR] Configuration validation failed in ${configPath}.`
-    );
+    let errorMsg = `Configuration validation failed in ${configPath}.\n`;
     for (const issue of parseResult.error.issues) {
       const pathStr =
         issue.path.length > 0 ? `${issue.path.join('.')}: ` : '';
-      logger.error(`   - ${pathStr}${issue.message}`);
+      errorMsg += `   - ${pathStr}${issue.message}\n`;
     }
-    process.exit(1);
+    throw new TranspilerError(errorMsg);
   }
 
   return {

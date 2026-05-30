@@ -1,18 +1,16 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import type { LLMProvider, AIResolution, LLMConfig } from '../types/index.js';
+import { MissingApiKeyError } from '../utils/errors.js';
 
 export class GeminiProvider implements LLMProvider {
   private ai: GoogleGenAI;
 
   constructor() {
     if (!process.env.GOOGLE_API_KEY && !process.env.GEMINI_API_KEY) {
-      console.error(
-        `❌ [ERROR] Missing required environment variable: GOOGLE_API_KEY or GEMINI_API_KEY.`
-      );
-      console.error(
-        `   To use the Gemini provider, you must export your API key before running the transpiler.`
-      );
-      process.exit(1);
+      throw new MissingApiKeyError('Gemini', [
+        'GOOGLE_API_KEY',
+        'GEMINI_API_KEY'
+      ]);
     }
     this.ai = new GoogleGenAI({});
   }

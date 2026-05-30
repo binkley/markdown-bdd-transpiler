@@ -4,6 +4,7 @@ import { execSync } from 'child_process';
 import readline from 'readline';
 import type { InitOptions } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+import { TranspilerError } from '../utils/errors.js';
 
 export async function runInitCommand(options: InitOptions) {
   logger.info('🚀 Initializing AI-Augmented Markdown BDD Transpiler...');
@@ -16,14 +17,9 @@ export async function runInitCommand(options: InitOptions) {
     isHeadless &&
     (!options.autoYes || !options.providerFlag || !options.modelFlag)
   ) {
-    logger.error(`❌ [ERROR] Incomplete automation flags provided.`);
-    logger.error(
-      `   To run in headless CI mode, you must provide ALL of the following: '--yes', '--provider <name>', and '--model <name>'.`
+    throw new TranspilerError(
+      `Incomplete automation flags provided.\n   To run in headless CI mode, you must provide ALL of the following: '--yes', '--provider <name>', and '--model <name>'.\n   Example: npx markdown-bdd init -y --provider openai --model gpt-4o`
     );
-    logger.error(
-      `   Example: npx markdown-bdd init -y --provider openai --model gpt-4o`
-    );
-    process.exit(1);
   }
 
   const rl = readline.createInterface({
@@ -87,10 +83,9 @@ export async function runInitCommand(options: InitOptions) {
       else if (normalized === 'gemini') providerChoice = '2';
       else if (normalized === 'openai') providerChoice = '3';
       else {
-        logger.error(
-          `❌ [ERROR] Unsupported LLM provider: "${options.providerFlag}". Supported providers: "anthropic", "gemini", "openai"`
+        throw new TranspilerError(
+          `Unsupported LLM provider: "${options.providerFlag}". Supported providers: "anthropic", "gemini", "openai"`
         );
-        process.exit(1);
       }
     } else {
       logger.info('\n🗳️  Which AI provider would you like to use?');

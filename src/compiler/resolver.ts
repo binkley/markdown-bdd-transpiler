@@ -1,7 +1,9 @@
 import type { LimitFunction } from 'p-limit';
+import { APICallError } from 'ai';
 import type { Feature, LLMProvider, LLMConfig } from '../types/index.js';
 import type { CacheManager } from './cache.js';
 import { logger } from '../utils/logger.js';
+import { EmptyResolutionError, TranspilerError } from '../utils/errors.js';
 
 export async function resolveFeatures(
   features: Feature[],
@@ -70,7 +72,7 @@ export async function resolveFeatures(
                   break;
                 } catch (e: any) {
                   if (attempt === llmConfig.maxRetries) {
-                    throw e;
+                    throw e; // We've exhausted retries, throw the raw error out of the loop
                   }
 
                   const delay =
@@ -89,23 +91,23 @@ export async function resolveFeatures(
                 }
               }
             } catch (e: any) {
-              if (e.status === 429) {
-                logger.error(
-                  `❌ [API ERROR] Rate Limit Exceeded after ${llmConfig.maxRetries} retries: "${stepText}".`
-                );
-                process.exit(1);
-              } else if (e.status === 503) {
-                logger.error(
-                  `❌ [API ERROR] The LLM Provider returned 503 (High Demand) while compiling: "${stepText}".`
-                );
-                process.exit(1);
-              } else {
-                logger.error(
-                  `❌ [API ERROR] Unexpected failure connecting to LLM Provider:`,
-                  e.message
-                );
-                process.exit(1);
+              // The retry loop threw. Let's inspect it to see if it's an APICallError
+              if (APICallError.isInstance(e)) {
+                if (e.statusCode === 429) {
+                  throw new TranspilerError(
+                    `Rate Limit Exceeded (429) after ${llmConfig.maxRetries} retries: "${stepText}".`,
+                    { cause: e }
+                  );
+                } else if (e.statusCode === 503) {
+                  throw new TranspilerError(
+                    `The LLM Provider returned 503 (High Demand) while compiling: "${stepText}".`,
+                    { cause: e }
+                  );
+                }
               }
+
+              // If it's something else (or a 400 bad request), just rethrow it so main() catches it
+              throw e;
             }
 
             const callDuration = (
@@ -115,10 +117,7 @@ export async function resolveFeatures(
             logger.debug(`⚡ API returned in ${callDuration}s`);
 
             if (!currentResolution) {
-              logger.error(
-                `❌ [API ERROR] Received empty resolution from LLM Provider.`
-              );
-              process.exit(1);
+              throw new EmptyResolutionError(stepText);
             }
 
             return currentResolution;
