@@ -433,12 +433,12 @@ manage `bdd-cache.json` and improve the developer experience:
 
 If you want to manage the cache and run the Playwright test suite in a single
 command, you can pass the underlying transpiler flags (`--ignore-cache`,
-`--update-cache`) directly to the E2E script using the `-t:` or
-`--transpiler:` prefix:
+`--update-cache`) directly to the E2E script using the `-t` or
+`--transpiler` flags:
 
 ```bash
 # Update the cache for login.md and immediately run its tests in Docker
-./scripts/test-e2e.sh -t:update-cache tests/login.md
+./scripts/test-e2e.sh -t update-cache tests/login.md
 ```
 
 To perform a full cache refresh alongside Docker execution, chain the

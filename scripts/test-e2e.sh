@@ -5,7 +5,7 @@ set -e
 
 function print_usage() {
   cat << EOU
-Usage: $0 [-h|--help] [-p:<OPTION>|--playwright:<OPTION>] [-q|--quiet] [-t:<OPTION>|--transpiler:<OPTION>] [-v|--verbose] [FILE...]
+Usage: $0 [-h|--help] [-p|--playwright <OPTION>] [-q|--quiet] [-t|--transpiler <OPTION>] [-v|--verbose] [FILE...]
 EOU
 }
 
@@ -23,10 +23,10 @@ Options:
   -v, --verbose    Verbose logging
 
 Tool Routing:
-  -p:<OPTION>, --playwright:<OPTION>
+  -p, --playwright <OPTION>
                    Pass an option directly to Playwright.
                    Separate multiple options with comma.
-  -t:<OPTION>, --transpiler:<OPTION>
+  -t, --transpiler <OPTION>
                    Pass an option directly to the Transpiler.
                    Separate multiple options with comma.
 
@@ -39,13 +39,13 @@ Examples:
                    Transpile and test all files in the test directory.
   $0 tests/example.md
                    Transpile and test only 'tests/example.md'.
-  $0 --verbose
+  $0 --verbose tests/example.md
                    Show verbose logging from transpiler and Playwright.
-  $0 --transpiler:clear-cache
+  $0 --transpiler=clear-cache
                    Run the transpiler with the '--clear-cache' option to wipe the cache without generating tests.
-  $0 --transpiler:update-cache
+  $0 -t update-cache
                    Run the transpiler with the '--update-cache' option to surgically repair missing cache entries.
-  $0 --transpiler:ignore-cache
+  $0 --transpiler=ignore-cache tests/example.md
                    Run the transpiler without using or updating the cache.
 EOH
 }
@@ -72,39 +72,48 @@ function process_routed_arg() {
   done
 }
 
-# Parse arguments and route them
-for arg in "$@"; do
-  case "$arg" in
-    -h | --help)
+while getopts :hqvp:t:-: opt; do
+  [[ $opt == - ]] && opt=${OPTARG%%=*} OPTARG=${OPTARG#*=}
+  case $opt in
+    h | help)
       print_help
       exit 0
       ;;
-    -p:* | --playwright:*)
-      process_routed_arg "PLAYWRIGHT_ARGS" "${arg#*:}"
+    p | playwright)
+      process_routed_arg "PLAYWRIGHT_ARGS" "$OPTARG"
       ;;
-    -q | --quiet)
+    q | quiet)
       quiet=true
       ;;
-    -t:* | --transpiler:*)
-      process_routed_arg "TRANSPILER_ARGS" "${arg#*:}"
+    t | transpiler)
+      process_routed_arg "TRANSPILER_ARGS" "$OPTARG"
       ;;
-    -v | --verbose)
+    v | verbose)
       verbose=true
       ;;
-    *.md)
-      # Route positional .md files to the transpiler
-      TRANSPILER_ARGS+=("$arg")
-
-      # Route the expected output .test.ts file to Playwright
-      filename=$(basename "$arg")
-      PLAYWRIGHT_ARGS+=(".generated/${filename}.test.ts")
-      ;;
     *)
-      echo "❌ Error: Unknown argument '$arg'. Use --t: for transpiler or --p: for playwright flags." >&2
+      echo "❌ Error: Unknown argument '$opt'. Use -t or --transpiler for transpiler flags, and -p or --playwright for playwright flags." >&2
       print_usage >&2
       exit 2
       ;;
   esac
+done
+shift $((OPTIND - 1))
+
+# Any remaining positional arguments are files
+for arg in "$@"; do
+  if [[ "$arg" == *.md ]]; then
+    # Route positional .md files to the transpiler
+    TRANSPILER_ARGS+=("$arg")
+
+    # Route the expected output .test.ts file to Playwright
+    filename=$(basename "$arg")
+    PLAYWRIGHT_ARGS+=(".generated/${filename}.test.ts")
+  else
+    echo "❌ Error: Unknown argument '$arg'. Use -t or --transpiler for transpiler flags, and -p or --playwright for playwright flags." >&2
+    print_usage >&2
+    exit 2
+  fi
 done
 
 if $quiet && $verbose; then
