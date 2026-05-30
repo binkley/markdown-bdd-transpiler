@@ -60,6 +60,9 @@ executed by **Playwright** and **Vitest**.
 The transpiler includes an interactive initialization script to automatically
 scaffold your configuration and install the correct peer dependencies.
 
+You can examine the package in
+[NPM](https://www.npmjs.com/package/@binkley/markdown-bdd-transpiler).
+
 ### 1. Install the Transpiler
 
 ```bash
