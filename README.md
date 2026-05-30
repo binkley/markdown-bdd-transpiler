@@ -475,6 +475,8 @@ is fully configurable to match your project's architecture.
   "manifestPath": "manifest.json",
   "cachePath": "bdd-cache.json",
   "setupInjection": "test.use({ extraHTTPHeaders: { 'x-mock-user': 'admin' } });",
+  "strict": false,
+  "maxWarnings": 5,
   "llm": {
     "provider": "gemini",
     "model": "gemini-2.5-flash-lite",

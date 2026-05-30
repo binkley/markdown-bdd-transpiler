@@ -108,10 +108,6 @@ test('emitPlaywright injects setup strings correctly', () => {
 
   assert.match(
     specCode,
-    /\/\/ --- INJECTED BDD SETUP ---\nconsole\.log\("injected config"\);\n\/\/ --------------------------/
-  );
-  assert.match(
-    specCode,
-    /\/\/ --- INJECTED BDD SETUP ---\nconsole\.log\("injected file"\);\n\/\/ --------------------------/
+    /\/\/ --- INJECTED BDD SETUP ---\nconsole\.log\("injected config"\);\nconsole\.log\("injected file"\);\n\/\/ --------------------------/
   );
 });

@@ -9,15 +9,13 @@ export function emitPlaywright(
   specCode += `import * as steps from '${config.frameworkImport}';\n\n`;
   const warnings: string[] = [];
 
-  if (config.setupInjection) {
-    specCode += `// --- INJECTED BDD SETUP ---\n`;
-    specCode += `${config.setupInjection}\n`;
-    specCode += `// --------------------------\n\n`;
-  }
+  const mergedSetup = [config.setupInjection, setupContent]
+    .filter(Boolean)
+    .join('\n');
 
-  if (setupContent) {
+  if (mergedSetup) {
     specCode += `// --- INJECTED BDD SETUP ---\n`;
-    specCode += `${setupContent}\n`;
+    specCode += `${mergedSetup}\n`;
     specCode += `// --------------------------\n\n`;
   }
 
