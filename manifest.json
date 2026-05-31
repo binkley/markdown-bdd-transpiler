@@ -20,5 +20,6 @@
       "description": "Asserts the state (e.g., 'visible', 'hidden', 'enabled', 'disabled') of an element identified by its ARIA role and accessible name.",
       "parameters": ["aria_role", "accessible_name", "expected_state"]
     }
-  ]
+  ],
+  "version": "0.5.0"
 }
