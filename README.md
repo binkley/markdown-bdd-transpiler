@@ -676,35 +676,44 @@ assistant, we can operationalize the metadata returned by modern LLMs:
    Playwright ARIA actions to implement next (e.g., "Authors attempted
    drag-and-drop 14 times").
 
-#### Grow Our Library for Playwright Support
+#### Automated Step Discovery (TypeScript AST Parsing)
 
-We currently have a limited number of mappings in `manifest.json`. A framework
-like this lives and dies by the breadth of its underlying capabilities. Future
-iterations should focus on:
+Currently, when a developer writes a custom UI step, they must manually keep
+their TypeScript function signature synchronized with the JSON object in
+`manifest.json`. The transpiler should eventually use the TypeScript Compiler
+API to automatically parse the exported functions in the consumer's
+`frameworkImport` file, generating the `manifest.json` schema automatically.
 
-1. **Expanding ARIA Support:** Research and implement broader ARIA roles for
-   `WHEN` actions (e.g., `combobox`, `dialog`, `tab`, `slider`).
-2. **Rich Assertions:** Expand the library for `THEN` verification steps. UI
-   testing requires verifying list lengths, exact text counts, and complex
-   visibility states beyond simple element presence.
+#### Community Manifest Ecosystem (Plugin Architecture)
+
+Because consuming projects can now eject their `manifest.json` and define
+custom UI steps, the core framework no longer needs to natively support every
+obscure ARIA role or complex interaction. Future iterations should focus on:
+
+1. **Manifest Modules:** Allowing `bdd.config.json` to accept an array of
+   manifest paths or NPM packages (e.g., `"manifests":
+["@binkley/bdd-salesforce-plugin"]`), enabling the community to share
+   pre-built step libraries for common SaaS platforms.
+2. **Rich Assertions:** Expanding the core library for `THEN` verification
+   steps to handle list lengths, exact text counts, and complex visibility
+   states beyond simple element presence.
 3. **Compound/Parametrized Selectors:** Support finding elements _within_
    other elements (e.g., "Click the 'Delete' button in the 'User Summary'
-   row"). This requires enhancing the manifest to support chained Playwright
-   locators.
+   row").
 
-#### Pluggable Test Framework Emitters
+#### Interactive Manifest Upgrades
 
-Currently, the transpiler hardcodes Playwright test generation syntax
-(`test.describe`, `test.step`). To increase adoption, the `emitPlaywright`
-logic should be abstracted into a generic `Emitter` interface. This would
-allow consumers to specify a `--framework` flag to target alternative E2E
-ecosystems (e.g., Cypress, WebdriverIO, Puppeteer).
+Because `npx markdown-bdd init` ejects a static copy of the default
+`manifest.json` into the consumer's project, they miss out on new steps added
+in future framework releases. We should build an interactive `npx markdown-bdd
+upgrade` command that parses the consumer's local manifest, diffs it against
+the latest default manifest, and interactively merges in new capabilities.
 
-#### Prompt Debugging & Dry Runs (Observability)
+#### Prompt Debugging (Payload Dumping)
 
-When the AI hallucinates or maps a step incorrectly, maintainers currently
-lack visibility into the exact textual context sent to the LLM. Implementing a
-`--dry-run` or `--dump-prompts` feature that saves the templated payloads to
-`.generated/prompts/` would massively improve observability, allowing
-developers to manually inspect and tune their `manifest.json` or Designer
-Notes.
+While the `--verbose` flag provides good observability into cache misses,
+maintainers currently lack visibility into the exact, finalized text prompt
+(including Designer Notes and injected variables) sent to the LLM.
+Implementing a `--dump-prompts` feature that saves the raw templated payloads
+to `.generated/prompts/` would massively improve the ability to tune custom
+manifests and Designer Notes.
