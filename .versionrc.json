@@ -5,6 +5,7 @@
   },
   "types": [
     { "type": "feat", "section": "✨ Features" },
+    { "type": "security", "section": "🔒 Security Updates" },
     { "type": "docs", "section": "📚 Documentation" },
     { "type": "refactor", "section": "🛠 Architecture" },
     { "type": "build", "section": "🧱 Build" },
