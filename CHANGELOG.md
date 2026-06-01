@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.1](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.0...v0.5.1) (2026-06-01)
+
+### 🐛 Bug Fixes
+
+- **cli:** Protect existing config files during init and eject manifest ([a55e859](https://github.com/binkley/markdown-bdd-transpiler/commit/a55e859bfc6db2d9e3d97334694ca98f3cb13025))
+- **framework:** Respect Playwright native baseURL ([ed12d8d](https://github.com/binkley/markdown-bdd-transpiler/commit/ed12d8da7ad40e6565adba35c2ee5a75a557647b))
+
+### ✨ Features
+
+- **framework:** Support text locators ([775fa39](https://github.com/binkley/markdown-bdd-transpiler/commit/775fa397e8e8c4482fa6b5b746a5dddbd0045e02))
+
+### 📚 Documentation
+
+- **readme:** Refresh TODOs ([55eef85](https://github.com/binkley/markdown-bdd-transpiler/commit/55eef8533847f60be3e1d23555f2e2d9af715ddf))
+
+### 🧱 Build
+
+- **release:** More safety ([06863fd](https://github.com/binkley/markdown-bdd-transpiler/commit/06863fdcaf82e897f27cc1ccfdcef10f6ca12aac))
+
 ## [0.5.0](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.4.0...v0.5.0) (2026-05-31)
 
 ### 🐛 Bug Fixes
