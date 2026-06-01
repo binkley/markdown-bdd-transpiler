@@ -1,6 +1,16 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [0.5.2](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.1...v0.5.2) (2026-06-01)
+
+### 🔒 Security Updates
+
+- **deps:** Update AI SDKs for security fix ([f6040fe](https://github.com/binkley/markdown-bdd-transpiler/commit/f6040fe4ae3ee40dd7c281161e511e5b3e4d7c82))
+
+### 🧱 Build
+
+- **release:** Update tooling ([ce14600](https://github.com/binkley/markdown-bdd-transpiler/commit/ce14600d7ff55363fa2e7a89a45bb237fac863c8))
 
 ### [0.5.1](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.0...v0.5.1) (2026-06-01)
 
