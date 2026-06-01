@@ -114,8 +114,8 @@ trap cleanup EXIT INT TERM
 old_version=$(node -p "require('./package.json').version")
 
 log_step "🔍 Analyzing Git history to calculate next '$release_type' version..."
-# We use standard-version's dry-run mode to extract the predicted new version number and changelog
-dry_run_output=$(npx standard-version --release-as "$release_type" --dry-run)
+# We use commit-and-tag-version's dry-run mode to extract the predicted new version number and changelog
+dry_run_output=$(npx commit-and-tag-version --release-as "$release_type" --dry-run)
 new_version=$(echo "$dry_run_output" | grep "bumping version in package.json from" | awk '{print $9}')
 
 if [[ -z "$new_version" ]]; then
@@ -149,13 +149,13 @@ fi
 
 function apply_version_bump() {
   if $dry_run; then
-    log_step "npx standard-version --release-as \"$release_type\" --sign --dry-run"
-    npx standard-version --release-as "$release_type" --sign --dry-run
+    log_step "npx commit-and-tag-version --release-as \"$release_type\" --sign --dry-run"
+    npx commit-and-tag-version --release-as "$release_type" --sign --dry-run
   else
     if $quiet; then
-      npx standard-version --release-as "$release_type" --sign > /dev/null
+      npx commit-and-tag-version --release-as "$release_type" --sign > /dev/null
     else
-      npx standard-version --release-as "$release_type" --sign
+      npx commit-and-tag-version --release-as "$release_type" --sign
     fi
   fi
 }
