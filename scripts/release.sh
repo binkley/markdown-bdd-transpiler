@@ -150,12 +150,12 @@ fi
 function apply_version_bump() {
   if $dry_run; then
     log_step "npx commit-and-tag-version --release-as \"$release_type\" --sign --dry-run"
-    npx commit-and-tag-version --release-as "$release_type" --sign --dry-run
+    npx commit-and-tag-version --no-verify --release-as "$release_type" --sign --dry-run
   else
     if $quiet; then
-      npx commit-and-tag-version --release-as "$release_type" --sign > /dev/null
+      npx commit-and-tag-version --no-verify --release-as "$release_type" --sign > /dev/null
     else
-      npx commit-and-tag-version --release-as "$release_type" --sign
+      npx commit-and-tag-version --no-verify --release-as "$release_type" --sign
     fi
   fi
 }
