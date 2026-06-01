@@ -1,4 +1,5 @@
 {
+  "_help": "This is your project's local copy of the BDD manifest. You can define custom UI steps here for the AI to use. For the latest default manifest, see the markdown-bdd-transpiler repository.",
   "available_steps": [
     {
       "function_name": "navigate_to",

@@ -1,13 +1,66 @@
 import fs from 'fs/promises';
+import { existsSync } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import readline from 'readline';
 import type { InitOptions } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import { TranspilerError } from '../utils/errors.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export async function runInitCommand(options: InitOptions) {
   logger.info('🚀 Initializing AI-Augmented Markdown BDD Transpiler...');
+
+  const cwd = process.cwd();
+
+  // Try to find the manifest path from an existing config, or default to manifest.json
+  let targetManifestPath = 'manifest.json';
+  const configPath = path.resolve(cwd, 'bdd.config.json');
+
+  if (existsSync(configPath)) {
+    try {
+      const existingConfig = JSON.parse(
+        await fs.readFile(configPath, 'utf-8')
+      );
+      if (existingConfig.manifestPath) {
+        targetManifestPath = existingConfig.manifestPath;
+      }
+    } catch {
+      // Ignore parse errors here, we'll bail out anyway due to the file existing
+    }
+  }
+
+  const resolvedManifestPath = path.resolve(cwd, targetManifestPath);
+
+  // Early Bail Idempotency Check
+  const hasConfig = existsSync(configPath);
+  const hasManifest = existsSync(resolvedManifestPath);
+
+  if (hasConfig || hasManifest) {
+    logger.warn(
+      '\n⚠️  Initialization aborted to protect your existing files.'
+    );
+    logger.info('\nFound existing configuration files:');
+    if (hasConfig) logger.info(`- ${configPath}`);
+    if (hasManifest) logger.info(`- ${resolvedManifestPath}`);
+
+    logger.info(
+      '\nIf you are trying to upgrade or reconfigure the transpiler:'
+    );
+    logger.info(
+      '1. Review the latest default configurations in the documentation.'
+    );
+    logger.info('2. Manually update your existing files.');
+    logger.info(
+      '3. Or, if you want to start fresh, delete these files and run init again.'
+    );
+
+    // Exit cleanly without throwing a stack trace
+    process.exit(0);
+  }
 
   const isHeadless =
     options.autoYes || !!options.providerFlag || !!options.modelFlag;
@@ -136,9 +189,39 @@ export async function runInitCommand(options: InitOptions) {
       }
     };
 
-    const configPath = path.resolve(process.cwd(), 'bdd.config.json');
     await fs.writeFile(configPath, JSON.stringify(config, null, 2));
     logger.info(`\n✅ Created configuration file at: ${configPath}`);
+
+    // Eject the manifest
+    // Calculate path to the source manifest.json.
+    // In dev: src/cli/init.ts -> ../../manifest.json
+    // In dist: dist/src/cli/init.js -> ../../../manifest.json
+    let sourceManifestPath = path.resolve(
+      __dirname,
+      '..',
+      '..',
+      'manifest.json'
+    );
+    if (!existsSync(sourceManifestPath)) {
+      sourceManifestPath = path.resolve(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'manifest.json'
+      );
+    }
+    try {
+      await fs.copyFile(sourceManifestPath, resolvedManifestPath);
+      logger.info(`✅ Ejected default manifest to: ${resolvedManifestPath}`);
+      logger.info(
+        `   (Edit this file to add custom UI steps for your project)`
+      );
+    } catch (err) {
+      logger.warn(
+        `⚠️ Failed to copy default manifest.json: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
 
     if (installPkg) {
       logger.info(
