@@ -102,19 +102,41 @@ if ! git diff-index --quiet HEAD --; then
   exit 1
 fi
 
+release_completed=false
+function cleanup() {
+  if [ "$release_completed" != "true" ] && ! $dry_run; then
+    log_step "🧹 Cleaning up aborted release to ensure a clean state..."
+    git checkout -- package.json package-lock.json manifest.json CHANGELOG.md > /dev/null 2>&1 || true
+  fi
+}
+trap cleanup EXIT INT TERM
+
 old_version=$(node -p "require('./package.json').version")
 
 log_step "🔍 Analyzing Git history to calculate next '$release_type' version..."
-# We use standard-version's dry-run mode purely to extract the predicted new version number
-# so we can show it to the user in the confirmation prompt.
-new_version=$(npx standard-version --release-as "$release_type" --dry-run | grep "bumping version in package.json from" | awk '{print $9}')
+# We use standard-version's dry-run mode to extract the predicted new version number and changelog
+dry_run_output=$(npx standard-version --release-as "$release_type" --dry-run)
+new_version=$(echo "$dry_run_output" | grep "bumping version in package.json from" | awk '{print $9}')
 
 if [[ -z "$new_version" ]]; then
   echo "❌ Error: Failed to calculate new version. Is the workspace clean?" >&2
   exit 1
 fi
 
+log_step "🎯 Validating codebase before release..."
+validate_flags=()
+if $quiet; then validate_flags=("--" "--quiet"); fi
+if $verbose; then validate_flags=("--" "--verbose"); fi
+
+$run npm run validate:push "${validate_flags[@]}"
+# Because of 'set -e' at top, this bails out if validation fails before we proceed.
+
 if $confirm; then
+  echo ""
+  log_step "📝 Proposed Changelog Addition:"
+  echo "$dry_run_output" | awk '/^---$/{flag=!flag; if(flag) next; else exit} flag'
+  echo ""
+
   read -r -p "🗳️  Ready to release ($old_version -> $new_version) and generate CHANGELOG? [y/N]: " answer
   case $answer in
     y* | Y*) ;;
@@ -138,15 +160,6 @@ function apply_version_bump() {
   fi
 }
 
-log_step "🎯 Validating for release..."
-VALIDATE_FLAGS=()
-if $quiet; then VALIDATE_FLAGS=("--" "--quiet"); fi
-if $verbose; then VALIDATE_FLAGS=("--" "--verbose"); fi
-
-$run npm run validate:push "${VALIDATE_FLAGS[@]}"
-# Because of 'set -e' at top, this bails out if validation fails before we
-# call either npm or git.
-
 log_step "🚀 Bumping '$release_type' release ($old_version -> $new_version)..."
 apply_version_bump
 
@@ -159,4 +172,5 @@ else
   $run git push --follow-tags --no-verify
 fi
 
+release_completed=true
 log_step "✅ Release v$new_version triggered! GitHub Actions will now build and publish to NPM."
