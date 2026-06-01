@@ -6,8 +6,7 @@ function escapeRegExp(string: string) {
 }
 
 export async function navigate_to(page: Page, url_string: string) {
-  const baseUrl = process.env.TEST_BASE_URL || 'http://localhost:5173';
-  await page.goto(`${baseUrl}${interpolate(url_string)}`);
+  await page.goto(interpolate(url_string));
 }
 
 export async function fill_input(

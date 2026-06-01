@@ -524,6 +524,52 @@ is fully configurable to match your project's architecture.
 _Note: All configuration options can also be overridden via CLI flags (e.g.,
 `npx markdown-bdd-transpiler --llm-provider openai`)._
 
+### Extensibility: Custom UI Steps
+
+The core framework enforces strict A11y and Playwright best practices (e.g., failing to click if an element is covered by an invisible modal overlay). Rather than polluting your BDD Markdown with technical terms (e.g., "forcefully click") or waiting for the core framework to implement edge cases, your project can easily extend the AI capabilities by defining custom steps.
+
+For example, to cleanly handle a blocking overlay without altering the natural language of your BDD:
+
+**1. Define it in your `manifest.json`:**
+
+```json
+{
+  "available_steps": [
+    {
+      "function_name": "dismiss_overlay",
+      "description": "Closes a blocking modal or overlay, such as the 'End Session' warning.",
+      "parameters": ["overlay_name"]
+    }
+  ]
+}
+```
+
+**2. Implement the technical hack in your own code:**
+
+```typescript
+// project-root/framework/custom-ui-steps.ts
+import type { Page } from '@playwright/test';
+
+export async function dismiss_overlay(page: Page, overlay_name: string) {
+  // Encapsulate the 'force' hack tailored to your specific UI problem
+  await page
+    .getByRole('button', { name: overlay_name })
+    .click({ force: true });
+}
+```
+
+**3. Point the config to your implementation:**
+
+```json
+// bdd.config.json
+{
+  "manifestPath": "manifest.json",
+  "frameworkImport": "./framework/custom-ui-steps.ts"
+}
+```
+
+Now, when a non-technical author writes `The user dismisses the "End Session" warning`, the AI will map it to your custom function, keeping the BDD clean and the Playwright hack abstracted.
+
 ---
 
 ## 🛠️ Development Commands
