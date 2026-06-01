@@ -142,6 +142,11 @@ export function parseMarkdown(
           const prevSibling = parent.children[nodeIndex - 1];
           if (prevSibling.type === 'paragraph') {
             designerNotes = getText(prevSibling).trim();
+            if (designerNotes) {
+              warnings.push(
+                `⚠️ ${relativeFilePath}:${node.position?.start?.line} - warning: Designer Note used ("${designerNotes.substring(0, 30)}..."). Designer Notes should be a temporary bridge for missing support code. Consider adding a custom UI step to encapsulate this logic long-term.`
+              );
+            }
           }
         }
       }

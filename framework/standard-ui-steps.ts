@@ -46,6 +46,15 @@ export async function interact_with(
   }
 }
 
+export async function interact_with_text(page: Page, visible_text: string) {
+  const finalText = interpolate(visible_text);
+  const regexText = new RegExp(escapeRegExp(finalText), 'i');
+
+  const locator = page.getByText(regexText).locator('visible=true').first();
+
+  await locator.click();
+}
+
 type ElementState = 'visible' | 'hidden' | 'enabled' | 'disabled';
 export async function verify_element_state(
   page: Page,

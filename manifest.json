@@ -17,6 +17,11 @@
       "parameters": ["aria_role", "accessible_name"]
     },
     {
+      "function_name": "interact_with_text",
+      "description": "Clicks an element identified solely by its visible text. Use this when the element lacks a clear ARIA role.",
+      "parameters": ["visible_text"]
+    },
+    {
       "function_name": "verify_element_state",
       "description": "Asserts the state (e.g., 'visible', 'hidden', 'enabled', 'disabled') of an element identified by its ARIA role and accessible name.",
       "parameters": ["aria_role", "accessible_name", "expected_state"]

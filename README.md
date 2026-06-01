@@ -526,9 +526,14 @@ _Note: All configuration options can also be overridden via CLI flags (e.g.,
 
 ### Extensibility: Custom UI Steps
 
-The core framework enforces strict A11y and Playwright best practices (e.g., failing to click if an element is covered by an invisible modal overlay). Rather than polluting your BDD Markdown with technical terms (e.g., "forcefully click") or waiting for the core framework to implement edge cases, your project can easily extend the AI capabilities by defining custom steps.
+The core framework enforces strict A11y and Playwright best practices (e.g.,
+failing to click if an element is covered by an invisible modal overlay).
+Rather than polluting your BDD Markdown with technical terms (e.g.,
+"forcefully click") or waiting for the core framework to implement edge cases,
+your project can easily extend the AI capabilities by defining custom steps.
 
-For example, to cleanly handle a blocking overlay without altering the natural language of your BDD:
+For example, to cleanly handle a blocking overlay without altering the natural
+language of your BDD:
 
 **1. Define it in your `manifest.json`:**
 
@@ -544,7 +549,7 @@ For example, to cleanly handle a blocking overlay without altering the natural l
 }
 ```
 
-**2. Implement the technical hack in your own code:**
+**2. Implement the workaround in your own code:**
 
 ```typescript
 // project-root/framework/custom-ui-steps.ts
@@ -568,7 +573,42 @@ export async function dismiss_overlay(page: Page, overlay_name: string) {
 }
 ```
 
-Now, when a non-technical author writes `The user dismisses the "End Session" warning`, the AI will map it to your custom function, keeping the BDD clean and the Playwright hack abstracted.
+Now, when a non-technical author writes `The user dismisses the "End Session"
+warning`, the AI will map it to your custom function, keeping the BDD clean
+and the Playwright hack abstracted.
+
+#### Temporary Workarounds (Designer Notes)
+
+Sometimes, you need a test to pass _today_ before you have time to write
+custom support code, or when dealing with a legacy UI element that lacks
+proper ARIA roles. The framework supports **Designer Notes**—a standard
+Markdown paragraph placed immediately before a `bdd` code fence. The
+transpiler sends this note directly to the AI to help it disambiguate the
+following steps.
+
+If an element cannot be found by its ARIA role, you can use a Designer Note to
+guide the AI to use the core framework's `interact_with_text` step:
+
+````markdown
+_QA Note: The "Submit Icon" lacks an ARIA role, but contains the visible text
+"Submit"._
+
+```bdd
+- The user clicks the Submit Icon
+```
+````
+
+**⚠️ The "Technical Debt" Warning**
+
+Because Designer Notes can leak technical implementation details (or raw
+locators) into your behavioral specifications, the transpiler considers them a
+"leaky abstraction." **Whenever the transpiler encounters a Designer Note, it
+will emit a build warning.**
+
+This is an intentional design choice to track technical debt. It allows the
+scenario to execute and pass in the short term, while signaling to your
+engineering team that technical work (like adding an ARIA role to the app, or
+writing a custom UI step) is required long-term to keep the test suite pure.
 
 ---
 
