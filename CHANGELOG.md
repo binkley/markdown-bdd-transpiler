@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.5.3](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.2...v0.5.3) (2026-06-02)
+
+### 📚 Documentation
+
+- **readme:** More badges ([e2d1088](https://github.com/binkley/markdown-bdd-transpiler/commit/e2d108886c53b25588e8694049938d799905dac0))
+
+### 🧱 Build
+
+- **release:** Do not repeat pre-commit checks ([ecec2e3](https://github.com/binkley/markdown-bdd-transpiler/commit/ecec2e386c73c9c877de3cc3fa43d105494e7b59))
+- Support older Node versions for consumers ([18ba629](https://github.com/binkley/markdown-bdd-transpiler/commit/18ba629aa189ecbe174c1329d10514b5af664283))
+
 ## [0.5.2](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.1...v0.5.2) (2026-06-01)
 
 ### 🔒 Security Updates

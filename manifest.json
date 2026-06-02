@@ -27,5 +27,5 @@
       "parameters": ["aria_role", "accessible_name", "expected_state"]
     }
   ],
-  "version": "0.5.2"
+  "version": "0.5.3"
 }
