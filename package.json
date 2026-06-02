@@ -17,7 +17,7 @@
     "url": "https://github.com/binkley/markdown-bdd-transpiler/issues"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=20.0.0"
   },
   "type": "module",
   "license": "CC0-1.0",

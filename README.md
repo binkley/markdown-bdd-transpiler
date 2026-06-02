@@ -10,15 +10,9 @@ align="right" width="10%" height="auto"/>
 [![ci](https://img.shields.io/github/actions/workflow/status/binkley/markdown-bdd-transpiler/ci.yml?branch=main&label=ci)](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml)
 [![issues](https://img.shields.io/github/issues/binkley/markdown-bdd-transpiler?label=issues)](https://github.com/binkley/markdown-bdd-transpiler/issues)
 [![pull requests](https://img.shields.io/github/issues-pr/binkley/markdown-bdd-transpiler?label=pull%20requests)](https://github.com/binkley/markdown-bdd-transpiler/pulls)
-[![npm version](https://img.shields.io/npm/v/@binkley/markdown-bdd-transpiler.svg)](https://www.npmjs.com/package/@binkley/markdown-bdd-transpiler)
 [![changelog](https://img.shields.io/badge/changelog-latest-blue.svg)](./CHANGELOG.md)
 [![node version](https://img.shields.io/node/v/@binkley/markdown-bdd-transpiler.svg)](https://nodejs.org)
-[![typescript](https://img.shields.io/badge/typescript-007acc?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![playwright](https://img.shields.io/badge/-playwright-45ba4b?style=flat&logo=playwright&logoColor=white)](https://playwright.dev/)
-[![vitest](https://img.shields.io/badge/-vitest-729B1B?style=flat&logo=vitest&logoColor=white)](https://vitest.dev/)
-[![vercel ai](https://img.shields.io/badge/powered%20by-vercel%20ai-black?style=flat&logo=vercel)](https://sdk.vercel.ai/)
-[![eslint](https://img.shields.io/badge/eslint-4b32c3?style=flat&logo=eslint&logoColor=white)](https://eslint.org/)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+[![npm version](https://img.shields.io/npm/v/@binkley/markdown-bdd-transpiler.svg)](https://www.npmjs.com/package/@binkley/markdown-bdd-transpiler)
 
 A modern, Behavior-Driven Development (BDD) testing framework that allows
 non-technical stakeholders to author End-to-End (E2E) user journeys using
