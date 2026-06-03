@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.5.5](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.4...v0.5.5) (2026-06-03)
+
+### ✨ Features
+
+- **manifest:** Steps for text and testid locators ([acfb05d](https://github.com/binkley/markdown-bdd-transpiler/commit/acfb05d14e36173f92ab88bfb3c81db3c3bbba29))
+
+### 📚 Documentation
+
+- **community:** Better local setup ([646aa29](https://github.com/binkley/markdown-bdd-transpiler/commit/646aa29b68de4affdb212e1cc126ec1018c6dc7d))
+- **community:** GitHub community standard files ([c163e58](https://github.com/binkley/markdown-bdd-transpiler/commit/c163e5821204b22ff6cfd6b18b77dca3d8459e57))
+
+### 🐛 Bug Fixes
+
+- **ci:** Bad formatting ([83d1c7a](https://github.com/binkley/markdown-bdd-transpiler/commit/83d1c7a8c1294d2d62738edaff6f56cea792d09c))
+
 ## [0.5.4](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.3...v0.5.4) (2026-06-02)
 
 ### 🐛 Bug Fixes

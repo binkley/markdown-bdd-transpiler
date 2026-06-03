@@ -47,5 +47,5 @@
       "parameters": ["test_id", "expected_state"]
     }
   ],
-  "version": "0.5.4"
+  "version": "0.5.5"
 }
