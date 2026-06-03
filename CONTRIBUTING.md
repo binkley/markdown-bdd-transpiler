@@ -67,6 +67,7 @@ Please follow these steps to have your contribution considered by the maintainer
 To set up your local development environment:
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/binkley/markdown-bdd-transpiler.git
    cd markdown-bdd-transpiler
@@ -74,17 +75,20 @@ To set up your local development environment:
 
 2. **Ensure you are using the correct Node version:**
    The project uses Node v24 (as defined in `.nvmrc`).
+
    ```bash
    nvm use
    ```
 
 3. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 4. **Setup commits and pushes:**
    Install `pre-commit` and `pre-push` hooks for the local repo clone.
+
    ```bash
    npm run prepare
    ```
