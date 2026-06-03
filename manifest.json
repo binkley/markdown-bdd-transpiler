@@ -22,9 +22,29 @@
       "parameters": ["visible_text"]
     },
     {
+      "function_name": "interact_with_testid",
+      "description": "Clicks an element identified by its data-testid attribute. Use this as a structural fallback for legacy applications.",
+      "parameters": ["test_id"]
+    },
+    {
+      "function_name": "fill_input_testid",
+      "description": "Fills out a text input area identified by its data-testid attribute.",
+      "parameters": ["test_id", "value_to_type"]
+    },
+    {
       "function_name": "verify_element_state",
       "description": "Asserts the state (e.g., 'visible', 'hidden', 'enabled', 'disabled') of an element identified by its ARIA role and accessible name.",
       "parameters": ["aria_role", "accessible_name", "expected_state"]
+    },
+    {
+      "function_name": "verify_text_state",
+      "description": "Asserts the state (e.g., 'visible', 'hidden', 'enabled', 'disabled') of an element identified solely by its visible text.",
+      "parameters": ["visible_text", "expected_state"]
+    },
+    {
+      "function_name": "verify_testid_state",
+      "description": "Asserts the state (e.g., 'visible', 'hidden', 'enabled', 'disabled') of an element identified by its data-testid attribute.",
+      "parameters": ["test_id", "expected_state"]
     }
   ],
   "version": "0.5.4"

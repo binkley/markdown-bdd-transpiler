@@ -107,7 +107,7 @@
     "?test": "echo \"Run both fast unit tests and the full E2E suite\"",
     "test": "npm run test:unit && npm run test:e2e",
     "?test:unit": "echo \"Run fast native Node.js unit tests with coverage\"",
-    "test:unit": "node --experimental-test-coverage --test-coverage-lines=96 --test-coverage-branches=94 --test-coverage-functions=97 --import tsx --test 'src/**/*.spec.ts'",
+    "test:unit": "node --experimental-test-coverage --test-coverage-lines=96 --test-coverage-branches=95 --test-coverage-functions=98 --import tsx --test 'src/**/*.spec.ts'",
     "?test:e2e": "echo \"Boot Docker and run the full Playwright integration suite\"",
     "test:e2e": "./scripts/test-e2e.sh",
     "test:playwright": "playwright test",

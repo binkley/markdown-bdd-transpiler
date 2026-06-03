@@ -56,17 +56,11 @@ export async function interact_with_text(page: Page, visible_text: string) {
 }
 
 type ElementState = 'visible' | 'hidden' | 'enabled' | 'disabled';
-export async function verify_element_state(
-  page: Page,
-  aria_role: Parameters<Page['getByRole']>[0],
-  accessible_name: string,
+
+async function assert_locator_state(
+  locator: ReturnType<Page['locator']>,
   expected_state: ElementState
 ) {
-  const finalName = interpolate(accessible_name);
-
-  const regexName = new RegExp(escapeRegExp(finalName), 'i');
-  let locator = page.getByRole(aria_role, { name: regexName });
-
   if (expected_state === 'hidden') {
     await locator.waitFor({ state: 'hidden' });
   } else {
@@ -82,4 +76,60 @@ export async function verify_element_state(
     const isEnabled = await locator.isEnabled();
     if (!isEnabled) throw new Error(`Expected element to be enabled`);
   }
+}
+
+export async function verify_element_state(
+  page: Page,
+  aria_role: Parameters<Page['getByRole']>[0],
+  accessible_name: string,
+  expected_state: ElementState
+) {
+  const finalName = interpolate(accessible_name);
+  const regexName = new RegExp(escapeRegExp(finalName), 'i');
+  const locator = page.getByRole(aria_role, { name: regexName });
+  await assert_locator_state(locator, expected_state);
+}
+
+export async function verify_text_state(
+  page: Page,
+  visible_text: string,
+  expected_state: ElementState
+) {
+  const finalText = interpolate(visible_text);
+  const regexText = new RegExp(escapeRegExp(finalText), 'i');
+  const locator = page.getByText(regexText);
+  await assert_locator_state(locator, expected_state);
+}
+
+export async function verify_testid_state(
+  page: Page,
+  test_id: string,
+  expected_state: ElementState
+) {
+  const finalTestId = interpolate(test_id);
+  const locator = page.getByTestId(finalTestId);
+  await assert_locator_state(locator, expected_state);
+}
+
+export async function interact_with_testid(page: Page, test_id: string) {
+  const finalTestId = interpolate(test_id);
+  const locator = page
+    .getByTestId(finalTestId)
+    .locator('visible=true')
+    .first();
+  await locator.click();
+}
+
+export async function fill_input_testid(
+  page: Page,
+  test_id: string,
+  value_to_type: string
+) {
+  const finalTestId = interpolate(test_id);
+  const finalValue = interpolate(value_to_type);
+  const locator = page
+    .getByTestId(finalTestId)
+    .locator('visible=true')
+    .first();
+  await locator.fill(finalValue);
 }
