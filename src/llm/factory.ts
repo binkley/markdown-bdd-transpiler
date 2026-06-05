@@ -22,7 +22,6 @@ export function getLLMProvider(config: LLMConfig): LLMProvider {
             'GEMINI_API_KEY'
           ]);
         }
-        process.env.GOOGLE_GENERATIVE_AI_API_KEY = apiKey;
         const google = createGoogleGenerativeAI({ apiKey });
         return new VercelAIProvider(google, 'gemini-2.5-flash-lite');
       } catch (e: any) {
