@@ -84,6 +84,9 @@ This interactive script will:
 - Prompt you to select your preferred AI Provider (Anthropic, Google Gemini,
   or OpenAI).
 - Generate a clean `bdd.config.json` tailored to your choice.
+- Genrate a customizable `manifest.json` into your project root.
+- Generate an example markdown BDD test file
+  (`tests/example-bdd-markdown-test.md`) (it will fail on purpose as a test)
 - Auto-install the necessary Vercel AI SDK provider adapter (e.g.,
   `@ai-sdk/openai`).
 

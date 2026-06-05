@@ -1,5 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Set default environment variables for the dynamic data injection tests.
+// This ensures the tests pass whether running locally or in Docker.
+process.env.TEST_DYNAMIC_USER =
+  process.env.TEST_DYNAMIC_USER || 'frontend_wizard';
+process.env.TEST_DYNAMIC_PATH = process.env.TEST_DYNAMIC_PATH || '/login';
+
 export default defineConfig({
   testDir: './.generated',
   timeout: 30000,

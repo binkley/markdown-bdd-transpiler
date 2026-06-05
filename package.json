@@ -34,7 +34,8 @@
   "files": [
     "dist",
     "manifest.json",
-    "schema.json"
+    "schema.json",
+    "example-bdd-markdown-test.md"
   ],
   "dependencies": {
     "@google/genai": "^2.7.0",
@@ -110,6 +111,8 @@
     "test:unit": "node --experimental-test-coverage --test-coverage-lines=96 --test-coverage-branches=95 --test-coverage-functions=98 --import tsx --test 'src/**/*.spec.ts'",
     "?test:e2e": "echo \"Boot Docker and run the full Playwright integration suite\"",
     "test:e2e": "./scripts/test-e2e.sh",
+    "?test:example": "echo \"Test the tutorial example BDD file to ensure the tutorial works\"",
+    "test:example": "./scripts/test-e2e.sh example-bdd-markdown-test.md",
     "test:playwright": "playwright test",
     "// --- 🧠 CACHE MANAGEMENT --- //": "",
     "?cache:clear": "echo \"Instantly wipe the AI cache file (bdd-cache.json) to an empty state without transpiling\"",

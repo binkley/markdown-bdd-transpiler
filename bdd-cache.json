@@ -203,5 +203,84 @@
     "matchedFunction": "interact_with",
     "extractedArguments": ["button", "Sign In"],
     "sourceFile": "tests/validation-warnings-journey.md"
+  },
+  "The user enters \"test_user\" into the \"Username\" field|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: The standard GIVEN, WHEN, THEN workflow\",\"phase\":\"WHEN\",\"designerNotes\":\"Next up is WHEN. This is where the user takes action. You can use natural, everyday language here. The AI is smart enough to map your plain English instructions to standard UI actions!\"}": {
+    "matchedFunction": "fill_input",
+    "extractedArguments": ["textbox", "Username", "test_user"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "Smash the \"Sign In\" button|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: The standard GIVEN, WHEN, THEN workflow\",\"phase\":\"WHEN\",\"designerNotes\":\"Next up is WHEN. This is where the user takes action. You can use natural, everyday language here. The AI is smart enough to map your plain English instructions to standard UI actions!\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user should see the heading \"Welcome Back!\"|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: The standard GIVEN, WHEN, THEN workflow\",\"phase\":\"THEN\",\"designerNotes\":\"Finally, we use THEN to check that the app did what we expected.\"}": {
+    "matchedFunction": "verify_text_state",
+    "extractedArguments": ["Welcome Back!", "visible"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user navigates to \"/demo-app\"|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: The standard GIVEN, WHEN, THEN workflow\",\"phase\":\"GIVEN\",\"designerNotes\":\"Notice the bdd code fence below? This special block signals to the transpiler that the bullet points inside should be converted into actual, runnable test code. Any text you write outside of these fences is just for humans to read (or to give the AI context!).\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/demo-app"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user enters \"{{TEST_DYNAMIC_USER}}\" into the \"Username\" field|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Dynamic Data Injection\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "fill_input",
+    "extractedArguments": ["textbox", "Username", "{{TEST_DYNAMIC_USER}}"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user should see the heading \"Welcome Back, Wizard!\"|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Dynamic Data Injection\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_text_state",
+    "extractedArguments": ["Welcome Back, Wizard!", "visible"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "Click the \"Sign In\" button|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Dynamic Data Injection\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Sign In"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user navigates to \"/login\"|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Dynamic Data Injection\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/login"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "Click the \"Save\" button|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Escaping Literal Braces\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "interact_with",
+    "extractedArguments": ["button", "Save"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user enters \"\\{{literal_template_string}}\" into the \"Code Input\" field|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Escaping Literal Braces\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "fill_input",
+    "extractedArguments": [
+      "textbox",
+      "Code Input",
+      "\\{{literal_template_string}}"
+    ],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user navigates to \"/code-editor\"|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Escaping Literal Braces\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/code-editor"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "Verify the \"Success\" alert is visible|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Escaping Literal Braces\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_text_state",
+    "extractedArguments": ["Success", "visible"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "Verify the \"Success\" alert is visible|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Using Designer Notes for Technical Workarounds\",\"phase\":\"THEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["alert", "Success", "visible"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user navigates to \"/legacy-dashboard\"|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Using Designer Notes for Technical Workarounds\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/legacy-dashboard"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user clicks the Submit Icon|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Using Designer Notes for Technical Workarounds\",\"phase\":\"WHEN\",\"designerNotes\":\"QA Note: The \\\"Submit Icon\\\" lacks an ARIA role, but contains the visible text \\\"Submit\\\".\"}": {
+    "matchedFunction": "interact_with_text",
+    "extractedArguments": ["Submit Icon"],
+    "sourceFile": "example-bdd-markdown-test.md"
   }
 }

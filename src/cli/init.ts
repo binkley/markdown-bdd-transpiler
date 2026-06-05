@@ -196,21 +196,11 @@ export async function runInitCommand(options: InitOptions) {
     // Calculate path to the source manifest.json.
     // In dev: src/cli/init.ts -> ../../manifest.json
     // In dist: dist/src/cli/init.js -> ../../../manifest.json
-    let sourceManifestPath = path.resolve(
-      __dirname,
-      '..',
-      '..',
-      'manifest.json'
-    );
-    if (!existsSync(sourceManifestPath)) {
-      sourceManifestPath = path.resolve(
-        __dirname,
-        '..',
-        '..',
-        '..',
-        'manifest.json'
-      );
+    let packageRoot = path.resolve(__dirname, '..', '..');
+    if (!existsSync(path.join(packageRoot, 'manifest.json'))) {
+      packageRoot = path.resolve(__dirname, '..', '..', '..');
     }
+    const sourceManifestPath = path.resolve(packageRoot, 'manifest.json');
     try {
       await fs.copyFile(sourceManifestPath, resolvedManifestPath);
       logger.info(`✅ Ejected default manifest to: ${resolvedManifestPath}`);
@@ -220,6 +210,40 @@ export async function runInitCommand(options: InitOptions) {
     } catch (err) {
       logger.warn(
         `⚠️ Failed to copy default manifest.json: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+
+    // Eject the example markdown BDD test file
+    const sourceExamplePath = path.resolve(
+      packageRoot,
+      'example-bdd-markdown-test.md'
+    );
+    const targetTestDir = path.resolve(cwd, config.testDir);
+    const resolvedExamplePath = path.resolve(
+      targetTestDir,
+      'example-bdd-markdown-test.md'
+    );
+
+    try {
+      // Ensure the test directory exists
+      if (!existsSync(targetTestDir)) {
+        await fs.mkdir(targetTestDir, { recursive: true });
+      }
+
+      // Copy the example file if it doesn't already exist
+      if (!existsSync(resolvedExamplePath)) {
+        await fs.copyFile(sourceExamplePath, resolvedExamplePath);
+        logger.info(
+          `\n✅ Generated a comprehensive tutorial and example BDD file:`
+        );
+        logger.info(`   👉 ${path.relative(cwd, resolvedExamplePath)}`);
+        logger.info(
+          `   (Read this file to learn how to write Markdown tests!)`
+        );
+      }
+    } catch (err) {
+      logger.warn(
+        `⚠️ Failed to copy example markdown file: ${err instanceof Error ? err.message : String(err)}`
       );
     }
 

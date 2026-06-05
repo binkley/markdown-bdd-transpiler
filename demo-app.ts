@@ -187,6 +187,72 @@ app.get('/checkout', (req: Request, res: Response) => {
   `);
 });
 
+app.get('/demo-app', (req: Request, res: Response) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><title>Demo App</title></head>
+    <body>
+      <div id="app">
+        <h2>Demo Login</h2>
+        <input type="text" id="username" placeholder="Username" aria-label="Username" />
+        <button id="sign-in">Sign In</button>
+      </div>
+      <script>
+        document.getElementById('sign-in').addEventListener('click', () => {
+          document.getElementById('app').innerHTML = '<h1 role="heading">Welcome Back!</h1>';
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+app.get('/code-editor', (req: Request, res: Response) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><title>Code Editor</title></head>
+    <body>
+      <div id="app">
+        <input type="text" id="code-input" aria-label="Code Input" />
+        <button id="save-btn">Save</button>
+      </div>
+      <script>
+        document.getElementById('save-btn').addEventListener('click', () => {
+          const val = document.getElementById('code-input').value;
+          if (val === '{{literal_template_string}}') {
+            document.getElementById('app').innerHTML = '<div role="alert" aria-label="Success">Success</div>';
+          } else {
+            alert('Wrong template string!');
+          }
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+app.get('/legacy-dashboard', (req: Request, res: Response) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><title>Legacy Dashboard</title></head>
+    <body>
+      <div id="app">
+        <!-- Purposely inaccessible element to demonstrate Designer Notes -->
+        <div id="submit-icon" style="cursor: pointer; background: blue; color: white; padding: 10px; display: inline-block;">Submit</div>
+      </div>
+      <script>
+        document.getElementById('submit-icon').addEventListener('click', () => {
+          document.getElementById('app').innerHTML = '<div role="alert" aria-label="Success">Success</div>';
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
 app.listen(port, () => {
   console.log(`Dummy frontend running at http://localhost:${port}`);
 });

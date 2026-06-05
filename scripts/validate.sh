@@ -117,6 +117,9 @@ if $run_full; then
 
   ./scripts/test-e2e.sh "${E2E_FLAGS[@]}"
 
+  log_step "📖 Validating Example Documentation Tutorial..."
+  npm run test:example -- "${E2E_FLAGS[@]}"
+
   log_step "🔒 Running Security Audit..."
   if $quiet; then
     npm audit --audit-level=moderate > /dev/null
