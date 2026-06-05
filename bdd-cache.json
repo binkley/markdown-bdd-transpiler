@@ -203,5 +203,10 @@
     "matchedFunction": "interact_with",
     "extractedArguments": ["button", "Sign In"],
     "sourceFile": "tests/validation-warnings-journey.md"
+  },
+  "Verify the \"Submit\" button is visible|{\"feature\":\"Feature: Context Ambiguity Handling\",\"scenario\":\"Scenario: Resolving pronouns via Step Sequence (Lookbehind)\",\"phase\":\"WHEN\"}": {
+    "matchedFunction": "verify_element_state",
+    "extractedArguments": ["button", "Submit", "visible"],
+    "sourceFile": "tests/context-ambiguity-journey.md"
   }
 }

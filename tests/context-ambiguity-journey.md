@@ -74,7 +74,7 @@ infer that "it" refers to the "Submit" button mentioned immediately prior.
 ### WHEN
 
 ```bdd
-- The user looks at the "Submit" button
+- Verify the "Submit" button is visible
 - Click it
 ```
 
