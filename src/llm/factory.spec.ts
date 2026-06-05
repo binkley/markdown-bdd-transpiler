@@ -27,8 +27,11 @@ describe('LLM Factory', () => {
     };
     assert.throws(
       () => getLLMProvider(config),
-      TranspilerError,
-      /Unsupported LLM provider: "not-a-real-provider"/
+      (err) =>
+        err instanceof TranspilerError &&
+        err.message.includes(
+          'Unsupported LLM provider: "not-a-real-provider"'
+        )
     );
   });
 
@@ -58,7 +61,7 @@ describe('LLM Factory', () => {
     assert.ok(provider);
   });
 
-  test('instantiates Gemini provider with API key', () => {
+  test('instantiates Gemini provider', () => {
     const config: LLMConfig = {
       provider: 'gemini',
       model: 'test',
@@ -67,12 +70,12 @@ describe('LLM Factory', () => {
       initialDelayMs: 1,
       backoffFactor: 1
     };
-    process.env.GEMINI_API_KEY = 'test-key';
+    process.env.GEMINI_API_KEY = 'test';
     const provider = getLLMProvider(config);
     assert.ok(provider);
   });
 
-  test('Gemini provider throws MissingApiKeyError if no key', () => {
+  test('throws MissingApiKeyError for gemini if no API key is present', () => {
     const config: LLMConfig = {
       provider: 'gemini',
       model: 'test',
@@ -83,6 +86,7 @@ describe('LLM Factory', () => {
     };
     delete process.env.GOOGLE_API_KEY;
     delete process.env.GEMINI_API_KEY;
+
     assert.throws(() => getLLMProvider(config), MissingApiKeyError);
   });
 });

@@ -1,6 +1,5 @@
 import { describe, it, mock, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import type { Page, Locator } from '@playwright/test';
 import {
   navigate_to,
   fill_input,
@@ -14,8 +13,8 @@ import {
 } from '../../framework/standard-ui-steps.js';
 
 describe('Standard UI Steps', () => {
-  let mockLocator: Locator;
-  let mockPage: Page;
+  let mockLocator: any;
+  let mockPage: any;
 
   beforeEach(() => {
     mockLocator = {
@@ -26,14 +25,14 @@ describe('Standard UI Steps', () => {
       waitFor: mock.fn(async () => {}),
       isDisabled: mock.fn(async () => true),
       isEnabled: mock.fn(async () => true)
-    } as unknown as Locator;
+    };
 
     mockPage = {
       goto: mock.fn(async () => {}),
       getByRole: mock.fn(() => mockLocator),
       getByText: mock.fn(() => mockLocator),
       getByTestId: mock.fn(() => mockLocator)
-    } as unknown as Page;
+    };
   });
 
   afterEach(() => {

@@ -1,15 +1,37 @@
 import { createRequire } from 'module';
 import type { LLMConfig, LLMProvider } from '../types/index.js';
-import { GeminiProvider } from './gemini.js';
 import { VercelAIProvider } from './vercel.js';
-import { MissingDependencyError, TranspilerError } from '../utils/errors.js';
+import {
+  MissingDependencyError,
+  TranspilerError,
+  MissingApiKeyError
+} from '../utils/errors.js';
 
 const require = createRequire(import.meta.url);
 
 export function getLLMProvider(config: LLMConfig): LLMProvider {
   switch (config.provider.toLowerCase()) {
     case 'gemini':
-      return new GeminiProvider();
+      try {
+        const { createGoogleGenerativeAI } = require('@ai-sdk/google');
+        const apiKey =
+          process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+          throw new MissingApiKeyError('Gemini', [
+            'GOOGLE_API_KEY',
+            'GEMINI_API_KEY'
+          ]);
+        }
+        const google = createGoogleGenerativeAI({ apiKey });
+        return new VercelAIProvider(google, 'gemini-2.5-flash-lite');
+      } catch (e: any) {
+        if (e.code === 'MODULE_NOT_FOUND') {
+          throw new MissingDependencyError('gemini', '@ai-sdk/google', {
+            cause: e
+          });
+        }
+        throw e;
+      }
     case 'openai':
       try {
         const { openai } = require('@ai-sdk/openai');
