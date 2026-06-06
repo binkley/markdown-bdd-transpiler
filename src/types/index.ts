@@ -17,6 +17,7 @@ export interface TranspilerConfig {
   bannerFile?: string;
   strict: boolean;
   maxWarnings?: number;
+  dumpPrompts?: boolean;
   llm: LLMConfig;
 }
 

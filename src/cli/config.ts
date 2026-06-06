@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { parseArgs } from 'util';
 import { runInitCommand } from './init.js';
+import { runSyncCommand } from './sync.js';
 import { transpilerConfigSchema } from './schema.js';
 import type {
   ExecutionState,
@@ -39,7 +40,8 @@ export async function loadConfig(): Promise<ExecutionState> {
     'banner-file': { type: 'string' },
     banner: { type: 'string' },
     'test-dir': { type: 'string' },
-    'update-cache': { type: 'boolean', default: false }
+    'update-cache': { type: 'boolean', default: false },
+    'dump-prompts': { type: 'boolean', default: false }
   } as const;
 
   const { values: argv, positionals } = parseArgs({
@@ -104,7 +106,11 @@ Options:
 
   if (argv.help) {
     console.log(`
-Usage: markdown-bdd [options] [files...]
+Usage: markdown-bdd [command] [options] [files...]
+
+Commands:
+  init                              Scaffolds a new project
+  sync                              Syncs manifest.json from frameworkImport
 
 An AI-augmented BDD testing framework that transpiles Markdown user journeys into Playwright tests.
 
@@ -122,6 +128,7 @@ Options:
   --banner <code>                   Raw string of code injected into every generated test
   --strict                          Fail the build if any warnings are detected (equivalent to maxWarnings: 0)
   --max-warnings <number>           Maximum number of warnings allowed before failing the build
+  --dump-prompts                    Save the final compiled prompts to the generated folder
   --llm-provider <string>           AI provider (e.g., anthropic, gemini, openai)
   --llm-model <string>              Specific AI model (e.g., gemini-2.5-flash-lite)
   --llm-concurrency <number>        Max parallel AI requests (default: 5)
@@ -171,6 +178,7 @@ Arguments:
   if (argv.strict) mergedConfig.strict = argv.strict;
   if (argv['max-warnings'])
     mergedConfig.maxWarnings = Number(argv['max-warnings']);
+  if (argv['dump-prompts']) mergedConfig.dumpPrompts = argv['dump-prompts'];
 
   // Handle nested LLM merges safely
   if (!mergedConfig.llm) mergedConfig.llm = {};
@@ -196,6 +204,22 @@ Arguments:
       errorMsg += `   - ${pathStr}${issue.message}\n`;
     }
     throw new TranspilerError(errorMsg);
+  }
+
+  if (positionals[0] === 'sync') {
+    if (argv.help) {
+      console.log(`
+Usage: markdown-bdd sync [options]
+
+Syncs the project's manifest.json with exported functions found in the configured frameworkImport TypeScript file.
+
+Options:
+  -h, --help                Print this help menu
+`);
+      process.exit(0);
+    }
+    await runSyncCommand(parseResult.data as TranspilerConfig);
+    process.exit(0);
   }
 
   return {

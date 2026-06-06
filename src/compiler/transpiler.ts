@@ -126,15 +126,28 @@ export class Transpiler {
         );
       }
 
-      const { apiCalls } = await resolveFeatures(
+      const { apiCalls, promptsDump } = await resolveFeatures(
         features,
         manifestStr,
         llmProvider,
         config.llm,
         cache,
         limit,
-        { sourceFile: relativeFilePath }
+        {
+          sourceFile: relativeFilePath,
+          dumpPrompts: config.dumpPrompts,
+          outDir: config.outDir
+        }
       );
+
+      if (config.dumpPrompts && promptsDump.length > 0) {
+        const promptsOutPath = path.join(outDir, `${baseName}.prompts.md`);
+        let dumpContent = `# Prompts for ${baseName}\n\n`;
+        for (const pd of promptsDump) {
+          dumpContent += `## Step: ${pd.stepText}\n\`\`\`text\n${pd.prompt}\n\`\`\`\n\n`;
+        }
+        await fs.writeFile(promptsOutPath, dumpContent);
+      }
 
       const { specCode, warnings: emitWarnings } = emitPlaywright(
         features,

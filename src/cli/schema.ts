@@ -80,6 +80,10 @@ export const transpilerConfigSchema = z
       .describe(
         'Maximum number of warnings allowed before failing the build'
       ),
+    dumpPrompts: z
+      .boolean()
+      .default(false)
+      .describe('Save the final compiled prompts to the generated folder'),
     llm: llmConfigSchema
   })
   .strict(); // strict() prevents users from adding random misspelled keys
