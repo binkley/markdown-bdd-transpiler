@@ -180,4 +180,21 @@ export async function runSyncCommand(config: TranspilerConfig) {
   } else {
     logger.info(`ℹ️  No new steps to sync to manifest.`);
   }
+
+  const DEPRECATED_CUSTOM_STEPS: Record<string, string> = {
+    verify_text_hidden: 'verify_text_state',
+    verify_text_visible: 'verify_text_state',
+    fill_input_by_id: 'fill_input_testid',
+    click_button_by_id: 'interact_with_testid',
+    interact_with_id: 'interact_with_testid'
+  };
+
+  for (const step of manifest.available_steps || []) {
+    const replacement = DEPRECATED_CUSTOM_STEPS[step.function_name];
+    if (replacement) {
+      logger.warn(
+        `⚠️  Warning: Custom capability '${step.function_name}' is now handled natively. Consider migrating to the standard '${replacement}' implementation.`
+      );
+    }
+  }
 }

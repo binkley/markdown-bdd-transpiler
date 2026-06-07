@@ -33,6 +33,29 @@ export class Transpiler {
       throw new TranspilerError(`Failed to read manifest at ${manifestPath}`);
     }
 
+    let manifestWarnings = 0;
+    try {
+      const parsedManifest = JSON.parse(manifestStr);
+      const DEPRECATED_CUSTOM_STEPS: Record<string, string> = {
+        verify_text_hidden: 'verify_text_state',
+        verify_text_visible: 'verify_text_state',
+        fill_input_by_id: 'fill_input_testid',
+        click_button_by_id: 'interact_with_testid',
+        interact_with_id: 'interact_with_testid'
+      };
+
+      for (const step of parsedManifest.available_steps || []) {
+        const replacement = DEPRECATED_CUSTOM_STEPS[step.function_name];
+        if (replacement) {
+          const warnMsg = `⚠️  Warning: Custom capability '${step.function_name}' is now handled natively. Consider migrating to the standard '${replacement}' implementation.`;
+          logger.warn(warnMsg);
+          manifestWarnings++;
+        }
+      }
+    } catch {
+      // Ignore JSON parse errors here
+    }
+
     const cache = new CacheManager(
       cachePath,
       this.state.ignoreCache,
@@ -178,7 +201,7 @@ export class Transpiler {
     );
     const totalWarnings = fileResults.reduce(
       (sum, res) => sum + res.warnings,
-      0
+      manifestWarnings
     );
 
     await cache.save();
