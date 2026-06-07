@@ -232,6 +232,14 @@ As you author markdown BDD tests, you can set a higher threshold using
 `--max-warnings=N` instead, progressively lowering the number over time. Both
 settings can also be configured permanently in `bdd.config.json`.
 
+#### Prompt Debugging (`--dump-prompts`)
+
+If the LLM is consistently misinterpreting an ambiguous UI step or ignoring your Designer Notes, you can use the `--dump-prompts` flag. This saves the exact, finalized text prompts sent to the LLM into the `.generated/` folder, allowing you to debug how your markdown and variables are being compiled before they hit the API:
+
+```bash
+npx markdown-bdd --dump-prompts
+```
+
 #### Diagnostic Logging (`--verbose`)
 
 If you need deeper insight into the compilation process, use the `--verbose`
@@ -581,6 +589,13 @@ export async function dismiss_overlay(page: Page, overlay_name: string) {
 Now, when a non-technical author writes `The user dismisses the "End Session"
 warning`, the AI will map it to your custom function, keeping the BDD clean
 and the Playwright hack abstracted.
+**4. Sync your manifest automatically:**
+
+Instead of manually editing `manifest.json` every time you add a new custom step in your TypeScript file, you can use the `sync` command. This will parse your custom framework file and automatically append new exported functions to your manifest:
+
+```bash
+npx markdown-bdd sync
+```
 
 #### Temporary Workarounds (Designer Notes)
 
@@ -681,14 +696,6 @@ assistant, we can operationalize the metadata returned by modern LLMs:
    Playwright ARIA actions to implement next (e.g., "Authors attempted
    drag-and-drop 14 times").
 
-#### Automated Step Discovery (TypeScript AST Parsing)
-
-Currently, when a developer writes a custom UI step, they must manually keep
-their TypeScript function signature synchronized with the JSON object in
-`manifest.json`. The transpiler should eventually use the TypeScript Compiler
-API to automatically parse the exported functions in the consumer's
-`frameworkImport` file, generating the `manifest.json` schema automatically.
-
 #### Community Manifest Ecosystem (Plugin Architecture)
 
 Because consuming projects can now eject their `manifest.json` and define
@@ -713,12 +720,3 @@ Because `npx markdown-bdd init` ejects a static copy of the default
 in future framework releases. We should build an interactive `npx markdown-bdd
 upgrade` command that parses the consumer's local manifest, diffs it against
 the latest default manifest, and interactively merges in new capabilities.
-
-#### Prompt Debugging (Payload Dumping)
-
-While the `--verbose` flag provides good observability into cache misses,
-maintainers currently lack visibility into the exact, finalized text prompt
-(including Designer Notes and injected variables) sent to the LLM.
-Implementing a `--dump-prompts` feature that saves the raw templated payloads
-to `.generated/prompts/` would massively improve the ability to tune custom
-manifests and Designer Notes.
