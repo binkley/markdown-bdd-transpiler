@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.5.6](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.5...v0.5.6) (2026-06-16)
+
+### ✨ Features
+
+- implement migration debt audit warning ([108d380](https://github.com/binkley/markdown-bdd-transpiler/commit/108d380bd2e9f84bf8b083dd519f7e39b9c61704))
+- implement sync command and dump-prompts flag ([1b3af62](https://github.com/binkley/markdown-bdd-transpiler/commit/1b3af62419cef3dc00328461de37975d7592a8de))
+
+### 🔒 Security Updates
+
+- bump esbuild from 0.28.0 to 0.28.1 ([1ed4c2a](https://github.com/binkley/markdown-bdd-transpiler/commit/1ed4c2ae37ddb9d0c8924661a116ca18753107d2)), closes [#1](https://github.com/binkley/markdown-bdd-transpiler/issues/1)
+
+### 📚 Documentation
+
+- document sync and dump-prompts features ([bcd2309](https://github.com/binkley/markdown-bdd-transpiler/commit/bcd230978ca08b7fcc77131bed01793b99485e1a))
+- **example:** BDD markdown authoring tutorial ([d3d6f59](https://github.com/binkley/markdown-bdd-transpiler/commit/d3d6f5965351c7a37162708daa0cfc0461167b65))
+
+### 🛠 Architecture
+
+- replace @google/genai with vercel ai sdk for gemini ([bb39a69](https://github.com/binkley/markdown-bdd-transpiler/commit/bb39a6912edf2f6a9ffca21738f0b7f4958276ba))
+
+### 🧱 Build
+
+- update typescript to 5.9.3 ([7c16b71](https://github.com/binkley/markdown-bdd-transpiler/commit/7c16b71aaa59ed83c58aa1ba0d97eaf25f5bbc16))
+
+### 🐛 Bug Fixes
+
+- ensure GEMINI_API_KEY maps correctly to vercel SDK env var ([25c356c](https://github.com/binkley/markdown-bdd-transpiler/commit/25c356c8169905ae5b75fa91451e6e37c7f568f5))
+
 ## [0.5.5](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.4...v0.5.5) (2026-06-03)
 
 ### ✨ Features
