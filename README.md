@@ -439,6 +439,23 @@ parser will ignore everything outside the fences._
 
 ---
 
+## 🧭 Guided Tour (Living Documentation)
+
+Because this framework transpiles Markdown into executable code, our own internal test suite serves as "living documentation." These files prove the features work while simultaneously explaining how to use them.
+
+We recommend new authors read the test files in this order to understand the framework's capabilities:
+
+1. **The Basics:** [`tests/login-journey.md`](./tests/login-journey.md)
+   Learn the fundamental anatomy of a BDD Scenario (GIVEN, WHEN, THEN) and see how natural language maps to Playwright actions.
+2. **Handling Secrets:** [`tests/dynamic-injection-journey.md`](./tests/dynamic-injection-journey.md)
+   Learn how to inject environment variables securely (e.g., passwords or dynamic URLs) and how to escape the transpiler if you need to type literal curly braces.
+3. **The AI Engine:** [`tests/context-ambiguity-journey.md`](./tests/context-ambiguity-journey.md)
+   Learn how the AI resolves vague instructions (like "Click it") by looking at previous steps, and how to use Designer Notes to guide the AI when the UI lacks proper accessibility roles.
+4. **Quality Assurance:** [`tests/validation-warnings-journey.md`](./tests/validation-warnings-journey.md)
+   See how the transpiler acts as a linter, actively enforcing rigorous testing structures and warning your team if scenarios become sloppy or lack assertions.
+
+---
+
 ## 🧠 Cache Management
 
 The transpiler ships with dedicated NPM scripts and built-in CLI flags to
