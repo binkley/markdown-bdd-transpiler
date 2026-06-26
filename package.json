@@ -133,7 +133,7 @@
     "profile": "./scripts/run-and-time.sh",
     "?profile:e2e": "echo \"Benchmark the Dockerized E2E test pipeline\"",
     "profile:e2e": "npm run profile -- profile-e2e npm run test:e2e",
-    "?release": "echo \"Trigger a semantic version bump and NPM publish (Maintainers only)\"",
+    "?release": "echo \"Trigger a semantic version bump and NPM publish (Maintainers only -- patch, minor, or major)\"",
     "release": "./scripts/release.sh",
     "?validate:commit": "echo \"Run the fast pre-commit pipeline (skips Docker tests)\"",
     "validate:commit": "./scripts/validate.sh --commit",
