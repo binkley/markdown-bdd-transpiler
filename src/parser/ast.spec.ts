@@ -150,3 +150,28 @@ test('parseMarkdown flags an error if a bdd block appears before a Scenario', ()
     /Found actionable BDD step \("Navigate to "\/login""\) before defining a Scenario/
   );
 });
+
+test('parseMarkdown extracts typescript setup code blocks into the Feature', () => {
+  const markdown = `
+# Feature: Setup Example
+\`\`\`ts setup
+test.use({ locale: 'fr-FR' });
+test.beforeEach(async ({ page }) => {
+  await page.route('**/*', route => route.abort());
+});
+\`\`\`
+## Scenario: Simple test
+### GIVEN
+\`\`\`bdd
+* step 1
+\`\`\`
+`;
+  const result = parseMarkdown(markdown, 'test.md');
+
+  assert.equal(result.features.length, 1);
+  assert.equal(result.features[0].backgroundCode?.length, 1);
+  assert.match(
+    result.features[0].backgroundCode![0],
+    /test\.use\(\{ locale: 'fr-FR' \}\);/
+  );
+});

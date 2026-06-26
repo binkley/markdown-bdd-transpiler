@@ -55,6 +55,18 @@ export async function interact_with_text(page: Page, visible_text: string) {
   await locator.click();
 }
 
+export async function interact_with_exact_text(
+  page: Page,
+  exact_text: string
+) {
+  const finalText = interpolate(exact_text);
+  const locator = page
+    .getByText(finalText, { exact: true })
+    .locator('visible=true')
+    .first();
+  await locator.click();
+}
+
 type ElementState = 'visible' | 'hidden' | 'enabled' | 'disabled';
 
 async function assert_locator_state(
@@ -98,6 +110,16 @@ export async function verify_text_state(
   const finalText = interpolate(visible_text);
   const regexText = new RegExp(escapeRegExp(finalText), 'i');
   const locator = page.getByText(regexText);
+  await assert_locator_state(locator, expected_state);
+}
+
+export async function verify_exact_text_state(
+  page: Page,
+  exact_text: string,
+  expected_state: ElementState
+) {
+  const finalText = interpolate(exact_text);
+  const locator = page.getByText(finalText, { exact: true });
   await assert_locator_state(locator, expected_state);
 }
 

@@ -26,6 +26,19 @@ export function emitPlaywright(
     if (validScenarios.length === 0) continue;
 
     specCode += `test.describe(${JSON.stringify(feature.name)}, () => {\n`;
+
+    if (feature.backgroundCode && feature.backgroundCode.length > 0) {
+      specCode += `  // --- FEATURE SETUP ---\n`;
+      for (const block of feature.backgroundCode) {
+        const indentedBlock = block
+          .split('\n')
+          .map((line) => `  ${line}`)
+          .join('\n');
+        specCode += `${indentedBlock}\n`;
+      }
+      specCode += `  // ---------------------\n\n`;
+    }
+
     for (const scenario of validScenarios) {
       if (scenario.phases[0] !== 'GIVEN') {
         warnings.push(
@@ -53,9 +66,16 @@ export function emitPlaywright(
       }
 
       specCode += `  test(${JSON.stringify(scenario.name)}, async ({ page }) => {\n`;
+      specCode += `    try {\n`;
       for (const step of scenario.steps) {
-        specCode += `${step}\n`;
+        specCode += `      ${step}\n`;
       }
+      specCode += `    } catch (error: any) {\n`;
+      specCode += `      if (error.message?.includes('strict mode violation')) {\n`;
+      specCode += `        error.message = '[BDD Strict Mode Error] Playwright found multiple elements matching your step. Try using an Exact Text, Role, or Test-ID step instead.\\n\\nOriginal Error:\\n' + error.message;\n`;
+      specCode += `      }\n`;
+      specCode += `      throw error;\n`;
+      specCode += `    }\n`;
       specCode += `  });\n\n`;
     }
     specCode += `});\n\n`;

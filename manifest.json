@@ -22,6 +22,11 @@
       "parameters": ["visible_text"]
     },
     {
+      "function_name": "interact_with_exact_text",
+      "description": "Clicks an element identified by its exact visible text. Use this to avoid Playwright strict-mode violations when multiple similar text strings exist.",
+      "parameters": ["exact_text"]
+    },
+    {
       "function_name": "interact_with_testid",
       "description": "Clicks an element identified by its data-testid attribute. Use this as a structural fallback for legacy applications.",
       "parameters": ["test_id"]
@@ -40,6 +45,11 @@
       "function_name": "verify_text_state",
       "description": "Asserts the state (e.g., 'visible', 'hidden', 'enabled', 'disabled') of an element identified solely by its visible text.",
       "parameters": ["visible_text", "expected_state"]
+    },
+    {
+      "function_name": "verify_exact_text_state",
+      "description": "Asserts the state (e.g., 'visible', 'hidden', 'enabled', 'disabled') of an element identified by its exact visible text. Use this to avoid Playwright strict-mode violations.",
+      "parameters": ["exact_text", "expected_state"]
     },
     {
       "function_name": "verify_testid_state",

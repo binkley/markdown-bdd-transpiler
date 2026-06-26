@@ -59,6 +59,7 @@ export type Scenario = {
 export type Feature = {
   name: string;
   scenarios: Scenario[];
+  backgroundCode?: string[];
   line?: number;
 };
 

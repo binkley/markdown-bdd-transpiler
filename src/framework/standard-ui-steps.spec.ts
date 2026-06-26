@@ -5,10 +5,12 @@ import {
   fill_input,
   interact_with,
   interact_with_text,
+  interact_with_exact_text,
   interact_with_testid,
   fill_input_testid,
   verify_element_state,
   verify_text_state,
+  verify_exact_text_state,
   verify_testid_state
 } from '../../framework/standard-ui-steps.js';
 
@@ -73,6 +75,18 @@ describe('Standard UI Steps', () => {
     });
   });
 
+  describe('interact_with_exact_text', () => {
+    it('clicks by exact text', async () => {
+      await interact_with_exact_text(mockPage, 'Exact Click Me');
+      assert.equal(mockPage.getByText.mock.calls.length, 1);
+      assert.deepEqual(mockPage.getByText.mock.calls[0].arguments, [
+        'Exact Click Me',
+        { exact: true }
+      ]);
+      assert.equal(mockLocator.click.mock.calls.length, 1);
+    });
+  });
+
   describe('interact_with_testid', () => {
     it('clicks by testid', async () => {
       await interact_with_testid(mockPage, 'submit-btn');
@@ -114,6 +128,19 @@ describe('Standard UI Steps', () => {
 
     it('verify_text_state visible', async () => {
       await verify_text_state(mockPage, 'Success', 'visible');
+      assert.equal(mockLocator.waitFor.mock.calls.length, 1);
+      assert.deepEqual(mockLocator.waitFor.mock.calls[0].arguments[0], {
+        state: 'visible'
+      });
+    });
+
+    it('verify_exact_text_state visible', async () => {
+      await verify_exact_text_state(mockPage, 'Exact Success', 'visible');
+      assert.equal(mockPage.getByText.mock.calls.length, 1);
+      assert.deepEqual(mockPage.getByText.mock.calls[0].arguments, [
+        'Exact Success',
+        { exact: true }
+      ]);
       assert.equal(mockLocator.waitFor.mock.calls.length, 1);
       assert.deepEqual(mockLocator.waitFor.mock.calls[0].arguments[0], {
         state: 'visible'

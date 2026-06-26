@@ -130,6 +130,23 @@ export function parseMarkdown(
       pendingContextLine = null;
     }
 
+    if (
+      node.type === 'code' &&
+      ((node as Code).lang === 'ts' ||
+        (node as Code).lang === 'typescript') &&
+      (node as Code).meta?.includes('setup')
+    ) {
+      if (currentFeature) {
+        currentFeature.backgroundCode = currentFeature.backgroundCode || [];
+        currentFeature.backgroundCode.push((node as Code).value);
+      } else {
+        logError(
+          node.position?.start?.line,
+          `Found a setup code block before defining a Feature. Please add a "# Feature" heading first.`
+        );
+      }
+    }
+
     if (node.type === 'code' && (node as Code).lang === 'bdd') {
       pendingContext = null;
       pendingContextLine = null;

@@ -111,3 +111,34 @@ test('emitPlaywright injects setup strings correctly', () => {
     /\/\/ --- INJECTED BDD SETUP ---\nconsole\.log\("injected config"\);\nconsole\.log\("injected file"\);\n\/\/ --------------------------/
   );
 });
+
+test('emitPlaywright injects feature backgroundCode inside test.describe', () => {
+  const features = [
+    {
+      name: 'Localized Feature',
+      backgroundCode: [
+        "test.use({ locale: 'fr-FR' });\ntest.beforeEach(() => { /* setup */ });"
+      ],
+      scenarios: [
+        {
+          name: 'Success',
+          phases: ['GIVEN', 'WHEN', 'THEN'],
+          steps: ['// step']
+        }
+      ]
+    }
+  ];
+
+  const { specCode } = emitPlaywright(features, {
+    frameworkImport: '@binkley/bdd'
+  });
+
+  assert.match(specCode, /test\.describe\("Localized Feature", \(\) => \{/);
+  assert.match(specCode, /\/\/ --- FEATURE SETUP ---/);
+  assert.match(specCode, / {2}test\.use\(\{ locale: 'fr-FR' \}\);/);
+  assert.match(
+    specCode,
+    / {2}test\.beforeEach\(\(\) => \{ \/\* setup \*\/ \}\);/
+  );
+  assert.match(specCode, /\/\/ ---------------------/);
+});
