@@ -90,7 +90,7 @@ export async function resolveFeatures(
                   const waitTime = Math.round(delay + jitter);
 
                   logger.warn(
-                    `    ⚠️  API Error (${e.message}). Retrying in ${waitTime}ms...`
+                    `    ⏳  API Retrying in ${Math.round(waitTime / 1000)}s... (${e.message})`
                   );
                   await new Promise((resolve) =>
                     setTimeout(resolve, waitTime)
