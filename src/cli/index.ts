@@ -1,7 +1,7 @@
 import { parseArgs } from 'util';
 import { loadConfig } from './config.js';
 import { logger, LogLevel } from '../utils/logger.js';
-import { TranspilerError } from '../utils/errors.js';
+import { TranspilerError, EarlyExitError } from '../utils/errors.js';
 import { Transpiler } from '../compiler/transpiler.js';
 
 export async function main() {
@@ -42,6 +42,9 @@ export async function main() {
       process.exit(1);
     }
   } catch (error: any) {
+    if (error instanceof EarlyExitError) {
+      process.exit(error.exitCode);
+    }
     if (error instanceof TranspilerError) {
       logger.error(`\n❌ [ERROR] ${error.message}`);
       process.exit(1);

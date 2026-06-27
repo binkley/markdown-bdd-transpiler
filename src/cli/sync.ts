@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import ts from 'typescript';
 import { logger } from '../utils/logger.js';
+import { TranspilerError } from '../utils/errors.js';
 import type { TranspilerConfig } from '../types/index.js';
 
 export async function runSyncCommand(config: TranspilerConfig) {
@@ -12,11 +13,16 @@ export async function runSyncCommand(config: TranspilerConfig) {
     const manifestStr = await fs.readFile(manifestPath, 'utf-8');
     manifest = JSON.parse(manifestStr);
   } catch {
-    logger.error(`❌ [ERROR] Could not read manifest at ${manifestPath}`);
-    process.exit(1);
+    throw new TranspilerError(`Could not read manifest at ${manifestPath}`);
   }
 
   const importPath = config.frameworkImport;
+  if (!importPath) {
+    logger.error(
+      '❌ [ERROR] You must define a `frameworkImport` path in your bdd.config.json or pass --framework-import.'
+    );
+    return;
+  }
   if (importPath.startsWith('@binkley/markdown-bdd-transpiler')) {
     logger.info(
       'ℹ️  Framework import is the standard library. Nothing to sync.'
@@ -56,8 +62,7 @@ export async function runSyncCommand(config: TranspilerConfig) {
   }
 
   if (!foundPath) {
-    logger.error(`❌ [ERROR] Could not find source file for ${importPath}`);
-    process.exit(1);
+    throw new TranspilerError(`Could not find source file for ${importPath}`);
   }
 
   logger.info(`🔍 Parsing AST for ${foundPath}...`);

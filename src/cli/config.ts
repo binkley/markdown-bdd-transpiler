@@ -10,7 +10,7 @@ import type {
   InitOptions
 } from '../types/index.js';
 import { logger } from '../utils/logger.js';
-import { TranspilerError } from '../utils/errors.js';
+import { TranspilerError, EarlyExitError } from '../utils/errors.js';
 
 export async function loadConfig(): Promise<ExecutionState> {
   const args = process.argv.slice(2);
@@ -55,7 +55,43 @@ export async function loadConfig(): Promise<ExecutionState> {
     logger.error(
       '❌ [ERROR] Cannot use --quiet and --verbose simultaneously.'
     );
-    process.exit(2);
+    throw new EarlyExitError(2);
+  }
+
+  // Handle specific command sub-help
+  const command = positionals[0];
+  if (command === 'init') {
+    if (argv.help) {
+      // NOTE: We don't have a printInitHelp in this codebase version yet,
+      // but if the user passed init --help, we should exit.
+      // Currently, it looks like init.ts handles its own logic, but let's just abort early here.
+      console.log('Usage: markdown-bdd init [options]');
+      throw new EarlyExitError(0);
+    }
+  } else if (command === 'sync') {
+    if (argv.help) {
+      console.log('Usage: markdown-bdd sync [options]');
+      throw new EarlyExitError(0);
+    }
+  }
+
+  if (argv.version) {
+    try {
+      const packageJsonStr = await fs.readFile(
+        path.resolve(process.cwd(), 'package.json'),
+        'utf-8'
+      );
+      const pkg = JSON.parse(packageJsonStr);
+      console.log(`@binkley/markdown-bdd-transpiler v${pkg.version}`);
+    } catch {
+      console.log('@binkley/markdown-bdd-transpiler (version unknown)');
+    }
+    throw new EarlyExitError(0);
+  }
+
+  if (argv.help && !command) {
+    console.log('Usage: markdown-bdd [options] [command]');
+    throw new EarlyExitError(0);
   }
 
   if (positionals[0] === 'init') {
@@ -144,7 +180,7 @@ Options:
 Arguments:
   files                             Specific Markdown file(s) to process. If omitted, all files in the test directory will be bulk-processed.
 `);
-    process.exit(0);
+    throw new EarlyExitError(0);
   }
 
   let fileConfig: any = {};
@@ -167,12 +203,13 @@ Arguments:
   // Merge CLI overrides over file config
   const mergedConfig: Record<string, any> = { ...fileConfig };
 
-  if (argv.testDir) mergedConfig.testDir = argv.testDir;
-  if (argv.outDir) mergedConfig.outDir = argv.outDir;
-  if (argv.manifestPath) mergedConfig.manifestPath = argv.manifestPath;
-  if (argv.cachePath) mergedConfig.cachePath = argv.cachePath;
-  if (argv.frameworkImport)
-    mergedConfig.frameworkImport = argv.frameworkImport;
+  if (argv['test-dir']) mergedConfig.testDir = argv['test-dir'];
+  if (argv['out-dir']) mergedConfig.outDir = argv['out-dir'];
+  if (argv['manifest-path'])
+    mergedConfig.manifestPath = argv['manifest-path'];
+  if (argv['cache-path']) mergedConfig.cachePath = argv['cache-path'];
+  if (argv['framework-import'])
+    mergedConfig.frameworkImport = argv['framework-import'];
   if (argv.banner) mergedConfig.banner = argv.banner;
   if (argv['banner-file']) mergedConfig.bannerFile = argv['banner-file'];
   if (argv.strict) mergedConfig.strict = argv.strict;
@@ -216,10 +253,10 @@ Syncs the project's manifest.json with exported functions found in the configure
 Options:
   -h, --help                Print this help menu
 `);
-      process.exit(0);
+      throw new EarlyExitError(0);
     }
     await runSyncCommand(parseResult.data as TranspilerConfig);
-    process.exit(0);
+    throw new EarlyExitError(0);
   }
 
   return {

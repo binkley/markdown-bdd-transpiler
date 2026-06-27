@@ -34,3 +34,16 @@ export class EmptyResolutionError extends TranspilerError {
     this.name = 'EmptyResolutionError';
   }
 }
+
+/**
+ * Thrown when the CLI needs to exit gracefully without an error stack trace
+ * (e.g., after printing a help menu or version number).
+ */
+export class EarlyExitError extends Error {
+  public exitCode: number;
+  constructor(exitCode: number = 0) {
+    super('Early exit');
+    this.name = 'EarlyExitError';
+    this.exitCode = exitCode;
+  }
+}

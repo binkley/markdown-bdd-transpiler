@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 import readline from 'readline';
 import type { InitOptions } from '../types/index.js';
 import { logger } from '../utils/logger.js';
-import { TranspilerError } from '../utils/errors.js';
+import { TranspilerError, EarlyExitError } from '../utils/errors.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -59,7 +59,7 @@ export async function runInitCommand(options: InitOptions) {
     );
 
     // Exit cleanly without throwing a stack trace
-    process.exit(0);
+    throw new EarlyExitError(0);
   }
 
   const isHeadless =
