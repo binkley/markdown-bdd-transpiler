@@ -702,7 +702,7 @@ assistant, we can operationalize the metadata returned by modern LLMs:
 3. **Smart Fallbacks (Dynamic Routing):** If a fast/cheap model (like Gemini
    Flash) fails with a "length" finish reason or low confidence, automatically
    route that specific step to a larger, reasoning-focused model (e.g., Gemini
-   1.5 Pro).
+   3.x Pro).
 4. **Semantic Cache Expansion:** Request the LLM to return
    `semantic_equivalents` for successful mappings (e.g., "tap the link",
    "select the link"). Proactively populate `bdd-cache.json` with these to
