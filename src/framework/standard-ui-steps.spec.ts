@@ -11,7 +11,10 @@ import {
   verify_element_state,
   verify_text_state,
   verify_exact_text_state,
-  verify_testid_state
+  verify_testid_state,
+  interact_with_nth_element,
+  verify_element_count,
+  dismiss_if_present
 } from '../../framework/standard-ui-steps.js';
 
 describe('Standard UI Steps', () => {
@@ -22,18 +25,22 @@ describe('Standard UI Steps', () => {
     mockLocator = {
       locator: mock.fn(() => mockLocator),
       first: mock.fn(() => mockLocator),
+      nth: mock.fn(() => mockLocator),
       click: mock.fn(async () => {}),
       fill: mock.fn(async () => {}),
       waitFor: mock.fn(async () => {}),
       isDisabled: mock.fn(async () => true),
-      isEnabled: mock.fn(async () => true)
+      isEnabled: mock.fn(async () => true),
+      count: mock.fn(async () => 1)
     };
 
     mockPage = {
       goto: mock.fn(async () => {}),
       getByRole: mock.fn(() => mockLocator),
       getByText: mock.fn(() => mockLocator),
-      getByTestId: mock.fn(() => mockLocator)
+      getByTestId: mock.fn(() => mockLocator),
+      waitForLoadState: mock.fn(async () => {}),
+      waitForTimeout: mock.fn(async () => {})
     };
   });
 
@@ -171,6 +178,77 @@ describe('Standard UI Steps', () => {
         verify_testid_state(mockPage, 'submit-btn', 'enabled'),
         /Expected element to be enabled/
       );
+    });
+  });
+
+  describe('interact_with_nth_element', () => {
+    it('clicks the nth element (1-based number)', async () => {
+      await interact_with_nth_element(mockPage, 'button', 'Item', 2);
+      assert.equal(mockPage.getByRole.mock.calls.length, 1);
+      assert.equal(mockLocator.nth.mock.calls.length, 1);
+      assert.equal(mockLocator.nth.mock.calls[0].arguments[0], 1); // 2 -> 1
+      assert.equal(mockLocator.click.mock.calls.length, 1);
+    });
+
+    it('parses ordinal string like "2nd" to 0-based index', async () => {
+      await interact_with_nth_element(mockPage, 'button', 'Item', '2nd');
+      assert.equal(mockLocator.nth.mock.calls[0].arguments[0], 1); // "2nd" -> 1
+    });
+
+    it('defaults to 0 if string does not contain a number', async () => {
+      await interact_with_nth_element(mockPage, 'button', 'Item', 'first');
+      assert.equal(mockLocator.nth.mock.calls[0].arguments[0], 0);
+    });
+
+    it('parses string number like "3" to 0-based index', async () => {
+      await interact_with_nth_element(mockPage, 'button', 'Item', '3');
+      assert.equal(mockLocator.nth.mock.calls[0].arguments[0], 2); // "3" -> 2
+    });
+  });
+
+  describe('verify_element_count', () => {
+    it('verifies exact element count', async () => {
+      mockLocator.count = mock.fn(async () => 3);
+      await verify_element_count(mockPage, 'listitem', 'Row', 3);
+      assert.equal(mockLocator.count.mock.calls.length, 1); // might be called more if polling? No, immediately returns 3
+    });
+
+    it('throws if count does not match', async () => {
+      mockLocator.count = mock.fn(async () => 2);
+      const originalDateNow = Date.now;
+      let callCount = 0;
+      Date.now = () => {
+        callCount++;
+        // First call sets start time, subsequent calls return start + 6000
+        return originalDateNow() + (callCount > 1 ? 6000 : 0);
+      };
+      try {
+        await assert.rejects(
+          verify_element_count(mockPage, 'listitem', 'Row', 3),
+          /Expected exactly 3 visible elements/
+        );
+      } finally {
+        Date.now = originalDateNow;
+      }
+    });
+  });
+
+  describe('dismiss_if_present', () => {
+    it('clicks if present', async () => {
+      await dismiss_if_present(mockPage, 'button', 'Close');
+      assert.equal(mockLocator.click.mock.calls.length, 1);
+      assert.deepEqual(mockLocator.click.mock.calls[0].arguments[0], {
+        timeout: 2000
+      });
+    });
+
+    it('ignores error if not present', async () => {
+      mockLocator.click = mock.fn(async () => {
+        throw new Error('Element not found');
+      });
+      await dismiss_if_present(mockPage, 'button', 'Close');
+      assert.equal(mockLocator.click.mock.calls.length, 1);
+      // Should not reject
     });
   });
 });

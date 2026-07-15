@@ -253,6 +253,39 @@ app.get('/legacy-dashboard', (req: Request, res: Response) => {
   `);
 });
 
+app.get('/lists-and-modals', (req: Request, res: Response) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><title>Lists and Modals</title></head>
+    <body>
+      <div id="modal" style="background: yellow; border: 1px solid black; padding: 10px; position: absolute; top: 10px; right: 10px;">
+        <p>Would you like to accept cookies?</p>
+        <button id="close-modal" aria-label="Dismiss">Dismiss</button>
+      </div>
+      <h2>Items List</h2>
+      <ul>
+        <li><button aria-label="Item">Item 1</button></li>
+        <li><button aria-label="Item">Item 2</button></li>
+        <li><button aria-label="Item">Item 3</button></li>
+      </ul>
+      <div id="status" role="status">Ready</div>
+      <script>
+        document.getElementById('close-modal').addEventListener('click', (e) => {
+          e.target.parentElement.remove();
+        });
+        document.querySelectorAll('li button').forEach((btn, index) => {
+          btn.addEventListener('click', () => {
+            document.getElementById('status').innerText = 'Clicked item ' + (index + 1);
+            btn.parentElement.remove();
+          });
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
 app.listen(port, () => {
   console.log(`Dummy frontend running at http://localhost:${port}`);
 });

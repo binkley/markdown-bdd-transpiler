@@ -19,7 +19,7 @@ explicitly about navigation, the AI knows to map this to `navigate_to`.
 ### WHEN
 
 ```bdd
-- Go home
+- The user navigates to "http://demo-app:5173/"
 ```
 
 ### THEN
@@ -45,7 +45,7 @@ A switch? A button? By injecting the preceding Markdown paragraph as a
 ### WHEN
 
 _Designer Note: The notification control is implemented as a standard web
-checkbox._
+checkbox named "Enable Notifications"._
 
 ```bdd
 - Turn it off

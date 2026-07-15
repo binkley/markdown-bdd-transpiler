@@ -115,7 +115,10 @@ npx markdown-bdd init -y --provider openai --model gpt-4o-mini
     LLM provider API to map unregistered human language steps to the manifest
     constraints.
 4.  **Standard Library (`framework/standard-ui-steps.ts`)**: The physical
-    Playwright implementation of the manifest.
+    Playwright implementation of the manifest. The core library supports:
+    - **Navigation & Interaction**: `navigate_to`, `fill_input`, `interact_with` (clicks, checks), `interact_with_text`.
+    - **State Verification**: `verify_element_state`, `verify_text_state`.
+    - **Advanced Interactions**: `interact_with_nth_element` (1-based or ordinal targeting for lists), `verify_element_count` (asserting list cardinality), and `dismiss_if_present` (safe, transient state handling for modals/cookie banners).
 5.  **Execution (`.generated/*.test.ts`)**: The transpiler outputs standard,
     execution-ready Playwrite spec files.
 

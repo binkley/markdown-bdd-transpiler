@@ -1,1 +1,74 @@
-{}
+{
+  "available_steps": [
+    {
+      "function_name": "navigate_to",
+      "description": "Executes navigate_to step.",
+      "parameters": ["url_string"]
+    },
+    {
+      "function_name": "fill_input",
+      "description": "Executes fill_input step.",
+      "parameters": ["aria_role", "accessible_name", "value_to_type"]
+    },
+    {
+      "function_name": "interact_with",
+      "description": "Executes interact_with step.",
+      "parameters": ["aria_role", "accessible_name"]
+    },
+    {
+      "function_name": "interact_with_text",
+      "description": "Executes interact_with_text step.",
+      "parameters": ["visible_text"]
+    },
+    {
+      "function_name": "interact_with_exact_text",
+      "description": "Executes interact_with_exact_text step.",
+      "parameters": ["exact_text"]
+    },
+    {
+      "function_name": "verify_element_state",
+      "description": "Executes verify_element_state step.",
+      "parameters": ["aria_role", "accessible_name", "expected_state"]
+    },
+    {
+      "function_name": "verify_text_state",
+      "description": "Executes verify_text_state step.",
+      "parameters": ["visible_text", "expected_state"]
+    },
+    {
+      "function_name": "verify_exact_text_state",
+      "description": "Executes verify_exact_text_state step.",
+      "parameters": ["exact_text", "expected_state"]
+    },
+    {
+      "function_name": "verify_testid_state",
+      "description": "Executes verify_testid_state step.",
+      "parameters": ["test_id", "expected_state"]
+    },
+    {
+      "function_name": "interact_with_testid",
+      "description": "Executes interact_with_testid step.",
+      "parameters": ["test_id"]
+    },
+    {
+      "function_name": "fill_input_testid",
+      "description": "Executes fill_input_testid step.",
+      "parameters": ["test_id", "value_to_type"]
+    },
+    {
+      "function_name": "interact_with_nth_element",
+      "description": "Executes interact_with_nth_element step.",
+      "parameters": ["aria_role", "accessible_name", "index_or_ordinal"]
+    },
+    {
+      "function_name": "verify_element_count",
+      "description": "Executes verify_element_count step.",
+      "parameters": ["aria_role", "accessible_name", "expected_count"]
+    },
+    {
+      "function_name": "dismiss_if_present",
+      "description": "Executes dismiss_if_present step.",
+      "parameters": ["aria_role", "accessible_name"]
+    }
+  ]
+}

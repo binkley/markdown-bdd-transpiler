@@ -155,3 +155,91 @@ export async function fill_input_testid(
     .first();
   await locator.fill(finalValue);
 }
+
+export async function interact_with_nth_element(
+  page: Page,
+  aria_role: Parameters<Page['getByRole']>[0],
+  accessible_name: string,
+  index_or_ordinal: string | number
+) {
+  const finalName = interpolate(accessible_name);
+  const regexName = new RegExp(escapeRegExp(finalName), 'i');
+
+  let i = 0;
+  if (typeof index_or_ordinal === 'number') {
+    // If it's already a number, assume it's 1-based from the user or 0-based.
+    // Let's assume the LLM passes 1 for "1st". So subtract 1.
+    i = index_or_ordinal > 0 ? index_or_ordinal - 1 : 0;
+  } else {
+    // Parse "1st", "2nd", "3", etc.
+    const match = index_or_ordinal.match(/\d+/);
+    if (match) {
+      const parsed = parseInt(match[0], 10);
+      i = parsed > 0 ? parsed - 1 : 0;
+    }
+  }
+
+  const locator = page
+    .getByRole(aria_role, { name: regexName })
+    .locator('visible=true')
+    .nth(i);
+
+  if (aria_role === 'checkbox' || aria_role === 'radio') {
+    await locator.click({ force: true });
+  } else {
+    await locator.click();
+  }
+}
+
+export async function verify_element_count(
+  page: Page,
+  aria_role: Parameters<Page['getByRole']>[0],
+  accessible_name: string,
+  expected_count: number
+) {
+  const finalName = interpolate(accessible_name);
+  const regexName = new RegExp(escapeRegExp(finalName), 'i');
+  const locator = page
+    .getByRole(aria_role, { name: regexName })
+    .locator('visible=true');
+
+  const count =
+    typeof expected_count === 'string'
+      ? parseInt(expected_count, 10)
+      : expected_count;
+
+  // Custom polling for count since standard tests don't import expect
+  const start = Date.now();
+  const timeout = 5000;
+  let currentCount = await locator.count();
+
+  while (currentCount !== count && Date.now() - start < timeout) {
+    await page.waitForTimeout(100); // 100ms polling
+    currentCount = await locator.count();
+  }
+
+  if (currentCount !== count) {
+    throw new Error(
+      `Expected exactly ${count} visible elements matching role '${aria_role}' and name '${finalName}', but found ${currentCount}`
+    );
+  }
+}
+
+export async function dismiss_if_present(
+  page: Page,
+  aria_role: Parameters<Page['getByRole']>[0],
+  accessible_name: string
+) {
+  const finalName = interpolate(accessible_name);
+  const regexName = new RegExp(escapeRegExp(finalName), 'i');
+  const locator = page
+    .getByRole(aria_role, { name: regexName })
+    .locator('visible=true')
+    .first();
+
+  try {
+    await locator.click({ timeout: 2000 });
+  } catch {
+    // Ignored on purpose: the element isn't present
+  }
+}
