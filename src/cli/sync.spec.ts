@@ -1,4 +1,4 @@
-import { test, describe, beforeEach, afterEach } from 'node:test';
+import { test, describe, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -8,17 +8,14 @@ import { logger } from '../utils/logger.js';
 
 describe('CLI Sync Command', () => {
   let tempDir: string;
-  let originalCwd: () => string;
-  let originalExit: NodeJS.Process['exit'];
   let loggedErrors: string[] = [];
   let loggedInfos: string[] = [];
   let loggedWarns: string[] = [];
 
   beforeEach(async () => {
-    originalCwd = process.cwd;
-    originalExit = process.exit;
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bdd-sync-test-'));
-    process.cwd = () => tempDir;
+    mock.method(process, 'cwd', () => tempDir);
+    mock.method(process, 'exit', () => {});
 
     loggedErrors = [];
     loggedInfos = [];
@@ -34,14 +31,11 @@ describe('CLI Sync Command', () => {
     logger.warn = (msg: string) => {
       loggedWarns.push(msg);
     };
-
-    process.exit = (() => {}) as any;
   });
 
   afterEach(async () => {
-    process.cwd = originalCwd;
-    process.exit = originalExit;
     await fs.rm(tempDir, { recursive: true, force: true });
+    mock.restoreAll();
   });
 
   test('aborts if manifest cannot be read', async () => {

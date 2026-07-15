@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Cache layer: copy package files and install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 # Copy the rest of the workspace (including transpile.ts, standard-ui-steps, and BDD files)
 COPY . .

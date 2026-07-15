@@ -44,6 +44,12 @@ jobs:
       - name: Lint Shell Scripts
         run: npm run lint:sh
 
+      - name: Security Audit
+        run: npm audit --audit-level=moderate
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+
       - name: Run E2E BDD Tests
         # Executes the dockerized Vitest suite
         env:
@@ -51,6 +57,13 @@ jobs:
           TEST_DYNAMIC_PATH: '/login'
           TEST_DYNAMIC_USER: 'frontend_wizard'
         run: ./scripts/test-e2e.sh
+
+      - name: Validate Example Documentation Tutorial
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TEST_DYNAMIC_PATH: '/login'
+          TEST_DYNAMIC_USER: 'frontend_wizard'
+        run: npm run test:example
 
       - name: Upload Test Artifacts
         if: failure()
