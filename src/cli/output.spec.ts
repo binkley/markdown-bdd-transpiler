@@ -28,7 +28,13 @@ describe('CLI Integration Tests', () => {
 
     const { stdout, stderr } = await execAsync(
       `node --import tsx transpile.ts --ignore-cache ${mdPath}`,
-      { env: { ...process.env, TRANSPILER_QUIET: 'false' } }
+      {
+        env: {
+          ...process.env,
+          TRANSPILER_QUIET: 'false',
+          GEMINI_API_KEY: 'dummy_key_for_test'
+        }
+      }
     ).catch((e) => e);
 
     assert.match(
