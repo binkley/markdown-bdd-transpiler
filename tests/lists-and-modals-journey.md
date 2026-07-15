@@ -12,9 +12,11 @@ The user dismisses the transient modal, verifies the list count, and deletes an 
 
 The user is on the lists and modals page.
 
+_Designer Note: The lists and modals page is located at `/lists-and-modals`._
+
 ```bdd
-* The user navigates to "http://demo-app:5173/lists-and-modals"
-* The user dismisses the "button" named "Dismiss" if it is present
+* The user visits the lists and modals page
+* The user dismisses the "Dismiss" button if it appears
 ```
 
 ### WHEN
@@ -22,8 +24,8 @@ The user is on the lists and modals page.
 The user verifies there are exactly 3 items and clicks the second one.
 
 ```bdd
-* The user verifies there are exactly 3 "button" elements named "Item"
-* The user clicks the 2nd "button" named "Item"
+* The user verifies there are exactly 3 "Item" buttons
+* The user clicks the 2nd button named "Item"
 ```
 
 ### THEN
@@ -31,6 +33,6 @@ The user verifies there are exactly 3 items and clicks the second one.
 The system confirms the item was clicked and the count decreases.
 
 ```bdd
-* The user sees the text "Clicked item 2" is "visible"
-* The user verifies there are exactly 2 "button" elements named "Item"
+* The user sees the exact text "Clicked item 2" is visible
+* The user verifies there are exactly 2 "Item" buttons
 ```

@@ -1,18 +1,19 @@
 # AI-Augmented Markdown BDD Transpiler for Testing
 
-<a href="./LICENSE.md">
-<img
+<a href="./LICENSE.md"> <img
 src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/cc-zero.svg"
-alt="Creative Commons Public Domain Dedication"
-align="right" width="10%" height="auto"/>
-</a>
+alt="Creative Commons Public Domain Dedication" align="right" width="10%"
+height="auto"/> </a>
 
 [![ci](https://img.shields.io/github/actions/workflow/status/binkley/markdown-bdd-transpiler/ci.yml?branch=main&label=ci)](https://github.com/binkley/markdown-bdd-transpiler/actions/workflows/ci.yml)
 [![issues](https://img.shields.io/github/issues/binkley/markdown-bdd-transpiler?label=issues)](https://github.com/binkley/markdown-bdd-transpiler/issues)
-[![pull requests](https://img.shields.io/github/issues-pr/binkley/markdown-bdd-transpiler?label=pull%20requests)](https://github.com/binkley/markdown-bdd-transpiler/pulls)
+[![pull
+requests](https://img.shields.io/github/issues-pr/binkley/markdown-bdd-transpiler?label=pull%20requests)](https://github.com/binkley/markdown-bdd-transpiler/pulls)
 [![changelog](https://img.shields.io/badge/changelog-latest-blue.svg)](./CHANGELOG.md)
-[![node version](https://img.shields.io/node/v/@binkley/markdown-bdd-transpiler.svg)](https://nodejs.org)
-[![npm version](https://img.shields.io/npm/v/@binkley/markdown-bdd-transpiler.svg)](https://www.npmjs.com/package/@binkley/markdown-bdd-transpiler)
+[![node
+version](https://img.shields.io/node/v/@binkley/markdown-bdd-transpiler.svg)](https://nodejs.org)
+[![npm
+version](https://img.shields.io/npm/v/@binkley/markdown-bdd-transpiler.svg)](https://www.npmjs.com/package/@binkley/markdown-bdd-transpiler)
 
 A modern, Behavior-Driven Development (BDD) testing framework that allows
 non-technical stakeholders to author End-to-End (E2E) user journeys using
@@ -67,15 +68,11 @@ You can examine the package in
 
 ### 1. Install the Transpiler
 
-```bash
-npm install --save-dev @binkley/markdown-bdd-transpiler
-```
+`bash npm install --save-dev @binkley/markdown-bdd-transpiler `
 
 ### 2. Run the Initialization Wizard
 
-```bash
-npx markdown-bdd init
-```
+`bash npx markdown-bdd init `
 
 This interactive script will:
 
@@ -98,9 +95,7 @@ rerun `npx markdown-bdd init`._
 If you are automating the setup in a CI/CD pipeline, you can bypass the
 interactive prompts by providing the `-y`, `--provider`, and `--model` flags:
 
-```bash
-npx markdown-bdd init -y --provider openai --model gpt-4o-mini
-```
+`bash npx markdown-bdd init -y --provider openai --model gpt-4o-mini `
 
 ---
 
@@ -111,14 +106,18 @@ npx markdown-bdd init -y --provider openai --model gpt-4o-mini
     set of Playwright A11y actions (e.g., `interact_with_element`,
     `verify_element_state`).
 3.  **Transpiler (`transpile.ts`)**: Crawls markdown using the `remark` AST
-    parser to track strict file locations, checks the cache, and calls the
-    LLM provider API to map unregistered human language steps to the manifest
+    parser to track strict file locations, checks the cache, and calls the LLM
+    provider API to map unregistered human language steps to the manifest
     constraints.
 4.  **Standard Library (`framework/standard-ui-steps.ts`)**: The physical
     Playwright implementation of the manifest. The core library supports:
-    - **Navigation & Interaction**: `navigate_to`, `fill_input`, `interact_with` (clicks, checks), `interact_with_text`.
+    - **Navigation & Interaction**: `navigate_to`, `fill_input`,
+      `interact_with` (clicks, checks), `interact_with_text`.
     - **State Verification**: `verify_element_state`, `verify_text_state`.
-    - **Advanced Interactions**: `interact_with_nth_element` (1-based or ordinal targeting for lists), `verify_element_count` (asserting list cardinality), and `dismiss_if_present` (safe, transient state handling for modals/cookie banners).
+    - **Advanced Interactions**: `interact_with_nth_element` (1-based or
+      ordinal targeting for lists), `verify_element_count` (asserting list
+      cardinality), and `dismiss_if_present` (safe, transient state handling
+      for modals/cookie banners).
 5.  **Execution (`.generated/*.test.ts`)**: The transpiler outputs standard,
     execution-ready Playwrite spec files.
 
@@ -133,18 +132,13 @@ repository:
 
 Install the package as a development dependency:
 
-```bash
-npm install --save-dev @binkley/markdown-bdd-transpiler
-```
+`bash npm install --save-dev @binkley/markdown-bdd-transpiler `
 
 _Note: This package requires `@playwright/test` as a peer dependency. If you
 have not already set up Playwright in your repository, you will also need to
 install it and its browser binaries:_
 
-```bash
-npm install --save-dev @playwright/test
-npx playwright install
-```
+`bash npm install --save-dev @playwright/test npx playwright install `
 
 ### 2. Configure and Run
 
@@ -154,16 +148,12 @@ Create a `bdd.config.json` in your project root (see the
 Then, use the included CLI to transpile your `.md` files into executable tests
 before running your test runner:
 
-```bash
-npx markdown-bdd
-```
+`bash npx markdown-bdd `
 
 To see a full list of available command-line overrides and positional file
 targeting options, use the help flag:
 
-```bash
-npx markdown-bdd --help
-```
+`bash npx markdown-bdd --help `
 
 _Tip: We recommend adding `"pretest": "markdown-bdd"` to your `package.json`
 scripts._
@@ -183,40 +173,28 @@ scripts._
 Export your LLM provider API key in your terminal session. An example for
 Google Gemini:
 
-```bash
-export GOOGLE_API_KEY="your_api_key_here"
-```
+`bash export GOOGLE_API_KEY="your_api_key_here" `
 
 ### 2. Local Execution (Native)
 
 If you prefer to run the project directly on your machine without Docker:
 
-```bash
-# Install dependencies (including Playwright browsers)
-npm install
+````bash # Install dependencies (including Playwright browsers) npm install
 
-# Start the dummy frontend application in the background
-npm run demo &
+# Start the dummy frontend application in the background npm run demo &
 
-# Transpile the markdown tests and run them via Vitest
-npm test
-```
+# Transpile the markdown tests and run them via Vitest npm test ```
 
 You can see a full list of NPM scripts with help:
 
-```bash
-npm run help
-# Or npm run ?
-```
+```bash npm run help # Or npm run ?  ```
 
 ### 3. Docker Execution (Recommended)
 
 To run the application and the test suite in a clean, isolated environment,
 simply run:
 
-```bash
-./scripts/test-e2e.sh
-```
+```bash ./scripts/test-e2e.sh ```
 
 Use `./scripts/test-e2e.sh --help` for help.
 
@@ -227,9 +205,7 @@ a `THEN` block) without failing the build. To enforce rigid BDD hygiene in
 CI/CD environments, you can fail the pipeline immediately if any warnings are
 detected:
 
-```bash
-./scripts/test-e2e.sh --strict
-```
+```bash ./scripts/test-e2e.sh --strict ```
 
 As you author markdown BDD tests, you can set a higher threshold using
 `--max-warnings=N` instead, progressively lowering the number over time. Both
@@ -237,32 +213,30 @@ settings can also be configured permanently in `bdd.config.json`.
 
 #### Prompt Debugging (`--dump-prompts`)
 
-If the LLM is consistently misinterpreting an ambiguous UI step or ignoring your Designer Notes, you can use the `--dump-prompts` flag. This saves the exact, finalized text prompts sent to the LLM into the `.generated/` folder, allowing you to debug how your markdown and variables are being compiled before they hit the API:
+If the LLM is consistently misinterpreting an ambiguous UI step or ignoring
+your Designer Notes, you can use the `--dump-prompts` flag. This saves the
+exact, finalized text prompts sent to the LLM into the `.generated/` folder,
+allowing you to debug how your markdown and variables are being compiled
+before they hit the API:
 
-```bash
-npx markdown-bdd --dump-prompts
-```
+```bash npx markdown-bdd --dump-prompts ```
 
 #### Diagnostic Logging (`--verbose`)
 
 If you need deeper insight into the compilation process, use the `--verbose`
 flag:
 
-```bash
-./scripts/test-e2e.sh --verbose
-# Or ./scripts/validate.sh --verbose
-```
+```bash ./scripts/test-e2e.sh --verbose # Or ./scripts/validate.sh --verbose
+````
 
 This outputs detailed runtime diagnostics, allowing you to track exactly which
 files are being processed, monitor AI cache misses, and profile the latency of
 the LLM provider API:
 
-```text
-📄 Transpiling tests/login-journey.md -> .generated/login-journey.md.test.ts
-☁️  Cache miss: "Click the "Sign In" button"
-⚡ API returned in 1.42s
-📄 Transpiling tests/settings-journey.md -> .generated/settings-journey.md.test.ts
-```
+`````text 📄 Transpiling tests/login-journey.md ->
+.generated/login-journey.md.test.ts ☁️  Cache miss: "Click the "Sign In"
+button" ⚡ API returned in 1.42s 📄 Transpiling tests/settings-journey.md ->
+.generated/settings-journey.md.test.ts ```
 
 This script will:
 
@@ -307,7 +281,7 @@ project utilizes **Husky hooks**.
   (`tsc`), and unit tests (`node:test`).
 - **Pre-Push (`npm run validate:push`)**: Runs the strict pipeline which
   includes all pre-commit checks, plus a dependency security audit (`npm
-audit`), and executes the full Playwright E2E suite inside Docker
+  audit`), and executes the full Playwright E2E suite inside Docker
   (`test-e2e.sh`).
 
 If any of these steps fail, the git action is aborted.
@@ -331,39 +305,35 @@ steps **must** be wrapped in a `bdd` code fence and formatted as bullet points
 (`-`).
 
 1. **`GIVEN` (The Setup):** Establishes the initial, immutable state of the
-   application before the test begins. This usually involves navigating to a
-   page or setting up prerequisites.
+application before the test begins. This usually involves navigating to a page
+or setting up prerequisites.
 2. **`WHEN` (The Action):** Describes the specific interactions the user takes
-   (e.g., clicking, typing, checking boxes). You can use natural language here
-   (e.g., "Smash the button").
+(e.g., clicking, typing, checking boxes). You can use natural language here
+(e.g., "Smash the button").
 3. **`THEN` (The Verification):** Describes the expected outcome or what the
-   user should see as a result of the `WHEN` actions.
+user should see as a result of the `WHEN` actions.
 
 **Example:**
 
-````markdown
-# Feature: User Authentication
+````markdown # Feature: User Authentication
 
 ## Scenario: User logs in successfully
 
 ### GIVEN
 
 ```bdd
-- The user navigates to "/login"
-```
+- The user navigates to "/login" ```
 
 ### WHEN
 
 ```bdd
 - The user enters "frontend_wizard" into the "Username" field
-- Click the "Sign In" button
-```
+- Click the "Sign In" button ```
 
 ### THEN
 
 ```bdd
-- The user should see the heading "Welcome Back, Wizard!"
-```
+- The user should see the heading "Welcome Back, Wizard!" ```
 
 ---
 
@@ -372,22 +342,18 @@ steps **must** be wrapped in a `bdd` code fence and formatted as bullet points
 ### GIVEN
 
 ```bdd
-- The user navigates to "/login"
-```
+- The user navigates to "/login" ```
 
 ### WHEN
 
 ```bdd
 - The user enters "bad_wizard" into the "Username" field
-- Click the "Sign In" button
-```
+- Click the "Sign In" button ```
 
 ### THEN
 
 ```bdd
-- Verify the "Error Message" alert is visible
-```
-````
+- Verify the "Error Message" alert is visible ``` ````
 
 ### 🔄 Dynamic Data Injection
 
@@ -399,14 +365,12 @@ variable (e.g., from `process.env` or your `.env` file).
 **Example:**
 
 ```bdd
-- The user enters "{{TEST_USER_PASSWORD}}" into the "Password" field
-```
+- The user enters "{{TEST_USER_PASSWORD}}" into the "Password" field ```
 
 or (both work):
 
 ```bdd
-- The user enters {{TEST_USER_PASSWORD}} into the "Password" field
-```
+- The user enters {{TEST_USER_PASSWORD}} into the "Password" field ```
 
 _If the environment variable is missing when the test runs, the test will
 immediately fail with a descriptive error to prevent silent UI failures._
@@ -420,8 +384,7 @@ escape the first brace with a backslash: `\{{...}}`.
 **Example:**
 
 ```bdd
-- The user enters "\{{literal_string}}" into the "Code Editor"
-```
+- The user enters "\{{literal_string}}" into the "Code Editor" ```
 
 ### ⚠️ Structural Validation Warnings
 
@@ -444,18 +407,31 @@ parser will ignore everything outside the fences._
 
 ## 🧭 Guided Tour (Living Documentation)
 
-Because this framework transpiles Markdown into executable code, our own internal test suite serves as "living documentation." These files prove the features work while simultaneously explaining how to use them.
+Because this framework transpiles Markdown into executable code, our own
+internal test suite serves as "living documentation." These files prove the
+features work while simultaneously explaining how to use them.
 
-We recommend new authors read the test files in this order to understand the framework's capabilities:
+We recommend new authors read the test files in this order to understand the
+framework's capabilities:
 
-1. **The Basics:** [`tests/login-journey.md`](./tests/login-journey.md)
-   Learn the fundamental anatomy of a BDD Scenario (GIVEN, WHEN, THEN) and see how natural language maps to Playwright actions.
-2. **Handling Secrets:** [`tests/dynamic-injection-journey.md`](./tests/dynamic-injection-journey.md)
-   Learn how to inject environment variables securely (e.g., passwords or dynamic URLs) and how to escape the transpiler if you need to type literal curly braces.
-3. **The AI Engine:** [`tests/context-ambiguity-journey.md`](./tests/context-ambiguity-journey.md)
-   Learn how the AI resolves vague instructions (like "Click it") by looking at previous steps, and how to use Designer Notes to guide the AI when the UI lacks proper accessibility roles.
-4. **Quality Assurance:** [`tests/validation-warnings-journey.md`](./tests/validation-warnings-journey.md)
-   See how the transpiler acts as a linter, actively enforcing rigorous testing structures and warning your team if scenarios become sloppy or lack assertions.
+1. **The Basics:** [`tests/login-journey.md`](./tests/login-journey.md) Learn
+the fundamental anatomy of a BDD Scenario (GIVEN, WHEN, THEN) and see how
+natural language maps to Playwright actions.
+2. **Handling Secrets:**
+[`tests/dynamic-injection-journey.md`](./tests/dynamic-injection-journey.md)
+Learn how to inject environment variables securely (e.g., passwords or dynamic
+URLs) and how to escape the transpiler if you need to type literal curly
+braces.
+3. **The AI Engine:**
+[`tests/context-ambiguity-journey.md`](./tests/context-ambiguity-journey.md)
+Learn how the AI resolves vague instructions (like "Click it") by looking at
+previous steps, and how to use Designer Notes to guide the AI when the UI
+lacks proper accessibility roles.
+4. **Quality Assurance:**
+[`tests/validation-warnings-journey.md`](./tests/validation-warnings-journey.md)
+See how the transpiler acts as a linter, actively enforcing rigorous testing
+structures and warning your team if scenarios become sloppy or lack
+assertions.
 
 ---
 
@@ -481,45 +457,28 @@ manage `bdd-cache.json` and improve the developer experience:
 
 If you want to manage the cache and run the Playwright test suite in a single
 command, you can pass the underlying transpiler flags (`--ignore-cache`,
-`--update-cache`) directly to the E2E script using the `-t` or
-`--transpiler` flags:
+`--update-cache`) directly to the E2E script using the `-t` or `--transpiler`
+flags:
 
-```bash
-# Update the cache for login.md and immediately run its tests in Docker
-./scripts/test-e2e.sh -t update-cache tests/login.md
-```
+```bash # Update the cache for login.md and immediately run its tests in
+Docker ./scripts/test-e2e.sh -t update-cache tests/login.md ```
 
 To perform a full cache refresh alongside Docker execution, chain the
 commands:
 
-```bash
-npm run cache:clear && ./scripts/test-e2e.sh
-```
+```bash npm run cache:clear && ./scripts/test-e2e.sh ```
 
 ## ⚙️ Configuration (`bdd.config.json`)
 
 While the `init` script provides a great out-of-the-box setup, the framework
 is fully configurable to match your project's architecture.
 
-```json
-{
-  "testDir": "tests",
-  "manifestPath": "manifest.json",
-  "cachePath": "bdd-cache.json",
-  "outDir": ".generated",
-  "banner": "test.use({ extraHTTPHeaders: { 'x-mock-user': 'admin' } });",
-  "bannerFile": "tests/setup.ts",
-  "strict": false,
-  "maxWarnings": 5,
-  "llm": {
-    "provider": "gemini",
-    "model": "gemini-2.5-flash-lite",
-    "maxRetries": 3,
-    "initialDelayMs": 1000,
-    "backoffFactor": 2.0
-  }
-}
-```
+```json { "testDir": "tests", "manifestPath": "manifest.json", "cachePath":
+"bdd-cache.json", "outDir": ".generated", "banner": "test.use({
+extraHTTPHeaders: { 'x-mock-user': 'admin' } });", "bannerFile":
+"tests/setup.ts", "strict": false, "maxWarnings": 5, "llm": { "provider":
+"gemini", "model": "gemini-2.5-flash-lite", "maxRetries": 3, "initialDelayMs":
+1000, "backoffFactor": 2.0 } } ```
 
 ### Configuration Options:
 
@@ -531,9 +490,9 @@ is fully configurable to match your project's architecture.
   to speed up future runs. (Default: `bdd-cache.json`)
 - **`outDir`**: The directory where the transpiler will output the generated
   Playwright `.test.ts` files. (Default: `.generated`)
-- **`banner`**: (Optional) A raw string of code injected at the top of
-  every generated test file. (For complex setups, use `bannerFile` instead to
-  avoid stringifying multiline code in JSON).
+- **`banner`**: (Optional) A raw string of code injected at the top of every
+  generated test file. (For complex setups, use `bannerFile` instead to avoid
+  stringifying multiline code in JSON).
 - **`bannerFile`**: (Optional) Path to a TypeScript/JavaScript file (e.g.,
   `tests/setup.ts`). The contents of this file are injected directly into
   every generated test file. This is the recommended way to inject global
@@ -570,52 +529,34 @@ language of your BDD:
 
 **1. Define it in your `manifest.json`:**
 
-```json
-{
-  "available_steps": [
-    {
-      "function_name": "dismiss_overlay",
-      "description": "Closes a blocking modal or overlay, such as the 'End Session' warning.",
-      "parameters": ["overlay_name"]
-    }
-  ]
-}
-```
+```json { "available_steps": [ { "function_name": "dismiss_overlay",
+"description": "Closes a blocking modal or overlay, such as the 'End Session'
+warning.", "parameters": ["overlay_name"] } ] } ```
 
 **2. Implement the workaround in your own code:**
 
-```typescript
-// project-root/framework/custom-ui-steps.ts
-import type { Page } from '@playwright/test';
+```typescript // project-root/framework/custom-ui-steps.ts import type { Page
+} from '@playwright/test';
 
-export async function dismiss_overlay(page: Page, overlay_name: string) {
-  // Encapsulate the 'force' hack tailored to your specific UI problem
-  await page
-    .getByRole('button', { name: overlay_name })
-    .click({ force: true });
-}
-```
+export async function dismiss_overlay(page: Page, overlay_name: string) { //
+Encapsulate the 'force' hack tailored to your specific UI problem await page
+.getByRole('button', { name: overlay_name }) .click({ force: true }); } ```
 
 **3. Point the config to your implementation:**
 
-```json
-// bdd.config.json
-{
-  "manifestPath": "manifest.json",
-  "frameworkImport": "./framework/custom-ui-steps.ts"
-}
-```
+```json // bdd.config.json { "manifestPath": "manifest.json",
+"frameworkImport": "./framework/custom-ui-steps.ts" } ```
 
 Now, when a non-technical author writes `The user dismisses the "End Session"
 warning`, the AI will map it to your custom function, keeping the BDD clean
-and the Playwright hack abstracted.
-**4. Sync your manifest automatically:**
+and the Playwright hack abstracted.  **4. Sync your manifest automatically:**
 
-Instead of manually editing `manifest.json` every time you add a new custom step in your TypeScript file, you can use the `sync` command. This will parse your custom framework file and automatically append new exported functions to your manifest:
+Instead of manually editing `manifest.json` every time you add a new custom
+step in your TypeScript file, you can use the `sync` command. This will parse
+your custom framework file and automatically append new exported functions to
+your manifest:
 
-```bash
-npx markdown-bdd sync
-```
+```bash npx markdown-bdd sync ```
 
 #### Temporary Workarounds (Designer Notes)
 
@@ -629,14 +570,11 @@ following steps.
 If an element cannot be found by its ARIA role, you can use a Designer Note to
 guide the AI to use the core framework's `interact_with_text` step:
 
-````markdown
-_QA Note: The "Submit Icon" lacks an ARIA role, but contains the visible text
-"Submit"._
+````markdown _QA Note: The "Submit Icon" lacks an ARIA role, but contains the
+visible text "Submit"._
 
 ```bdd
-- The user clicks the Submit Icon
-```
-````
+- The user clicks the Submit Icon ``` ````
 
 **⚠️ The "Technical Debt" Warning**
 
@@ -677,9 +615,7 @@ To publish a new version of the transpiler, use the included release script.
 This script will automatically run the tests, bump the version in
 `package.json`, create the git tag, and push to origin:
 
-```bash
-npm run release -- patch # Or minor, major
-```
+```bash npm run release -- patch # Or minor, major ```
 
 The GitHub Action will automatically trigger upon seeing the new tag, build
 the project, run all static analysis, and securely publish the new version to
@@ -695,26 +631,25 @@ To transition the transpiler from a "dumb translator" to an active testing
 assistant, we can operationalize the metadata returned by modern LLMs:
 
 1. **Interactive Confidence-Gating:** Parse the LLM's confidence scores. For
-   high confidence, transpile automatically. For medium confidence, enter an
-   interactive CLI mode to prompt the author ("Did you mean X? [Y/n]"). For
-   low confidence, hard-fail with an actionable reason.
+high confidence, transpile automatically. For medium confidence, enter an
+interactive CLI mode to prompt the author ("Did you mean X? [Y/n]"). For low
+confidence, hard-fail with an actionable reason.
 2. **Automated Test Flakiness Prediction:** Ask the LLM to return a
-   `flakiness_risk` metric. The transpiler can proactively wrap high-risk
-   actions in a `test.step` with longer timeouts or explicit `.waitFor()`
-   conditions.
+`flakiness_risk` metric. The transpiler can proactively wrap high-risk actions
+in a `test.step` with longer timeouts or explicit `.waitFor()` conditions.
 3. **Smart Fallbacks (Dynamic Routing):** If a fast/cheap model (like Gemini
-   Flash) fails with a "length" finish reason or low confidence, automatically
-   route that specific step to a larger, reasoning-focused model (e.g., Gemini
-   3.x Pro).
+Flash) fails with a "length" finish reason or low confidence, automatically
+route that specific step to a larger, reasoning-focused model (e.g., Gemini
+3.x Pro).
 4. **Semantic Cache Expansion:** Request the LLM to return
-   `semantic_equivalents` for successful mappings (e.g., "tap the link",
-   "select the link"). Proactively populate `bdd-cache.json` with these to
-   drastically reduce API dependency over time.
+`semantic_equivalents` for successful mappings (e.g., "tap the link", "select
+the link"). Proactively populate `bdd-cache.json` with these to drastically
+reduce API dependency over time.
 5. **Manifest Gap Analysis:** Aggregate when the LLM successfully understands
-   a step but reports a `missing_capability` against the provided
-   `manifest.json`. Print an end-of-run report to guide maintainers on which
-   Playwright ARIA actions to implement next (e.g., "Authors attempted
-   drag-and-drop 14 times").
+a step but reports a `missing_capability` against the provided
+`manifest.json`. Print an end-of-run report to guide maintainers on which
+Playwright ARIA actions to implement next (e.g., "Authors attempted
+drag-and-drop 14 times").
 
 #### Community Manifest Ecosystem (Plugin Architecture)
 
@@ -723,15 +658,14 @@ custom UI steps, the core framework no longer needs to natively support every
 obscure ARIA role or complex interaction. Future iterations should focus on:
 
 1. **Manifest Modules:** Allowing `bdd.config.json` to accept an array of
-   manifest paths or NPM packages (e.g., `"manifests":
+manifest paths or NPM packages (e.g., `"manifests":
 ["@binkley/bdd-salesforce-plugin"]`), enabling the community to share
-   pre-built step libraries for common SaaS platforms.
+pre-built step libraries for common SaaS platforms.
 2. **Rich Assertions:** Expanding the core library for `THEN` verification
-   steps to handle list lengths, exact text counts, and complex visibility
-   states beyond simple element presence.
+steps to handle list lengths, exact text counts, and complex visibility states
+beyond simple element presence.
 3. **Compound/Parametrized Selectors:** Support finding elements _within_
-   other elements (e.g., "Click the 'Delete' button in the 'User Summary'
-   row").
+other elements (e.g., "Click the 'Delete' button in the 'User Summary' row").
 
 #### Interactive Manifest Upgrades
 
@@ -740,3 +674,4 @@ Because `npx markdown-bdd init` ejects a static copy of the default
 in future framework releases. We should build an interactive `npx markdown-bdd
 upgrade` command that parses the consumer's local manifest, diffs it against
 the latest default manifest, and interactively merges in new capabilities.
+`````
