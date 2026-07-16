@@ -1,4 +1,4 @@
-import { test, describe, beforeEach, afterEach } from 'node:test';
+import { test, describe, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -7,27 +7,19 @@ import { loadConfig } from './config.js';
 
 describe('CLI Config Loader', () => {
   let originalArgv: string[];
-  let originalExit: NodeJS.Process['exit'];
   let tempDir: string;
-  let originalCwd: () => string;
 
   beforeEach(async () => {
     originalArgv = process.argv;
-    originalExit = process.exit;
-    originalCwd = process.cwd;
-
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bdd-config-test-'));
-    process.cwd = () => tempDir;
-
-    // Prevent actual exiting during tests
-    process.exit = (() => {}) as any;
+    mock.method(process, 'cwd', () => tempDir);
+    mock.method(process, 'exit', () => {});
   });
 
   afterEach(async () => {
     process.argv = originalArgv;
-    process.exit = originalExit;
-    process.cwd = originalCwd;
     await fs.rm(tempDir, { recursive: true, force: true });
+    mock.restoreAll();
   });
 
   test('loads defaults when no config file exists', async () => {

@@ -1,4 +1,4 @@
-import { test, describe, beforeEach, afterEach } from 'node:test';
+import { test, describe, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -9,16 +9,14 @@ import type { ExecutionState } from '../types/index.js';
 
 describe('Transpiler Orchestration', () => {
   let tempDir: string;
-  let originalCwd: () => string;
   let loggedErrors: string[] = [];
   let loggedWarns: string[] = [];
 
   beforeEach(async () => {
-    originalCwd = process.cwd;
     tempDir = await fs.mkdtemp(
       path.join(os.tmpdir(), 'bdd-transpiler-test-')
     );
-    process.cwd = () => tempDir;
+    mock.method(process, 'cwd', () => tempDir);
 
     loggedErrors = [];
     loggedWarns = [];
@@ -31,8 +29,8 @@ describe('Transpiler Orchestration', () => {
   });
 
   afterEach(async () => {
-    process.cwd = originalCwd;
     await fs.rm(tempDir, { recursive: true, force: true });
+    mock.restoreAll();
   });
 
   function createBaseState(): ExecutionState {
