@@ -21,13 +21,32 @@ describe('CLI Integration Tests', () => {
 
   test('prints warnings for missing GIVEN phases to stderr', async () => {
     const mdPath = path.join(tempDir, 'missing-given.md');
+    const cachePath = path.join(tempDir, 'fake-cache.json');
+
     await fs.writeFile(
       mdPath,
       `# Feature: Missing GIVEN\n## Scenario: Only WHEN and THEN\n### WHEN\n\`\`\`bdd\n* do something\n\`\`\`\n### THEN\n\`\`\`bdd\n* expect something\n\`\`\`\n`
     );
 
+    // Mock cache to prevent real LLM calls during integration tests
+    await fs.writeFile(
+      cachePath,
+      JSON.stringify({
+        'do something|{"feature":"Feature: Missing GIVEN","scenario":"Scenario: Only WHEN and THEN","phase":"WHEN"}':
+          {
+            matchedFunction: 'interact_with_text',
+            extractedArguments: ['something']
+          },
+        'expect something|{"feature":"Feature: Missing GIVEN","scenario":"Scenario: Only WHEN and THEN","phase":"THEN"}':
+          {
+            matchedFunction: 'verify_text_state',
+            extractedArguments: ['something', 'visible']
+          }
+      })
+    );
+
     const { stdout, stderr } = await execAsync(
-      `node --import tsx transpile.ts --ignore-cache ${mdPath}`,
+      `node --import tsx transpile.ts --cache-path ${cachePath} ${mdPath}`,
       {
         env: {
           ...process.env,

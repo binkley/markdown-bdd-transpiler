@@ -9,14 +9,16 @@ import type { ExecutionState } from '../types/index.js';
 
 describe('Transpiler Orchestration', () => {
   let tempDir: string;
+  let originalCwd: () => string;
   let loggedErrors: string[] = [];
   let loggedWarns: string[] = [];
 
   beforeEach(async () => {
+    originalCwd = process.cwd;
     tempDir = await fs.mkdtemp(
       path.join(os.tmpdir(), 'bdd-transpiler-test-')
     );
-    mock.method(process, 'cwd', () => tempDir);
+    process.cwd = () => tempDir;
 
     loggedErrors = [];
     loggedWarns = [];
@@ -29,6 +31,7 @@ describe('Transpiler Orchestration', () => {
   });
 
   afterEach(async () => {
+    process.cwd = originalCwd;
     await fs.rm(tempDir, { recursive: true, force: true });
     mock.restoreAll();
   });

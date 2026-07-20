@@ -7,14 +7,22 @@ import { runInitCommand } from './init.js';
 
 describe('CLI Init Command', () => {
   let tempDir: string;
+  let originalCwd: () => string;
+  let originalExit: NodeJS.Process['exit'];
 
   beforeEach(async () => {
+    originalCwd = process.cwd;
+    originalExit = process.exit;
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bdd-init-test-'));
-    mock.method(process, 'cwd', () => tempDir);
-    mock.method(process, 'exit', () => {});
+    process.cwd = () => tempDir;
+
+    // Prevent actual exiting during tests
+    process.exit = (() => {}) as any;
   });
 
   afterEach(async () => {
+    process.cwd = originalCwd;
+    process.exit = originalExit;
     await fs.rm(tempDir, { recursive: true, force: true });
     mock.restoreAll();
   });

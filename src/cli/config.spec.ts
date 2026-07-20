@@ -7,17 +7,26 @@ import { loadConfig } from './config.js';
 
 describe('CLI Config Loader', () => {
   let originalArgv: string[];
+  let originalExit: NodeJS.Process['exit'];
   let tempDir: string;
+  let originalCwd: () => string;
 
   beforeEach(async () => {
     originalArgv = process.argv;
+    originalExit = process.exit;
+    originalCwd = process.cwd;
+
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bdd-config-test-'));
-    mock.method(process, 'cwd', () => tempDir);
-    mock.method(process, 'exit', () => {});
+    process.cwd = () => tempDir;
+
+    // Prevent actual exiting during tests
+    process.exit = (() => {}) as any;
   });
 
   afterEach(async () => {
     process.argv = originalArgv;
+    process.exit = originalExit;
+    process.cwd = originalCwd;
     await fs.rm(tempDir, { recursive: true, force: true });
     mock.restoreAll();
   });
