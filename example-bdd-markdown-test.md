@@ -155,3 +155,41 @@ visible text: "Submit".
 ```bdd
 - Verify the "Success" alert is visible
 ```
+
+---
+
+## Scenario: Navigating Lists and Transient Modals
+
+Sometimes UIs are complex: you might have multiple identical items in a list,
+or a popup might appear unpredictably (like a newsletter signup or a cookie
+banner).
+
+The transpiler handles this easily with ordinal targeting and conditional
+dismissals.
+
+### GIVEN
+
+```bdd
+- The user navigates to "/lists-and-modals"
+```
+
+### WHEN
+
+You can target specific items in a list by using their ordinal number (e.g.,
+1st, 2nd, 3rd) or just the number itself. If a modal happens to get in the
+way, you can tell the AI to clear it _only if it's there_.
+
+```bdd
+- Click the "Dismiss" button if it appears
+- Click the 2nd "Item" button
+```
+
+### THEN
+
+You can also precisely verify how many items exist on the page to ensure
+a list rendered correctly.
+
+```bdd
+- Verify there are exactly 2 "Item" buttons
+- The "Clicked item 2" text is visible
+```
