@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.6.0](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.6...v0.6.0) (2026-08-06)
+
+### ✨ Features
+
+- **framework:** List targeting, transient modals ([f83a6c2](https://github.com/binkley/markdown-bdd-transpiler/commit/f83a6c2d613198c0a3da0446930a5475f2f77dde))
+- implement precise UI locators and setup API ([87d9381](https://github.com/binkley/markdown-bdd-transpiler/commit/87d938173cd935588010ce72d265bff415b40f35))
+- Improve API retry logging DX ([3db9d07](https://github.com/binkley/markdown-bdd-transpiler/commit/3db9d073a2cf8bd7e3ef7072077df010e71d1257))
+
+### 📚 Documentation
+
+- add Guided Tour section pointing to test scenarios ([3168af9](https://github.com/binkley/markdown-bdd-transpiler/commit/3168af9ba0d606112940089b89c54e0d9db60c99))
+- **help:** Point out release type ([c29f7b2](https://github.com/binkley/markdown-bdd-transpiler/commit/c29f7b239a2219377f8c66bd5d537db9bbbd8ac6))
+- **readme:** Fix typo ([7514f1a](https://github.com/binkley/markdown-bdd-transpiler/commit/7514f1a749e58778767a0e095354143475b20274))
+
+### 🛠 Architecture
+
+- **cli:** Improve error handling, fix config args, and add unit tests ([2d818d1](https://github.com/binkley/markdown-bdd-transpiler/commit/2d818d1bcb7f2c6861d9f25fcb80a8cf005e267d))
+
+### 🧱 Build
+
+- Test fixes ([7aee058](https://github.com/binkley/markdown-bdd-transpiler/commit/7aee0585852bfabc26d7c1003a64dfa649183a08))
+
+### 🐛 Bug Fixes
+
+- IPC serialization integration test API call ([cfca840](https://github.com/binkley/markdown-bdd-transpiler/commit/cfca8403582136acee32cc81d701fd5f81463877))
+
 ## [0.5.6](https://github.com/binkley/markdown-bdd-transpiler/compare/v0.5.5...v0.5.6) (2026-06-16)
 
 ### ✨ Features

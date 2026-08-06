@@ -70,5 +70,6 @@
       "description": "Executes dismiss_if_present step.",
       "parameters": ["aria_role", "accessible_name"]
     }
-  ]
+  ],
+  "version": "0.6.0"
 }
