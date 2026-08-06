@@ -3,6 +3,7 @@ import path from 'path';
 import { parseArgs } from 'util';
 import { runInitCommand } from './init.js';
 import { runSyncCommand } from './sync.js';
+import { runUpgradeCommand } from './upgrade.js';
 import { transpilerConfigSchema } from './schema.js';
 import type {
   ExecutionState,
@@ -62,15 +63,17 @@ export async function loadConfig(): Promise<ExecutionState> {
   const command = positionals[0];
   if (command === 'init') {
     if (argv.help) {
-      // NOTE: We don't have a printInitHelp in this codebase version yet,
-      // but if the user passed init --help, we should exit.
-      // Currently, it looks like init.ts handles its own logic, but let's just abort early here.
       console.log('Usage: markdown-bdd init [options]');
       throw new EarlyExitError(0);
     }
   } else if (command === 'sync') {
     if (argv.help) {
       console.log('Usage: markdown-bdd sync [options]');
+      throw new EarlyExitError(0);
+    }
+  } else if (command === 'upgrade') {
+    if (argv.help) {
+      console.log('Usage: markdown-bdd upgrade [options]');
       throw new EarlyExitError(0);
     }
   }
@@ -130,16 +133,6 @@ Options:
     process.exit(0);
   }
 
-  if (argv.version) {
-    const pkgContent = await fs.readFile(
-      path.resolve(process.cwd(), 'package.json'),
-      'utf-8'
-    );
-    const pkg = JSON.parse(pkgContent);
-    console.log(pkg.version);
-    process.exit(0);
-  }
-
   if (argv.help) {
     console.log(`
 Usage: markdown-bdd [command] [options] [files...]
@@ -147,6 +140,7 @@ Usage: markdown-bdd [command] [options] [files...]
 Commands:
   init                              Scaffolds a new project
   sync                              Syncs manifest.json from frameworkImport
+  upgrade                           Interactively merges new core capabilities into your local manifest
 
 An AI-augmented BDD testing framework that transpiles Markdown user journeys into Playwright tests.
 
@@ -256,6 +250,25 @@ Options:
       throw new EarlyExitError(0);
     }
     await runSyncCommand(parseResult.data as TranspilerConfig);
+    throw new EarlyExitError(0);
+  }
+
+  if (positionals[0] === 'upgrade') {
+    if (argv.help) {
+      console.log(`
+Usage: markdown-bdd upgrade [options]
+
+Interactively merges new UI capabilities from the latest core transpiler framework into your local manifest.json without overwriting your custom steps.
+
+Options:
+  -h, --help                Print this help menu
+  -y, --yes                 Bypass the interactive prompt and automatically merge all new capabilities
+`);
+      throw new EarlyExitError(0);
+    }
+    await runUpgradeCommand(parseResult.data as TranspilerConfig, {
+      autoYes: !!argv.yes
+    });
     throw new EarlyExitError(0);
   }
 

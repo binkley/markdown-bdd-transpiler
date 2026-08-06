@@ -138,7 +138,18 @@ export async function resolveFeatures(
           });
         }
 
-        const argsStr = (resolution.extractedArguments || [])
+        // Sanitize arguments to strip hallucinated surrounding quotes from the LLM or polluted cache
+        const sanitizedArgs = (resolution.extractedArguments || []).map(
+          (a: string) => {
+            if (typeof a === 'string') {
+              // Strip matching leading/trailing double quotes or single quotes
+              return a.replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
+            }
+            return a;
+          }
+        );
+
+        const argsStr = sanitizedArgs
           .map((a: string) => JSON.stringify(a))
           .join(', ');
         const argsCall = argsStr ? `, ${argsStr}` : '';

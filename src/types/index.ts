@@ -49,6 +49,10 @@ export interface InitOptions {
   modelFlag?: string;
 }
 
+export interface UpgradeOptions {
+  autoYes: boolean;
+}
+
 export type Scenario = {
   name: string;
   steps: string[];
