@@ -505,6 +505,8 @@ extraHTTPHeaders: { 'x-mock-user': 'admin' } });", "bannerFile":
 - **`llm`**: Configures the third-party AI provider behavior.
   - **`provider`**: The vendor to use (`gemini`, `openai`, or `anthropic`).
   - **`model`**: The specific LLM version to use (e.g., `gpt-4o-mini`).
+  - **`temperature`**: LLM generation temperature (0.0 for deterministic
+    output). (Default: `0.0`)
   - **`concurrency`**: Max parallel network requests to the LLM. (Default:
     `5`)
   - **`maxRetries`**: Maximum number of times to retry a failed API call

@@ -26,7 +26,8 @@ export class VercelAIProvider implements LLMProvider {
       system: systemInstruction,
       prompt: escapedContents,
       schema: resolutionSchema,
-      maxRetries: config.maxRetries
+      maxRetries: config.maxRetries,
+      temperature: config.temperature
     });
 
     return object;

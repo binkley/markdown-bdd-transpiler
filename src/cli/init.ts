@@ -182,6 +182,7 @@ export async function runInitCommand(options: InitOptions) {
       llm: {
         provider,
         model,
+        temperature: 0.0,
         concurrency: 5,
         maxRetries: 3,
         initialDelayMs: 1000,

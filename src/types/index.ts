@@ -1,6 +1,7 @@
 export interface LLMConfig {
   provider: string;
   model: string;
+  temperature?: number;
   maxRetries: number;
   initialDelayMs: number;
   backoffFactor: number;

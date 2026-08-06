@@ -7,6 +7,12 @@ const llmConfigSchema = z.object({
   model: z
     .string()
     .min(1, "LLM model is required (e.g., 'gemini-2.5-flash-lite')."),
+  temperature: z
+    .number()
+    .min(0)
+    .max(2)
+    .default(0.0)
+    .describe('LLM generation temperature (0.0 for deterministic output)'),
   concurrency: z
     .number()
     .int()
