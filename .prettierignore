@@ -5,3 +5,4 @@ test-results
 # Ignore generated Husky scripts and Node downloads
 .husky/_
 node_modules
+README.md
