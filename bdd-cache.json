@@ -312,5 +312,30 @@
     "matchedFunction": "verify_element_state",
     "extractedArguments": ["alert", "Success", "visible"],
     "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The user navigates to \"/lists-and-modals\"|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Navigating Lists and Transient Modals\",\"phase\":\"GIVEN\"}": {
+    "matchedFunction": "navigate_to",
+    "extractedArguments": ["/lists-and-modals"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "The \"Clicked item 2\" text is visible|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Navigating Lists and Transient Modals\",\"phase\":\"THEN\",\"designerNotes\":\"You can also precisely verify how many items exist on the page to ensure\\na list rendered correctly.\"}": {
+    "matchedFunction": "interact_with_text",
+    "extractedArguments": ["Clicked item 2"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "Click the 2nd \"Item\" button|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Navigating Lists and Transient Modals\",\"phase\":\"WHEN\",\"designerNotes\":\"You can target specific items in a list by using their ordinal number (e.g.,\\n1st, 2nd, 3rd) or just the number itself. If a modal happens to get in the\\nway, you can tell the AI to clear it only if it's there.\"}": {
+    "matchedFunction": "interact_with_nth_element",
+    "extractedArguments": ["button", "Item", "2nd"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "Click the \"Dismiss\" button if it appears|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Navigating Lists and Transient Modals\",\"phase\":\"WHEN\",\"designerNotes\":\"You can target specific items in a list by using their ordinal number (e.g.,\\n1st, 2nd, 3rd) or just the number itself. If a modal happens to get in the\\nway, you can tell the AI to clear it only if it's there.\"}": {
+    "matchedFunction": "dismiss_if_present",
+    "extractedArguments": ["button", "Dismiss"],
+    "sourceFile": "example-bdd-markdown-test.md"
+  },
+  "Verify there are exactly 2 \"Item\" buttons|{\"feature\":\"Feature: Example BDD Markdown Test\",\"scenario\":\"Scenario: Navigating Lists and Transient Modals\",\"phase\":\"THEN\",\"designerNotes\":\"You can also precisely verify how many items exist on the page to ensure\\na list rendered correctly.\"}": {
+    "matchedFunction": "verify_element_count",
+    "extractedArguments": ["button", "Item", "2"],
+    "sourceFile": "example-bdd-markdown-test.md"
   }
 }

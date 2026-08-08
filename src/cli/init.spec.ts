@@ -45,4 +45,25 @@ describe('CLI Init Command', () => {
       /Incomplete automation flags provided/
     );
   });
+
+  test('successfully generates bdd.config.json with correct defaults and temperature', async () => {
+    // We must mock multiselect/text if autoYes is false, but since we pass autoYes=true,
+    // we bypass the interactive prompts in the CLI.
+    await runInitCommand({
+      autoYes: true,
+      providerFlag: 'gemini',
+      modelFlag: 'gemini-2.5-flash-lite'
+    });
+
+    const configContent = await fs.readFile(
+      path.join(tempDir, 'bdd.config.json'),
+      'utf8'
+    );
+    const config = JSON.parse(configContent);
+
+    assert.equal(config.testDir, 'tests');
+    assert.equal(config.llm.provider, 'gemini');
+    assert.equal(config.llm.model, 'gemini-2.5-flash-lite');
+    assert.equal(config.llm.temperature, 0.0);
+  });
 });

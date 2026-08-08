@@ -48,7 +48,7 @@
   },
   "peerDependencies": {
     "@ai-sdk/anthropic": "^3.0.81",
-    "@ai-sdk/google": "^3.0.80",
+    "@ai-sdk/google": "^4.0.39",
     "@ai-sdk/openai": "^3.0.67",
     "@playwright/test": "^1.60.0",
     "typescript": "^6.0.3"
@@ -69,10 +69,10 @@
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.81",
-    "@ai-sdk/google": "^3.0.84",
+    "@ai-sdk/google": "^4.0.39",
     "@ai-sdk/openai": "^3.0.67",
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "^1.62.1",
     "@types/express": "^5.0.6",
     "@types/mdast": "^4.0.4",
     "@types/node": "^25.9.1",
@@ -139,6 +139,8 @@
     "?validate:commit": "echo \"Run the fast pre-commit pipeline (skips Docker tests)\"",
     "validate:commit": "./scripts/validate.sh --commit",
     "?validate:push": "echo \"Run the strict pre-push pipeline (includes E2E Docker tests)\"",
-    "validate:push": "./scripts/validate.sh --push"
+    "validate:push": "./scripts/validate.sh --push",
+    "?security": "echo \"Fix dependency security vulnerabilities\"",
+    "security": "npm audit fix"
   }
 }
