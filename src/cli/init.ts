@@ -75,13 +75,16 @@ export async function runInitCommand(options: InitOptions) {
     );
   }
 
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-  const question = (query: string): Promise<string> =>
-    new Promise((resolve) => rl.question(query, resolve));
+  let rl: readline.Interface | undefined;
+  const question = (query: string): Promise<string> => {
+    if (!rl) {
+      rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+    }
+    return new Promise((resolve) => rl!.question(query, resolve));
+  };
 
   try {
     let installPlaywright = 'y';
@@ -277,6 +280,6 @@ export async function runInitCommand(options: InitOptions) {
       `Don't forget to export your API key (e.g., export ${provider === 'openai' ? 'OPENAI_API_KEY' : provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'GOOGLE_API_KEY'}="your-key") before running tests.`
     );
   } finally {
-    rl.close();
+    rl?.close();
   }
 }
