@@ -108,16 +108,20 @@ export async function runInitCommand(options: InitOptions) {
     ) {
       logger.info(`\n📦 Installing @playwright/test...`);
       try {
-        execSync(`npm install --save-dev @playwright/test`, {
-          stdio: 'inherit'
-        });
-        logger.info(`✅ Successfully installed Playwright.`);
+        if (process.env.NODE_ENV !== 'test') {
+          execSync(`npm install --save-dev @playwright/test`, {
+            stdio: 'inherit'
+          });
+          logger.info(`✅ Successfully installed Playwright.`);
 
-        logger.info(`\n📦 Installing Playwright browsers...`);
-        execSync(`npx playwright install`, {
-          stdio: 'inherit'
-        });
-        logger.info(`✅ Successfully installed Playwright browsers.`);
+          logger.info(`\n📦 Installing Playwright browsers...`);
+          execSync(`npx playwright install`, {
+            stdio: 'inherit'
+          });
+          logger.info(`✅ Successfully installed Playwright browsers.`);
+        } else {
+          logger.info(`✅ (Skipped Playwright install during tests)`);
+        }
       } catch {
         logger.error(
           `❌ Failed to install Playwright. Please run 'npm install --save-dev @playwright/test' manually.`
@@ -256,10 +260,14 @@ export async function runInitCommand(options: InitOptions) {
         `\n📦 Installing necessary peer dependency: ${installPkg}...`
       );
       try {
-        execSync(`npm install --save-dev ${installPkg}`, {
-          stdio: 'inherit'
-        });
-        logger.info(`✅ Successfully installed ${installPkg}`);
+        if (process.env.NODE_ENV !== 'test') {
+          execSync(`npm install --save-dev ${installPkg}`, {
+            stdio: 'inherit'
+          });
+          logger.info(`✅ Successfully installed ${installPkg}`);
+        } else {
+          logger.info(`✅ (Skipped ${installPkg} install during tests)`);
+        }
       } catch {
         logger.error(
           `❌ Failed to install ${installPkg}. Please run it manually.`
