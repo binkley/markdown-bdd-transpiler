@@ -9,14 +9,10 @@ describe('CLI Init Command', () => {
   let tempDir: string;
   let originalCwd: () => string;
   let originalExit: NodeJS.Process['exit'];
-  let originalEnv: string | undefined;
 
   beforeEach(async () => {
     originalCwd = process.cwd;
     originalExit = process.exit;
-    originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'test';
-
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bdd-init-test-'));
     process.cwd = () => tempDir;
 
@@ -27,7 +23,6 @@ describe('CLI Init Command', () => {
   afterEach(async () => {
     process.cwd = originalCwd;
     process.exit = originalExit;
-    process.env.NODE_ENV = originalEnv;
     await fs.rm(tempDir, { recursive: true, force: true });
     mock.restoreAll();
   });

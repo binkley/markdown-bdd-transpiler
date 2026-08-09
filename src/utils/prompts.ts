@@ -1,25 +1,31 @@
 import * as readline from 'readline';
+import { EarlyExitError } from './errors.js';
 
 /**
  * Renders an interactive multiselect menu natively in the terminal.
  *
  * @param message The prompt question to ask the user.
  * @param options Array of options to select from.
+ * @param inStream Stream to read keystrokes from (defaults to process.stdin).
+ * @param outStream Stream to write UI output to (defaults to process.stdout).
  * @returns A promise resolving to an array of the selected values.
  */
 export async function multiselect<T>(
   message: string,
-  options: { label: string; value: T; checked?: boolean }[]
+  options: { label: string; value: T; checked?: boolean }[],
+  inStream: NodeJS.ReadStream = process.stdin as NodeJS.ReadStream,
+  outStream: NodeJS.WriteStream = process.stdout as NodeJS.WriteStream
 ): Promise<T[]> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
+      input: inStream,
+      output: outStream,
+      terminal: true
     });
 
     // Make stdin emit keypress events and enter raw mode so we get every keystroke
-    readline.emitKeypressEvents(process.stdin);
-    if (process.stdin.isTTY) process.stdin.setRawMode(true);
+    readline.emitKeypressEvents(inStream);
+    if (inStream.isTTY) inStream.setRawMode(true);
 
     const items = options.map((opt) => ({ ...opt, checked: !!opt.checked }));
     let cursorIndex = 0;
@@ -29,7 +35,7 @@ export async function multiselect<T>(
     const render = () => {
       // Clear previously rendered lines
       for (let i = 0; i < linesRendered; i++) {
-        process.stdout.write('\x1b[1A\x1b[2K');
+        outStream.write('\x1b[1A\x1b[2K');
       }
 
       let output = `\x1b[36m?\x1b[0m ${message}\n`;
@@ -44,23 +50,24 @@ export async function multiselect<T>(
         output += `${pointer} ${checkbox} ${color}${item.label}${reset}\n`;
       });
 
-      process.stdout.write(output);
+      outStream.write(output);
       linesRendered = items.length + 2; // +1 for message, +1 for instructions
     };
 
     const cleanup = () => {
-      if (process.stdin.isTTY) process.stdin.setRawMode(false);
-      process.stdin.removeListener('keypress', onKeypress);
+      if (inStream.isTTY) inStream.setRawMode(false);
+      inStream.removeListener('keypress', onKeypress);
       rl.close();
-      process.stdout.write('\x1B[?25h'); // Show cursor again
+      outStream.write('\x1B[?25h'); // Show cursor again
     };
 
     const onKeypress = (str: string, key: any) => {
       // Abort on Ctrl+C or Escape
       if ((key.ctrl && key.name === 'c') || key.name === 'escape') {
         cleanup();
-        process.stdout.write('\n\x1b[31m✖ Aborted.\x1b[0m\n');
-        process.exit(1);
+        outStream.write('\n\x1b[31m✖ Aborted.\x1b[0m\n');
+        reject(new EarlyExitError(1));
+        return;
       }
 
       if (key.name === 'up') {
@@ -76,15 +83,15 @@ export async function multiselect<T>(
         if (submitted) return;
         submitted = true;
         cleanup();
-        process.stdout.write('\n'); // Move past the menu
+        outStream.write('\n'); // Move past the menu
         resolve(items.filter((i) => i.checked).map((i) => i.value));
       }
     };
 
     // Hide cursor for the menu
-    process.stdout.write('\x1B[?25l');
+    outStream.write('\x1B[?25l');
 
-    process.stdin.on('keypress', onKeypress);
+    inStream.on('keypress', onKeypress);
     render(); // Initial render
   });
 }
