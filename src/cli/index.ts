@@ -4,10 +4,6 @@ import { logger, LogLevel } from '../utils/logger.js';
 import { TranspilerError, EarlyExitError } from '../utils/errors.js';
 import { Transpiler } from '../compiler/transpiler.js';
 
-// TODO: REMOVE THESE LINE -- fake commit to force GitHub to run CI again. We
-// encountered service unavailable errors from GitHub (transient) in the
-// middle of making the v0.6.0 release.
-
 export async function main() {
   try {
     const state = await loadConfig();
