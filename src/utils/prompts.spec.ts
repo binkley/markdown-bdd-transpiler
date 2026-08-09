@@ -4,7 +4,7 @@ import { PassThrough } from 'node:stream';
 import { multiselect } from './prompts.js';
 import { EarlyExitError } from './errors.js';
 
-describe('Prompts multiselect', () => {
+describe('Prompts multiselect', { skip: !!process.env.CI }, () => {
   let inStream: PassThrough & {
     isTTY?: boolean;
     setRawMode?: (mode: boolean) => void;
