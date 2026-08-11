@@ -5,7 +5,7 @@ import type { CacheManager } from './cache.js';
 import { logger } from '../utils/logger.js';
 import { EmptyResolutionError, TranspilerError } from '../utils/errors.js';
 
-export async function resolveFeatures(
+export async function synthesizeStepsWithAI(
   features: Feature[],
   manifestStr: string,
   llmProvider: LLMProvider,
@@ -19,6 +19,27 @@ export async function resolveFeatures(
 }> {
   let apiCalls = 0;
   const promptsDump: { stepText: string; prompt: string }[] = [];
+
+  let uncachedStepsCount = 0;
+  for (const feature of features) {
+    for (const scenario of feature.scenarios) {
+      for (const stepPayload of scenario.steps) {
+        const payload = JSON.parse(stepPayload);
+        const { stepText, richContextStr } = payload;
+        const cacheKey = `${stepText}|${richContextStr}`;
+        if (!cache.get(cacheKey)) {
+          uncachedStepsCount++;
+        }
+      }
+    }
+  }
+
+  if (uncachedStepsCount > 0) {
+    logger.info(
+      `ℹ️  Resolving ${uncachedStepsCount} uncached steps via AI engine (this may take a moment)...`
+    );
+  }
+
   for (const feature of features) {
     for (const scenario of feature.scenarios) {
       // We will map over the steps and process them concurrently

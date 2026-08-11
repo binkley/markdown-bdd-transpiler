@@ -3,7 +3,7 @@ import path from 'path';
 import { getLLMProvider } from '../llm/factory.js';
 import { CacheManager } from './cache.js';
 import { parseMarkdown } from '../parser/ast.js';
-import { resolveFeatures } from './resolver.js';
+import { synthesizeStepsWithAI } from './resolver.js';
 import pLimit from 'p-limit';
 import { emitPlaywright } from './playwright.js';
 import { logger } from '../utils/logger.js';
@@ -149,7 +149,7 @@ export class Transpiler {
         );
       }
 
-      const { apiCalls, promptsDump } = await resolveFeatures(
+      const { apiCalls, promptsDump } = await synthesizeStepsWithAI(
         features,
         manifestStr,
         llmProvider,

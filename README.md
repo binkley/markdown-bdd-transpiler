@@ -21,10 +21,11 @@ native Markdown.
 
 Traditional BDD frameworks (like Cucumber) often suffer from "step-definition
 bloat," requiring extensive engineering work to map rigid phrases to code via
-Regex.' This project solves that by asking an AI to work out the correct test
-code from the Markdown as a semantic translation layer at compile-time. It
-maps human language variations to a standardized UI action manifest natively
-executed by **Playwright** and **Vitest**.
+Regex. This project solves that by completely eliminating regex matching.
+The LLM is the primary compilation engine. It acts as a semantic translation
+layer at compile-time, mapping human language variations to a standardized UI
+action manifest natively executed by **Playwright** and **Vitest**. The local
+cache is strictly an optimization for speed, not the source of truth.
 
 ## 🌟 Key Features
 

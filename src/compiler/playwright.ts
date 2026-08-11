@@ -72,7 +72,7 @@ export function emitPlaywright(
       }
       specCode += `    } catch (error: any) {\n`;
       specCode += `      if (error.message?.includes('strict mode violation')) {\n`;
-      specCode += `        error.message = '[BDD Strict Mode Error] Playwright found multiple elements matching your step. Try using an Exact Text, Role, or Test-ID step instead.\\n\\nOriginal Error:\\n' + error.message;\n`;
+      specCode += `        error.message = '[BDD Strict Mode Error] Playwright found multiple elements matching your step. Consider using the standard step: \\'... with testid "your-id"\\' to ensure unique selection.\\n\\nOriginal Error:\\n' + error.message;\n`;
       specCode += `      }\n`;
       specCode += `      throw error;\n`;
       specCode += `    }\n`;
